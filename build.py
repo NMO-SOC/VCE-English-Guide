@@ -451,75 +451,27 @@ qz_page = TOOL_LABEL + """<h1>Technique Quiz</h1>
 })();
 </script>""" % json.dumps([{"term": g["term"], "def": g["def"]} for g in glossary], ensure_ascii=False)
 
-EXAMGEN = json.load(open(os.path.join(BUILD, "examgen", "examgen.json"), encoding="utf-8"))
+N_EXAMS = len([f for f in os.listdir(os.path.join(BUILD, "examgen", "out")) if f.endswith(".docx")])
 eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
-<p class="lede">Generate a full three-section practice exam &mdash; a random analytical topic, a Creating Texts prompt with stimulus, and an Analysing Argument source. Print it for authentic exam conditions.</p>
+<p class="lede">Download a randomly generated three-section practice examination &mdash; the complete task book as a Word document, identical in format to the real paper: cover page, instructions, Section A topics for both texts, a Creating Texts prompt with stimulus material, Section C source material and the assessment criteria.</p>
 <div class="tool-bar">
-  <select id="eg-text">
-    <option value="both">Section A: both texts</option>
-    <option value="sb">Section A: Sunset Boulevard only</option>
-    <option value="re">Section A: Rainbow&rsquo;s End only</option>
-  </select>
-  <button id="eg-go">Generate exam</button>
-  <button id="eg-print" style="display:none">Print / save as PDF</button>
+  <button id="eg-go">Generate exam &#8595;</button>
+  <span class="tool-count" id="eg-note"></span>
 </div>
-<div id="eg-paper" class="eg-paper" style="display:none">
-  <div class="eg-head">
-    <div class="eg-school">South Oakleigh College</div>
-    <h2 class="eg-title">VCE English &mdash; Practice Examination</h2>
-    <p class="eg-meta">Reading time: 15 minutes &middot; Writing time: 3 hours &middot; Answer one task from each section</p>
-  </div>
-  <div id="eg-a"></div>
-  <div id="eg-b"></div>
-  <div id="eg-c"></div>
-</div>
-<script>window.EXAMGEN = %s;</script>
+<p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">Each click downloads a different randomly assembled paper. Print it and sit it under timed conditions &mdash; then mark it against the <a href="part-09-exam-assessment-criteria.html">assessment criteria</a> or with the <a href="marker.html">Essay Marker</a>.</p>
 <script>
 (function(){
-  var D = window.EXAMGEN;
-  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
-  function two(a){ var i = Math.floor(Math.random() * a.length), j = i;
-    while (j === i && a.length > 1) j = Math.floor(Math.random() * a.length);
-    return [a[i], a[j]]; }
-  function esc(s){ return s.replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
-  function para(s){ return esc(s).split(String.fromCharCode(10)).join('<br>'); }
-  function topicBlock(name, arr){
-    var t = two(arr);
-    var h = '<div class="eg-text-name">' + name + '</div><ol class="eg-topics" type="i">';
-    h += '<li>' + para(t[0]) + '</li>';
-    if (t[1] !== t[0]) h += '<li>' + para(t[1]) + '</li>';
-    return h + '</ol>';
-  }
+  var N = %d;
   document.getElementById('eg-go').addEventListener('click', function(){
-    var mode = document.getElementById('eg-text').value;
-    var a = '<h3 class="eg-sec">Section A &mdash; Analytical response to a text</h3>' +
-            '<p class="eg-inst">Write an analytical response to ONE topic on your selected text.</p>';
-    if (mode === 'both' || mode === 'sb') a += topicBlock('Sunset Boulevard (Billy Wilder)', D.sb);
-    if (mode === 'both' || mode === 're') a += topicBlock('Rainbow\u2019s End (Jane Harrison)', D.re);
-    document.getElementById('eg-a').innerHTML = a;
-
-    var b = pick(D.b);
-    var bh = '<h3 class="eg-sec">Section B &mdash; Creating a text</h3>' +
-             '<p class="eg-inst">Framework of Ideas: Writing about personal journeys. Use the title and at least one piece of stimulus in your response.</p>' +
-             '<div class="eg-b-title">Title: \u2018' + esc(b.title) + '\u2019</div>';
-    if (b.s1) bh += '<div class="eg-stim"><div class="eg-stim-n">Stimulus 1</div>' + para(b.s1) + '</div>';
-    if (b.img) bh += '<div class="eg-stim"><div class="eg-stim-n">Stimulus 2</div><img src="assets/exam/b/' + b.img + '" alt="Section B visual stimulus"></div>';
-    if (b.s3) bh += '<div class="eg-stim"><div class="eg-stim-n">Stimulus 3</div>' + para(b.s3) + '</div>';
-    document.getElementById('eg-b').innerHTML = bh;
-
-    var cPool = D.c.filter(function(x){ return x.imgs.length; });
-    var c = pick(cPool);
-    var ch = '<h3 class="eg-sec">Section C &mdash; Analysis of argument and language</h3>' +
-             '<p class="eg-inst">Analyse the ways in which argument and language are used to persuade the intended audience in the material below.</p>';
-    c.imgs.forEach(function(f){ ch += '<img class="eg-c-img" src="assets/exam/c/' + f + '" alt="Section C source material">'; });
-    document.getElementById('eg-c').innerHTML = ch;
-
-    document.getElementById('eg-paper').style.display = '';
-    document.getElementById('eg-print').style.display = '';
+    var n = Math.floor(Math.random() * N) + 1;
+    var f = 'practice-exam-' + (n < 10 ? '0' : '') + n + '.docx';
+    var a = document.createElement('a');
+    a.href = 'assets/exams/' + f; a.download = f;
+    document.body.appendChild(a); a.click(); a.remove();
+    document.getElementById('eg-note').textContent = 'Downloaded ' + f;
   });
-  document.getElementById('eg-print').addEventListener('click', function(){ window.print(); });
 })();
-</script>""" % json.dumps(EXAMGEN, ensure_ascii=False)
+</script>""" % N_EXAMS
 
 hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
 <p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
@@ -549,11 +501,11 @@ all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Es
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
 all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
 all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "html": eg_page, "nav": "study-tools.html"})
-for _sub in ("b", "c"):
-    _d = os.path.join(PUBLIC, "assets", "exam", _sub)
-    os.makedirs(_d, exist_ok=True)
-    for _f in os.listdir(os.path.join(BUILD, "examgen", _sub)):
-        copy_if_changed(os.path.join(BUILD, "examgen", _sub, _f), os.path.join(_d, _f))
+_d = os.path.join(PUBLIC, "assets", "exams")
+os.makedirs(_d, exist_ok=True)
+for _f in os.listdir(os.path.join(BUILD, "examgen", "out")):
+    if _f.endswith(".docx"):
+        copy_if_changed(os.path.join(BUILD, "examgen", "out", _f), os.path.join(_d, _f))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
 def rewrite_anchors(scope, current):
@@ -700,7 +652,7 @@ for k, pg in enumerate(all_pages):
                  % (pg["part"]["file"], num, html.escape(pg["part"]["title"]),
                     pg.get("chidx", 8), pg.get("chtotal", 8)))
         body = crumb + """<h1>English Exam Generator</h1>
-<p>The exam generator now runs directly on this site &mdash; no download needed. It assembles a full three-section practice paper from the question banks: a random analytical topic for your text, a Creating Texts prompt with stimulus material, and an Analysing Argument source. You can print the result for timed practice.</p>
+<p>The exam generator now runs directly on this site &mdash; no download needed. It assembles a full three-section practice paper from the question banks: a random analytical topic for your text, a Creating Texts prompt with stimulus material, and an Analysing Argument source. Each generated paper downloads as a Word document identical in format to the real exam task book.</p>
 <p><a class="btn" style="background:var(--accent);color:#fff" href="exam-generator.html">Open the Exam Generator &#8594;</a></p>
 <p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">The original desktop version (Windows) is still available:
 <a class="file-dl" href="assets/files/ExamGenerator.exe" download>ExamGenerator.exe</a></p>"""
