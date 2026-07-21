@@ -280,9 +280,10 @@ fc_page = TOOL_LABEL + """<h1>Quote Flashcards</h1>
   <span class="tool-count" id="fc-count"></span>
 </div>
 <div class="fc-card" id="fc-card" tabindex="0">
-  <div class="fc-front" id="fc-front"></div>
-  <div class="fc-back" id="fc-back"></div>
-  <div class="fc-hint">Click card to flip</div>
+  <div class="fc-inner">
+    <div class="fc-face"><div class="fc-front" id="fc-front"></div><div class="fc-hint">Click card to flip</div></div>
+    <div class="fc-face fc-back-face"><div class="fc-back" id="fc-back"></div></div>
+  </div>
 </div>
 <div class="tool-bar">
   <button id="fc-prev">&#8592; Previous</button>
@@ -450,6 +451,76 @@ qz_page = TOOL_LABEL + """<h1>Technique Quiz</h1>
 })();
 </script>""" % json.dumps([{"term": g["term"], "def": g["def"]} for g in glossary], ensure_ascii=False)
 
+EXAMGEN = json.load(open(os.path.join(BUILD, "examgen", "examgen.json"), encoding="utf-8"))
+eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
+<p class="lede">Generate a full three-section practice exam &mdash; a random analytical topic, a Creating Texts prompt with stimulus, and an Analysing Argument source. Print it for authentic exam conditions.</p>
+<div class="tool-bar">
+  <select id="eg-text">
+    <option value="both">Section A: both texts</option>
+    <option value="sb">Section A: Sunset Boulevard only</option>
+    <option value="re">Section A: Rainbow&rsquo;s End only</option>
+  </select>
+  <button id="eg-go">Generate exam</button>
+  <button id="eg-print" style="display:none">Print / save as PDF</button>
+</div>
+<div id="eg-paper" class="eg-paper" style="display:none">
+  <div class="eg-head">
+    <div class="eg-school">South Oakleigh College</div>
+    <h2 class="eg-title">VCE English &mdash; Practice Examination</h2>
+    <p class="eg-meta">Reading time: 15 minutes &middot; Writing time: 3 hours &middot; Answer one task from each section</p>
+  </div>
+  <div id="eg-a"></div>
+  <div id="eg-b"></div>
+  <div id="eg-c"></div>
+</div>
+<script>window.EXAMGEN = %s;</script>
+<script>
+(function(){
+  var D = window.EXAMGEN;
+  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+  function two(a){ var i = Math.floor(Math.random() * a.length), j = i;
+    while (j === i && a.length > 1) j = Math.floor(Math.random() * a.length);
+    return [a[i], a[j]]; }
+  function esc(s){ return s.replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
+  function para(s){ return esc(s).split(String.fromCharCode(10)).join('<br>'); }
+  function topicBlock(name, arr){
+    var t = two(arr);
+    var h = '<div class="eg-text-name">' + name + '</div><ol class="eg-topics" type="i">';
+    h += '<li>' + para(t[0]) + '</li>';
+    if (t[1] !== t[0]) h += '<li>' + para(t[1]) + '</li>';
+    return h + '</ol>';
+  }
+  document.getElementById('eg-go').addEventListener('click', function(){
+    var mode = document.getElementById('eg-text').value;
+    var a = '<h3 class="eg-sec">Section A &mdash; Analytical response to a text</h3>' +
+            '<p class="eg-inst">Write an analytical response to ONE topic on your selected text.</p>';
+    if (mode === 'both' || mode === 'sb') a += topicBlock('Sunset Boulevard (Billy Wilder)', D.sb);
+    if (mode === 'both' || mode === 're') a += topicBlock('Rainbow\u2019s End (Jane Harrison)', D.re);
+    document.getElementById('eg-a').innerHTML = a;
+
+    var b = pick(D.b);
+    var bh = '<h3 class="eg-sec">Section B &mdash; Creating a text</h3>' +
+             '<p class="eg-inst">Framework of Ideas: Writing about personal journeys. Use the title and at least one piece of stimulus in your response.</p>' +
+             '<div class="eg-b-title">Title: \u2018' + esc(b.title) + '\u2019</div>';
+    if (b.s1) bh += '<div class="eg-stim"><div class="eg-stim-n">Stimulus 1</div>' + para(b.s1) + '</div>';
+    if (b.img) bh += '<div class="eg-stim"><div class="eg-stim-n">Stimulus 2</div><img src="assets/exam/b/' + b.img + '" alt="Section B visual stimulus"></div>';
+    if (b.s3) bh += '<div class="eg-stim"><div class="eg-stim-n">Stimulus 3</div>' + para(b.s3) + '</div>';
+    document.getElementById('eg-b').innerHTML = bh;
+
+    var cPool = D.c.filter(function(x){ return x.imgs.length; });
+    var c = pick(cPool);
+    var ch = '<h3 class="eg-sec">Section C &mdash; Analysis of argument and language</h3>' +
+             '<p class="eg-inst">Analyse the ways in which argument and language are used to persuade the intended audience in the material below.</p>';
+    c.imgs.forEach(function(f){ ch += '<img class="eg-c-img" src="assets/exam/c/' + f + '" alt="Section C source material">'; });
+    document.getElementById('eg-c').innerHTML = ch;
+
+    document.getElementById('eg-paper').style.display = '';
+    document.getElementById('eg-print').style.display = '';
+  });
+  document.getElementById('eg-print').addEventListener('click', function(){ window.print(); });
+})();
+</script>""" % json.dumps(EXAMGEN, ensure_ascii=False)
+
 hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
 <p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
 <h2 class="in-part-head">Tools</h2>
@@ -459,6 +530,7 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
   <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
   <a class="ch-card" href="technique-quiz.html"><span class="ch-num">5</span><span>Technique Quiz</span></a>
+  <a class="ch-card" href="exam-generator.html"><span class="ch-num">6</span><span>Exam Generator</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -469,12 +541,19 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                                {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
                                {"title": "Glossary of Techniques", "file": "glossary.html"},
                                {"title": "Essay Marker", "file": "marker.html"},
-                               {"title": "Technique Quiz", "file": "technique-quiz.html"}]})
+                               {"title": "Technique Quiz", "file": "technique-quiz.html"},
+                               {"title": "Exam Generator", "file": "exam-generator.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
 all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
+all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "html": eg_page, "nav": "study-tools.html"})
+for _sub in ("b", "c"):
+    _d = os.path.join(PUBLIC, "assets", "exam", _sub)
+    os.makedirs(_d, exist_ok=True)
+    for _f in os.listdir(os.path.join(BUILD, "examgen", _sub)):
+        copy_if_changed(os.path.join(BUILD, "examgen", _sub, _f), os.path.join(_d, _f))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
 def rewrite_anchors(scope, current):
@@ -520,7 +599,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=9">
+<link rel="stylesheet" href="assets/style.css?v=10">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -548,7 +627,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=9"></script>
+<script src="assets/site.js?v=10"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)
@@ -619,6 +698,8 @@ for k, pg in enumerate(all_pages):
         sec = pg["chapter"]["sec"]
         if "quote-bank" in pg["file"]:
             sec["class"] = sec.get("class", []) + ["quotes-page"]
+        if "exemplar" in pg["file"] or "sample-" in pg["file"]:
+            sec["class"] = sec.get("class", []) + ["exemplar-page"]
         rewrite_anchors(sec, pg["file"])
         hh = sec.find(["h2", "h3", "h4"])
         if hh: hh.name = "h1"
@@ -637,6 +718,27 @@ for k, pg in enumerate(all_pages):
         shell(pg["title"], pg["nav"], pg["file"], body, pn))
 
 # ---------------- landing ----------------
+ICONS = {
+ "How to Use This Site": '<circle cx="12" cy="12" r="9"/><path d="M12 8l3 7-7-3z"/>',
+ "Sunset Boulevard": '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 8l3-4 4 3 4-3 4 3 3-2v3"/>',
+ "Rainbow\u2019s End": '<path d="M4 17a8 8 0 0 1 16 0"/><path d="M8 17a4 4 0 0 1 8 0"/>',
+ "Analytical Text Response Essays": '<path d="M14 3l7 7-11 11H3v-7z"/><path d="M12 5l7 7"/>',
+ "Creating Texts": '<path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/>',
+ "Analysing Argument": '<path d="M21 12a8 7 0 0 1-8 7 9 9 0 0 1-4-1l-5 2 2-4a7 7 0 0 1-1-4 8 7 0 0 1 8-7 8 7 0 0 1 8 7z"/>',
+ "The Exam": '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
+ "Practice Exams": '<rect x="7" y="3" width="13" height="16" rx="2"/><path d="M4 7v12a2 2 0 0 0 2 2h10"/>',
+ "Exam Assessment Criteria": '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9l2 2 4-4M8 16h8"/>',
+ "Exam Checklists": '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/>',
+ "Key Takeaways from the 2024 Assessment Report": '<path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/>',
+ "Key Takeaways from the 2025 Assessment Report": '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+ "Effectively Studying For Exams": '<path d="M12 5c-2-2-6-2-8 0v13c2-2 6-2 8 0 2-2 6-2 8 0V5c-2-2-6-2-8 0z"/><path d="M12 5v13"/>',
+ "Study Tools": '<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>',
+}
+def icon_svg(title):
+    body = ICONS.get(title, '<circle cx="12" cy="12" r="9"/>')
+    return ('<span class="card-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" '
+            'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">%s</svg></span>' % body)
+
 BLURB = {
  "How to Use This Site": "Quick orientation: search, sections, practice exams and suggested study routes.",
  "Sunset Boulevard": "Billy Wilder's film — context, themes, quote banks, scene analyses, techniques, symbols and exemplar essays.",
@@ -652,8 +754,8 @@ BLURB = {
  "Key Takeaways from the 2025 Assessment Report": "What VCAA assessors flagged in 2025 — topic verbs, Framework choices and the interplay discriminator.",
  "Effectively Studying For Exams": "Study habits, schedules, recall and wellbeing.",
 }
-cards = "".join('<a class="card" href="%s"><div class="card-num">%02d</div><div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
-                % (it["file"], it["num"], html.escape(it["title"]), html.escape(BLURB.get(it["title"], "")))
+cards = "".join('<a class="card" href="%s">%s<div class="card-num">%02d</div><div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
+                % (it["file"], icon_svg(it["title"]), it["num"], html.escape(it["title"]), html.escape(BLURB.get(it["title"], "")))
                 for it in nav_items)
 landing = """
 <section class="hero">
@@ -674,6 +776,17 @@ landing = """
 """ % (nav_items[0]["file"], cards,
        "".join('<li><a href="%s">%s</a></li>' % (e["url"], html.escape(e["title"])) for e in exemplars))
 open(os.path.join(PUBLIC, "index.html"), "w", encoding="utf-8").write(shell("Home", "", "index.html", landing))
+
+nf = """
+<div class="nf-wrap">
+  <div class="nf-code">404</div>
+  <h1>Page not found</h1>
+  <p>That page doesn&rsquo;t exist &mdash; it may have moved when the site was reorganised.</p>
+  <p><a class="btn" style="background:var(--accent);color:#fff" href="index.html">Back to the guide</a></p>
+  <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">Or use the search box in the sidebar &mdash; it covers every page.</p>
+</div>
+"""
+open(os.path.join(PUBLIC, "404.html"), "w", encoding="utf-8").write(shell("Page not found", "", "404.html", nf))
 
 print("PAGES:", len(all_pages) + 1, "| PARTS:", len(nav_items), "| IMGS:", n_imgs, "| PDFS:", len(copied_pdfs),
       "| SEARCH:", len(search), "| EXEMPLARS:", len(exemplars))

@@ -22,8 +22,10 @@
             res.push(r);}
         }
         if(!res.length){out.innerHTML='<div class="nores">No matches for &ldquo;'+esc(box.value)+'&rdquo;</div>';out.classList.add('show');return;}
+        function hl(s){var e=esc(s),i=e.toLowerCase().indexOf(q);if(i<0)return e;
+          return e.substring(0,i)+'<b>'+e.substring(i,i+q.length)+'</b>'+e.substring(i+q.length);}
         out.innerHTML=res.map(function(r){
-          return '<a href="'+r.u+'">'+esc(r.t)+'<small>'+esc(r.p)+(r.s?' \u2014 '+esc(r.s):'')+'</small></a>';
+          return '<a href="'+r.u+'">'+hl(r.t)+'<small>'+esc(r.p)+(r.s?' \u2014 '+hl(r.s):'')+'</small></a>';
         }).join('');
         out.classList.add('show');
       });
@@ -49,10 +51,18 @@
       el.querySelector('.eb-time').style.display='none';
       clearInterval(iv);return;
     }
-    d.textContent=Math.floor(diff/86400000);
+    var days=Math.floor(diff/86400000);
+    d.textContent=days;
     h.textContent=pad(Math.floor(diff/3600000)%24);
     m.textContent=pad(Math.floor(diff/60000)%60);
     s.textContent=pad(Math.floor(diff/1000)%60);
+    var u=days<=7?'cd-final':days<=30?'cd-near':days<=100?'cd-mid':'';
+    ['cd-mid','cd-near','cd-final'].forEach(function(c){el.classList.remove(c);});
+    if(u)el.classList.add(u);
+    var chip=document.getElementById('cd-chip');
+    if(chip){chip.textContent='Exam: '+days+'d '+pad(Math.floor(diff/3600000)%24)+':'+pad(Math.floor(diff/60000)%60);
+      ['cd-mid','cd-near','cd-final'].forEach(function(c){chip.classList.remove(c);});
+      if(u)chip.classList.add(u);}
   }
   var iv=setInterval(tick,1000);tick();
 })();
@@ -73,4 +83,49 @@
   t.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
   document.body.appendChild(t);
   window.addEventListener('scroll',function(){t.classList.toggle('show',window.scrollY>600);},{passive:true});
+})();
+
+(function(){
+  var bar=document.createElement('div');bar.id='progress-bar';document.body.appendChild(bar);
+  function upd(){var h=document.documentElement.scrollHeight-window.innerHeight;
+    bar.style.width=(h>200?Math.min(100,window.scrollY/h*100):0)+'%';}
+  window.addEventListener('scroll',upd,{passive:true});upd();
+
+  var chip=document.createElement('div');chip.id='cd-chip';document.body.appendChild(chip);
+  var banner=document.getElementById('countdown');
+  window.addEventListener('scroll',function(){
+    var out=banner?banner.getBoundingClientRect().bottom<0:window.scrollY>150;
+    chip.classList.toggle('show',out&&chip.textContent);
+  },{passive:true});
+
+  document.addEventListener('click',function(e){
+    var img=e.target.closest&&e.target.closest('img.content-img');
+    if(!img)return;
+    var ov=document.createElement('div');ov.className='lb-overlay';
+    var big=document.createElement('img');big.src=img.src;big.alt=img.alt||'';
+    ov.appendChild(big);ov.addEventListener('click',function(){ov.remove();});
+    document.addEventListener('keydown',function esc2(ev){if(ev.key==='Escape'){ov.remove();document.removeEventListener('keydown',esc2);}});
+    document.body.appendChild(ov);
+  });
+
+  var sb=document.getElementById('sidebar');
+  var act=sb&&(sb.querySelector('.subnav li.active')||sb.querySelector('.toc li.active'));
+  if(sb&&act){var r=act.getBoundingClientRect(),rs=sb.getBoundingClientRect();
+    if(r.top>rs.bottom-80||r.top<rs.top)sb.scrollTop+=r.top-rs.top-sb.clientHeight/2;}
+
+  try{
+    var here=location.pathname.split('/').pop()||'index.html';
+    if(here!=='index.html'&&here!=='404.html'){
+      var tt=(document.title||'').split(' · ')[0];
+      localStorage.setItem('lastPage',JSON.stringify({u:here,t:tt}));
+    }else if(here==='index.html'){
+      var lp=JSON.parse(localStorage.getItem('lastPage')||'null');
+      var hero=document.querySelector('.hero');
+      if(lp&&lp.u&&hero){
+        var a=document.createElement('a');a.className='resume-chip';a.href=lp.u;
+        a.innerHTML='<span class="rc-label">Resume</span> '+lp.t.replace(/[<>&]/g,'')+' →';
+        hero.parentNode.insertBefore(a,hero.nextSibling);
+      }
+    }
+  }catch(e){}
 })();
