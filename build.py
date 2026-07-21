@@ -330,6 +330,38 @@ for pg in all_pages:
         if len(cells) >= 2 and cells[0] and len(cells[0]) < 60:
             d = cells[1] + ((" \u2014 " + cells[2]) if len(cells) > 2 and cells[2] else "")
             glossary.append({"term": cells[0], "def": d, "src": srcname})
+EXTRA_GLOSSARY = [
+ ("Allusion", "An indirect reference to another text, event or figure that imports its associations into the work."),
+ ("Characterisation", "The methods an author uses to construct a character: dialogue, actions, appearance, others' reactions."),
+ ("Connotation", "The emotional or cultural associations a word carries beyond its literal meaning."),
+ ("Contention", "The central argument a writer or speaker advances; in your essay, the position your paragraphs prove."),
+ ("Dramatic irony", "When the audience knows something a character does not, creating tension or poignancy."),
+ ("Emotive language", "Word choices designed to provoke an emotional response and position the audience."),
+ ("Flashback", "A scene set earlier than the main narrative, used to reveal context or motive."),
+ ("Foreshadowing", "Hints or clues that prepare the audience for later events."),
+ ("Framing device", "A narrative structure that encloses the main story, shaping how it is read."),
+ ("Hyperbole", "Deliberate exaggeration for emphasis or effect."),
+ ("Imagery", "Language appealing to the senses to create vivid impressions."),
+ ("Inclusive language", "Pronouns like 'we' and 'our' that position the audience as sharing the writer's view."),
+ ("Juxtaposition", "Placing contrasting elements side by side so each sharpens the other."),
+ ("Metaphor", "A direct comparison describing one thing as another to transfer its qualities."),
+ ("Motif", "A recurring image, phrase or idea that accumulates meaning across a text."),
+ ("Narrative voice", "The perspective and personality through which a story is told."),
+ ("Pathos", "An appeal to the audience's emotions."),
+ ("Personification", "Giving human qualities to non-human things."),
+ ("Rebuttal", "Directly addressing and dismantling an opposing argument."),
+ ("Rhetorical question", "A question posed for effect, leading the audience toward an implied answer."),
+ ("Satire", "Humour, irony or exaggeration used to criticise people, institutions or ideas."),
+ ("Simile", "A comparison using 'like' or 'as'."),
+ ("Stage directions", "A playwright's instructions for action, delivery and staging \u2014 key evidence when analysing drama."),
+ ("Symbolism", "Objects, settings or images that carry meaning beyond their literal presence."),
+ ("Tone", "The attitude a writer or speaker conveys toward their subject or audience."),
+ ("Vernacular", "Everyday or regional language that grounds characters in place, class or community."),
+]
+_existing = set(g["term"].lower() for g in glossary)
+for _t, _d in EXTRA_GLOSSARY:
+    if _t.lower() not in _existing:
+        glossary.append({"term": _t, "def": _d, "src": "Metalanguage"})
 glossary.sort(key=lambda g: g["term"].lower())
 
 TOOL_LABEL = '<div class="part-label">Study Tools</div>'
@@ -583,6 +615,200 @@ eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
 })();
 </script>""" % (json.dumps(EXAMGEN, ensure_ascii=False), json.dumps(SLOTCFG))
 
+# ---------- outline builder (static page, no % formatting) ----------
+ob_page = TOOL_LABEL + """<h1>Essay Outline Builder</h1>
+<p class="lede">Plan a body paragraph with the Th.E.S.A.M.L. method. Fill in each element, then copy or print your plan. Everything autosaves on this device.</p>
+<div class="ob-field"><label>Contention (your essay&rsquo;s overall argument)</label><textarea id="ob-contention" rows="2" placeholder="e.g. Obsession with self is what ultimately leads to the downfall of characters."></textarea></div>
+<div id="ob-paras"></div>
+<div class="tool-bar">
+  <button id="ob-add">+ Add paragraph</button>
+  <span style="flex:1"></span>
+  <button id="ob-copy">Copy plan</button>
+  <button id="ob-print">Print plan</button>
+  <button id="ob-clear">Clear all</button>
+</div>
+<div id="ob-preview" class="ob-preview"></div>
+<script>
+(function(){
+  var FIELDS = [
+    ['th', 'Th \u2014 Thematic topic sentence', 'A sentence based on a theme, not a character.'],
+    ['e', 'E \u2014 Evidence', 'Quotes and scenes that support the theme.'],
+    ['s', 'S \u2014 Symbols', 'Symbols, context and setting that relate to the theme.'],
+    ['a', 'A \u2014 Authorial intention', 'What was the author intending?'],
+    ['m', 'M \u2014 Metalanguage', 'The techniques you will name and analyse.'],
+    ['l', 'L \u2014 Linking sentence', 'Link back to your contention.']
+  ];
+  var state = { contention: '', paras: [{}] };
+  try { var sv = JSON.parse(localStorage.getItem('obState') || 'null'); if (sv && sv.paras) state = sv; } catch(e){}
+  function save(){ try { localStorage.setItem('obState', JSON.stringify(state)); } catch(e){} }
+  function render(){
+    document.getElementById('ob-contention').value = state.contention || '';
+    var host = document.getElementById('ob-paras'); host.innerHTML = '';
+    state.paras.forEach(function(p, pi){
+      var box = document.createElement('div'); box.className = 'ob-para';
+      var head = document.createElement('div'); head.className = 'ob-para-head';
+      head.innerHTML = '<b>Body paragraph ' + (pi + 1) + '</b>';
+      if (state.paras.length > 1){
+        var rm = document.createElement('button'); rm.textContent = 'Remove'; rm.className = 'ob-rm';
+        rm.addEventListener('click', function(){ state.paras.splice(pi, 1); save(); render(); preview(); });
+        head.appendChild(rm);
+      }
+      box.appendChild(head);
+      FIELDS.forEach(function(f){
+        var w = document.createElement('div'); w.className = 'ob-field';
+        var lb = document.createElement('label'); lb.textContent = f[1]; w.appendChild(lb);
+        var ta = document.createElement('textarea'); ta.rows = 2; ta.placeholder = f[2]; ta.value = p[f[0]] || '';
+        ta.addEventListener('input', function(){ p[f[0]] = ta.value; save(); preview(); });
+        w.appendChild(ta); box.appendChild(w);
+      });
+      host.appendChild(box);
+    });
+  }
+  function planText(){
+    var out = 'ESSAY PLAN' + String.fromCharCode(10) + 'Contention: ' + (state.contention || '') + String.fromCharCode(10);
+    state.paras.forEach(function(p, pi){
+      out += String.fromCharCode(10) + 'BODY PARAGRAPH ' + (pi + 1) + String.fromCharCode(10);
+      FIELDS.forEach(function(f){ if (p[f[0]]) out += '  ' + f[1] + ': ' + p[f[0]] + String.fromCharCode(10); });
+    });
+    return out;
+  }
+  function esc(s){ return s.replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
+  function preview(){
+    var h = '<h2>Your plan</h2>';
+    if (state.contention) h += '<p><b>Contention:</b> ' + esc(state.contention) + '</p>';
+    state.paras.forEach(function(p, pi){
+      var rows = FIELDS.filter(function(f){ return p[f[0]]; });
+      if (!rows.length) return;
+      h += '<h3>Body paragraph ' + (pi + 1) + '</h3><ul>';
+      rows.forEach(function(f){ h += '<li><b>' + f[1].split(' \u2014 ')[0] + ':</b> ' + esc(p[f[0]]) + '</li>'; });
+      h += '</ul>';
+    });
+    document.getElementById('ob-preview').innerHTML = h;
+  }
+  document.getElementById('ob-contention').addEventListener('input', function(e){ state.contention = e.target.value; save(); preview(); });
+  document.getElementById('ob-add').addEventListener('click', function(){ if (state.paras.length < 5){ state.paras.push({}); save(); render(); } });
+  document.getElementById('ob-copy').addEventListener('click', function(){ navigator.clipboard.writeText(planText()).then(function(){ document.getElementById('ob-copy').textContent = 'Copied \u2713'; setTimeout(function(){ document.getElementById('ob-copy').textContent = 'Copy plan'; }, 1500); }); });
+  document.getElementById('ob-print').addEventListener('click', function(){ window.print(); });
+  document.getElementById('ob-clear').addEventListener('click', function(){ if (confirm('Clear the whole plan?')){ state = { contention: '', paras: [{}] }; save(); render(); preview(); } });
+  render(); preview();
+})();
+</script>"""
+
+# ---------- vocabulary upgrader ----------
+VOCAB_SWAPS = {
+  "shows": ["demonstrates", "illustrates", "reveals", "highlights", "conveys", "depicts", "exposes", "emphasises", "underscores"],
+  "show": ["demonstrate", "illustrate", "reveal", "highlight", "convey", "depict", "expose", "emphasise"],
+  "showed": ["demonstrated", "illustrated", "revealed", "highlighted", "conveyed", "depicted"],
+  "shown": ["demonstrated", "illustrated", "revealed", "conveyed"],
+  "says": ["asserts", "contends", "argues", "maintains", "suggests", "posits", "claims", "declares", "implies"],
+  "say": ["assert", "contend", "argue", "maintain", "suggest", "claim"],
+  "said": ["asserted", "contended", "argued", "maintained", "suggested", "claimed"],
+  "does": ["constructs", "orchestrates", "positions", "cultivates", "reinforces", "subverts", "foregrounds", "amplifies"],
+  "did": ["constructed", "orchestrated", "positioned", "reinforced", "subverted"],
+  "likes": ["favours", "endorses", "embraces", "advocates for"],
+  "liked": ["favoured", "endorsed", "embraced"],
+  "doesn't like": ["rejects", "condemns", "critiques", "denounces", "repudiates"],
+  "good": ["effective", "compelling", "powerful", "persuasive"],
+  "bad": ["destructive", "corrosive", "damaging", "flawed"],
+  "gets": ["compels", "positions", "prompts", "invites"],
+  "thing": ["element", "idea", "notion", "concern"],
+  "things": ["elements", "ideas", "notions", "concerns"],
+  "a lot": ["considerably", "extensively", "markedly"],
+  "very": ["profoundly", "distinctly", "markedly"],
+}
+vu_page = TOOL_LABEL + """<h1>Vocabulary Upgrader</h1>
+<p class="lede">Paste a paragraph and it flags the words that flatten analytical writing &mdash; <em>shows, says, does, very, thing</em> and friends &mdash; with stronger swaps from the vocabulary bank. Pick a suggestion to replace it.</p>
+<textarea id="vu-text" rows="8" style="width:100%%;font-family:var(--serif);font-size:16.5px;line-height:1.6;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)" placeholder="Paste your paragraph here&hellip;"></textarea>
+<div class="tool-bar">
+  <button id="vu-check">Check my writing</button>
+  <span class="tool-count" id="vu-count"></span>
+</div>
+<div id="vu-out" class="vu-out"></div>
+<p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">See the full <a href="vocabulary.html">Vocabulary Bank</a> for the complete lists.</p>
+<script>window.VU = %s;</script>
+<script>
+(function(){
+  var SW = window.VU, out = document.getElementById('vu-out'), ta = document.getElementById('vu-text');
+  var keys = Object.keys(SW).sort(function(a, b){ return b.length - a.length; });
+  function esc(s){ return s.replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
+  function check(){
+    var text = ta.value;
+    if (!text.trim()){ out.innerHTML = ''; document.getElementById('vu-count').textContent = ''; return; }
+    var pattern = new RegExp('\\b(' + keys.map(function(k){ return k.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'); }).join('|') + ')\\b', 'gi');
+    var n = 0, html = '';
+    var last = 0, m;
+    while ((m = pattern.exec(text)) !== null){
+      html += esc(text.slice(last, m.index));
+      var word = m[0], sugg = SW[word.toLowerCase()] || [];
+      n++;
+      html += '<span class="vu-flag" tabindex="0">' + esc(word) + '<span class="vu-pop">' +
+        sugg.map(function(s){ return '<button class="vu-sw" data-i="' + m.index + '" data-len="' + word.length + '">' + esc(s) + '</button>'; }).join('') +
+        '</span></span>';
+      last = m.index + word.length;
+    }
+    html += esc(text.slice(last));
+    out.innerHTML = '<div class="vu-render">' + html.replace(/\\n/g, '<br>') + '</div>';
+    document.getElementById('vu-count').textContent = n ? n + ' word' + (n > 1 ? 's' : '') + ' to strengthen' : 'Nothing flagged \u2014 strong vocabulary throughout.';
+    out.querySelectorAll('.vu-sw').forEach(function(b){
+      b.addEventListener('click', function(){
+        var i = parseInt(b.dataset.i, 10), len = parseInt(b.dataset.len, 10);
+        ta.value = ta.value.slice(0, i) + b.textContent + ta.value.slice(i + len);
+        check();
+      });
+    });
+  }
+  document.getElementById('vu-check').addEventListener('click', check);
+})();
+</script>""" % json.dumps(VOCAB_SWAPS, ensure_ascii=False)
+
+# ---------- timed micro-drills ----------
+dr_page = TOOL_LABEL + """<h1>Micro-Drills</h1>
+<p class="lede">Five-minute bursts that build one skill at a time. Draw a drill, write against the clock.</p>
+<div class="tool-bar">
+  <select id="dr-type">
+    <option value="topics">Three topic sentences (5 min)</option>
+    <option value="plan">Plan an essay \u2014 no prose (5 min)</option>
+    <option value="contention">Contention in one sentence (2 min)</option>
+    <option value="link">Linking sentence back to contention (2 min)</option>
+  </select>
+  <button id="dr-go">Draw a drill</button>
+  <span class="tool-count timer" id="dr-timer" style="font-size:28px"></span>
+</div>
+<div class="tp-topic" id="dr-topic" style="display:none"></div>
+<textarea id="dr-pad" style="display:none;width:100%%;min-height:200px;font-family:var(--serif);font-size:16.5px;line-height:1.6;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);margin-top:10px" placeholder="Write here&hellip;"></textarea>
+<div class="tool-bar"><span class="tool-count" id="dr-wc" style="margin-left:0"></span></div>
+<script>window.DRT = %s;</script>
+<script>
+(function(){
+  var T = window.DRT, iv = null;
+  var TASKS = {
+    topics: ['Write THREE different thematic topic sentences for this topic:', 300],
+    plan: ['Plan a full essay for this topic \u2014 contention plus three Th.E.S.A.M.L. skeletons. Dot points only:', 300],
+    contention: ['Write your contention for this topic in ONE sentence:', 120],
+    link: ['Write a linking sentence that ends a body paragraph and returns to your contention for this topic:', 120]
+  };
+  function pick(){ var names = Object.keys(T), n = names[Math.floor(Math.random() * names.length)];
+    return '[' + n + '] ' + T[n][Math.floor(Math.random() * T[n].length)]; }
+  function fmt(s){ return Math.floor(s / 60) + ':' + (s %% 60 < 10 ? '0' : '') + (s %% 60); }
+  document.getElementById('dr-go').addEventListener('click', function(){
+    var t = TASKS[document.getElementById('dr-type').value];
+    document.getElementById('dr-topic').style.display = '';
+    document.getElementById('dr-topic').innerHTML = '<b>' + t[0] + '</b><br><br>' + pick();
+    var pad = document.getElementById('dr-pad'); pad.style.display = ''; pad.value = ''; pad.focus();
+    var left = t[1], el = document.getElementById('dr-timer');
+    clearInterval(iv); el.classList.remove('t-done'); el.textContent = fmt(left);
+    iv = setInterval(function(){ left--;
+      if (left <= 0){ clearInterval(iv); el.textContent = "Time!"; el.classList.add('t-done'); return; }
+      el.textContent = fmt(left); el.classList.toggle('t-low', left <= 30);
+    }, 1000);
+  });
+  document.getElementById('dr-pad').addEventListener('input', function(e){
+    var w = e.target.value.trim() ? e.target.value.trim().split(/\\s+/).length : 0;
+    document.getElementById('dr-wc').textContent = w + ' words';
+  });
+})();
+</script>""" % json.dumps(topics_data, ensure_ascii=False)
+
 hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
 <p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
 <h2 class="in-part-head">Tools</h2>
@@ -593,6 +819,9 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
   <a class="ch-card" href="technique-quiz.html"><span class="ch-num">5</span><span>Technique Quiz</span></a>
   <a class="ch-card" href="exam-generator.html"><span class="ch-num">6</span><span>Exam Generator</span></a>
+  <a class="ch-card" href="outline-builder.html"><span class="ch-num">7</span><span>Essay Outline Builder</span></a>
+  <a class="ch-card" href="vocab-upgrader.html"><span class="ch-num">8</span><span>Vocabulary Upgrader</span></a>
+  <a class="ch-card" href="micro-drills.html"><span class="ch-num">9</span><span>Micro-Drills</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -604,13 +833,19 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                                {"title": "Glossary of Techniques", "file": "glossary.html"},
                                {"title": "Essay Marker", "file": "marker.html"},
                                {"title": "Technique Quiz", "file": "technique-quiz.html"},
-                               {"title": "Exam Generator", "file": "exam-generator.html"}]})
+                               {"title": "Exam Generator", "file": "exam-generator.html"},
+                               {"title": "Essay Outline Builder", "file": "outline-builder.html"},
+                               {"title": "Vocabulary Upgrader", "file": "vocab-upgrader.html"},
+                               {"title": "Micro-Drills", "file": "micro-drills.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
 all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
 all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "html": eg_page, "nav": "study-tools.html"})
+all_pages.append({"file": "outline-builder.html", "title": "Essay Outline Builder", "html": ob_page, "nav": "study-tools.html"})
+all_pages.append({"file": "vocab-upgrader.html", "title": "Vocabulary Upgrader", "html": vu_page, "nav": "study-tools.html"})
+all_pages.append({"file": "micro-drills.html", "title": "Micro-Drills", "html": dr_page, "nav": "study-tools.html"})
 _ed = os.path.join(PUBLIC, "assets", "exam")
 for _sub in ("b", "c"):
     os.makedirs(os.path.join(_ed, _sub), exist_ok=True)
@@ -675,7 +910,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=16">
+<link rel="stylesheet" href="assets/style.css?v=17">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -703,7 +938,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=16"></script>
+<script src="assets/site.js?v=17"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
