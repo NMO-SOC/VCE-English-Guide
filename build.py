@@ -791,7 +791,11 @@ for k, pg in enumerate(all_pages):
         body = page_toc(sec) + sec.decode()
 
     if pg["file"] == "part-08-practice-exams.html":
-        body += PRACTICE_LINKS
+        _g = re.search(r'(<section[^>]*id="english-exam-generator".*?</section>)', body, re.S)
+        if _g:
+            body = body.replace(_g.group(1), "", 1) + PRACTICE_LINKS + _g.group(1)
+        else:
+            body += PRACTICE_LINKS
     open(os.path.join(PUBLIC, pg["file"]), "w", encoding="utf-8").write(
         shell(pg["title"], pg["nav"], pg["file"], body, pn))
 
