@@ -26,6 +26,9 @@ tex = open(os.path.join(SRC, "main.tex"), encoding="utf-8").read()
 tex = re.sub(r"(\\section\{English Exam Generator\}).*?(?=\\clearpage)",
              r"\1\nThe exam generator now runs directly on this site. It assembles a complete three-section practice paper from the question banks and downloads it as a Word document in the authentic task-book format.\n\n\\href{ZZFILE::__EXAMGEN__}{Open the Exam Generator}\n\n", tex, flags=re.S)
 
+# Th.E.S.A.M.L body paragraph method: replace with styled layout
+tex = re.sub(r"\\paragraph\{Th\}.*?Link back to your contention\.", "\n\nZZSAML\n\n", tex, count=1, flags=re.S)
+
 # script section: link out instead of hosting the PDF
 tex = tex.replace("Click the link below to open the Script:\\\\  \n\\textattachfile{SBScript.pdf}{Open SBScript.pdf}",
                   "The full script is available online:\n\n\\href{https://www.dailyscript.com/scripts/sunset_bld_3_21_49.html}{Read the Sunset Boulevard script at Daily Script}")
@@ -142,7 +145,30 @@ for _t in soup.find_all("table"):
         _rows[1].decompose()
         _rows = _t.find_all("tr")
 
+SAML_HTML = """<div class="saml">
+<div class="saml-item"><span class="saml-badge">Th</span><div class="saml-body"><b>Thematic-based topic sentence</b>
+<p>Your topic sentence needs to be based upon a theme in the text, not a character.</p>
+<div class="saml-ex"><span class="saml-no">&#10007;</span> &lsquo;Norma Desmond&rsquo;s obsession with herself ultimately leads to her downfall.&rsquo;<br>
+<span class="saml-yes">&#10003;</span> &lsquo;Obsession with self is what ultimately leads to the downfall of characters.&rsquo;</div></div></div>
+<div class="saml-item"><span class="saml-badge">E</span><div class="saml-body"><b>Evidence</b>
+<p>Quotes and scenes from the text that support the theme.</p></div></div>
+<div class="saml-item"><span class="saml-badge">S</span><div class="saml-body"><b>Symbols</b>
+<p>Symbols that relate to this theme &mdash; including historical and social context, and setting.</p></div></div>
+<div class="saml-item"><span class="saml-badge">A</span><div class="saml-body"><b>Authorial intention</b>
+<p>What was the author intending?</p></div></div>
+<div class="saml-item"><span class="saml-badge">M</span><div class="saml-body"><b>Metalanguage</b>
+<p>Discuss the metalanguage the author uses around this theme.</p></div></div>
+<div class="saml-item"><span class="saml-badge">L</span><div class="saml-body"><b>Linking sentence</b>
+<p>Link back to your contention.</p></div></div>
+<p class="saml-note">Only the <b>Th</b> and <b>L</b> elements need to appear in this order &mdash; the middle elements can be woven through the paragraph.</p>
+</div>"""
+
 exp_pat = re.compile(r"ZZEXP\s+(.+?)\s+ZZEXPEND")
+for _p in soup.find_all("p"):
+    if "ZZSAML" in _p.get_text():
+        _p.replace_with(BeautifulSoup(SAML_HTML, "html.parser"))
+        break
+
 exemplars = []
 for _p in soup.find_all("p"):
     _m = exp_pat.search(_p.get_text())
@@ -645,7 +671,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=15">
+<link rel="stylesheet" href="assets/style.css?v=16">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -673,7 +699,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=15"></script>
+<script src="assets/site.js?v=16"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)

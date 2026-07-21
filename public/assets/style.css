@@ -331,3 +331,14 @@ a.btn-inline:hover{text-decoration:none;filter:brightness(1.1)}
 .pdf-pages{border:1px solid var(--line);border-radius:12px;background:#525659;padding:14px;max-height:82vh;overflow-y:auto;user-select:none;-webkit-user-select:none}
 .pdf-pages img{display:block;width:100%;max-width:820px;margin:0 auto 14px;border-radius:4px;background:#fff;pointer-events:none}
 @media print{.pdf-pages{display:none!important}}
+.saml{margin:1.4em 0}
+.saml-item{display:flex;gap:18px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:10px}
+.saml-badge{flex:0 0 auto;font-family:var(--sans);font-weight:800;font-size:18px;background:var(--accent);color:#fff;border-radius:10px;min-width:46px;text-align:center;padding:9px 8px}
+.saml-body b{font-size:1.05rem}
+.saml-body p{font-family:var(--sans);font-size:14.5px;color:var(--body2);margin:.3em 0 0}
+.saml-ex{font-size:14.5px;background:var(--soft);border-radius:8px;padding:10px 14px;margin-top:10px;line-height:1.7;font-style:italic}
+.saml-no{color:#a32d2d;font-style:normal;font-weight:700;margin-right:6px}
+.saml-yes{color:#3b6d11;font-style:normal;font-weight:700;margin-right:6px}
+[data-theme="dark"] .saml-no{color:#f09595}
+[data-theme="dark"] .saml-yes{color:#97c459}
+.saml-note{font-family:var(--sans);font-size:13.5px;color:var(--muted);margin-top:12px}
