@@ -597,6 +597,8 @@ for _f in os.listdir(os.path.join(BUILD, "pdffrag", "img")):
 os.makedirs(os.path.join(PUBLIC, "assets", "pdf"), exist_ok=True)
 copy_if_changed(os.path.join(BUILD, "localpdf", "practice-exam-viii.pdf"),
                 os.path.join(PUBLIC, "assets", "pdf", "practice-exam-viii.pdf"))
+copy_if_changed(os.path.join(BUILD, "localpdf", "practice-exam-ix.pdf"),
+                os.path.join(PUBLIC, "assets", "pdf", "practice-exam-ix.pdf"))
 copy_if_changed(os.path.join(BUILD, "examgen", "web-template.docx"), os.path.join(_ed, "web-template.docx"))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
@@ -736,6 +738,14 @@ PRACTICE_LINKS = """
   <a class="pdf-open" href="assets/pdf/practice-exam-viii.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
   <a class="pdf-dl" href="assets/pdf/practice-exam-viii.pdf" download>Download &#8595;</a></div>
   <iframe class="pdf-frame" src="assets/pdf/practice-exam-viii.pdf#view=FitH" loading="lazy" title="Practice Exam VIII"></iframe>
+</div>
+<h2>Practice Exam IX</h2>
+<p>View below or download for printing.</p>
+<div class="pdf-embed">
+  <div class="pdf-embed-bar"><span class="pdf-name">Practice Exam IX</span>
+  <a class="pdf-open" href="assets/pdf/practice-exam-ix.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
+  <a class="pdf-dl" href="assets/pdf/practice-exam-ix.pdf" download>Download &#8595;</a></div>
+  <iframe class="pdf-frame" src="assets/pdf/practice-exam-ix.pdf#view=FitH" loading="lazy" title="Practice Exam IX"></iframe>
 </div>
 """
 
