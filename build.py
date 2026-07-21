@@ -171,6 +171,200 @@ for pm in part_meta:
 for e in exemplars:
     e["url"] = (id_to_page.get(e["id"], "index.html") + "#" + e["id"]) if e["id"] else "index.html"
 
+
+# ================= study tools =================
+def _clean(t): return re.sub(r"\s+", " ", t).strip()
+
+def _heading_chain(el, stop):
+    chain = []
+    sec = el.find_parent("section")
+    while sec is not None and sec is not stop.parent:
+        hh = sec.find(["h1","h2","h3","h4","h5"], recursive=False) or sec.find(["h2","h3","h4","h5"])
+        if hh: chain.append(_clean(hh.get_text()))
+        if sec is stop: break
+        sec = sec.find_parent("section")
+    return list(reversed(chain))
+
+flashcards = []
+for pg in all_pages:
+    if "chapter" not in pg or "quote-bank" not in pg["file"]: continue
+    text_name = pg["part"]["title"]
+    root = pg["chapter"]["sec"]
+    for li in root.find_all("li"):
+        q = _clean(li.get_text(" "))
+        if len(q) < 20 or li.find("ul"): continue
+        chain = _heading_chain(li, root)
+        cat = " \u00b7 ".join(c for c in chain[1:] if c) or chain[0] if chain else pg["title"]
+        flashcards.append({"q": q, "cat": (chain[0] + " \u00b7 " + cat) if len(chain) > 1 else pg["title"],
+                           "text": text_name})
+
+topics_data = {}
+for pg in all_pages:
+    if "chapter" not in pg or "practice-analytical-text-response-topics" not in pg["file"]: continue
+    tname = pg["part"]["title"]
+    lines = [ _clean(x) for x in pg["chapter"]["sec"].get_text("\n").split("\n") ]
+    out, cur = [], None
+    for ln in lines:
+        m = re.match(r"^(\d+)\.\s+(.*)", ln)
+        if m:
+            if cur: out.append(_clean(cur))
+            cur = m.group(2)
+        elif cur is not None and ln and not ln.lower().startswith(("topics from", "practice analytical")):
+            if len(ln) < 120: cur += " " + ln
+            else:
+                out.append(_clean(cur)); cur = None
+    if cur: out.append(_clean(cur))
+    topics_data.setdefault(tname, [])
+    topics_data[tname] += [t for t in out if len(t) > 25]
+
+glossary = []
+for pg in all_pages:
+    if "chapter" not in pg: continue
+    if pg["file"] == "p02-film-techniques.html": srcname = "Film technique"
+    elif pg["file"] == "p06-analysing-written-language.html": srcname = "Persuasive technique"
+    else: continue
+    tbl = pg["chapter"]["sec"].find("table")
+    if not tbl: continue
+    for tr in tbl.find_all("tr")[1:]:
+        cells = [_clean(c.get_text(" ")) for c in tr.find_all(["td","th"])]
+        if len(cells) >= 2 and cells[0] and len(cells[0]) < 60:
+            d = cells[1] + ((" \u2014 " + cells[2]) if len(cells) > 2 and cells[2] else "")
+            glossary.append({"term": cells[0], "def": d, "src": srcname})
+glossary.sort(key=lambda g: g["term"].lower())
+
+TOOL_LABEL = '<div class="part-label">Study Tools</div>'
+fc_page = TOOL_LABEL + """<h1>Quote Flashcards</h1>
+<p class="lede">Test yourself on the quote banks. Read the quote, recall who says it and which theme it serves, then flip.</p>
+<div class="tool-bar">
+  <select id="fc-text"><option value="">Both texts</option></select>
+  <button id="fc-shuffle">Shuffle</button>
+  <span class="tool-count" id="fc-count"></span>
+</div>
+<div class="fc-card" id="fc-card" tabindex="0">
+  <div class="fc-front" id="fc-front"></div>
+  <div class="fc-back" id="fc-back"></div>
+  <div class="fc-hint">Click card to flip</div>
+</div>
+<div class="tool-bar">
+  <button id="fc-prev">&#8592; Previous</button>
+  <button id="fc-flip">Flip</button>
+  <button id="fc-next">Next &#8594;</button>
+</div>
+<script>window.FLASHCARDS = %s;</script>
+<script>
+(function(){
+  var all = window.FLASHCARDS, deck = [], i = 0, flipped = false;
+  var texts = {}; all.forEach(function(c){ texts[c.text] = 1; });
+  var sel = document.getElementById('fc-text');
+  Object.keys(texts).forEach(function(t){ var o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
+  function shuffle(a){ for (var j = a.length - 1; j > 0; j--){ var k = Math.floor(Math.random() * (j + 1)); var tmp = a[j]; a[j] = a[k]; a[k] = tmp; } }
+  function rebuild(){ deck = all.filter(function(c){ return !sel.value || c.text === sel.value; }); shuffle(deck); i = 0; show(); }
+  function show(){
+    if (!deck.length) return;
+    flipped = false;
+    document.getElementById('fc-card').classList.remove('flipped');
+    document.getElementById('fc-front').textContent = deck[i].q;
+    document.getElementById('fc-back').textContent = deck[i].text + ' \u2014 ' + deck[i].cat;
+    document.getElementById('fc-count').textContent = (i + 1) + ' / ' + deck.length;
+  }
+  function flip(){ flipped = !flipped; document.getElementById('fc-card').classList.toggle('flipped', flipped); }
+  document.getElementById('fc-card').addEventListener('click', flip);
+  document.getElementById('fc-flip').addEventListener('click', flip);
+  document.getElementById('fc-next').addEventListener('click', function(){ i = (i + 1) %% deck.length; show(); });
+  document.getElementById('fc-prev').addEventListener('click', function(){ i = (i - 1 + deck.length) %% deck.length; show(); });
+  document.getElementById('fc-shuffle').addEventListener('click', rebuild);
+  sel.addEventListener('change', rebuild);
+  rebuild();
+})();
+</script>""" % json.dumps(flashcards, ensure_ascii=False)
+
+tp_page = TOOL_LABEL + """<h1>Practice Topics &amp; Essay Timer</h1>
+<p class="lede">Draw a random analytical topic and write against the clock, exam-style.</p>
+<div class="tool-bar">
+  <select id="tp-text"></select>
+  <button id="tp-draw">Draw a topic</button>
+</div>
+<div class="tp-topic" id="tp-topic">Press &ldquo;Draw a topic&rdquo; to begin.</div>
+<div class="timer-wrap">
+  <div class="timer" id="timer">60:00</div>
+  <div class="tool-bar">
+    <select id="t-mins"><option value="60">60 min (exam section)</option><option value="45">45 min</option><option value="30">30 min</option><option value="20">20 min (plan only)</option></select>
+    <button id="t-start">Start</button>
+    <button id="t-pause" disabled>Pause</button>
+    <button id="t-reset">Reset</button>
+  </div>
+</div>
+<script>window.TOPICS = %s;</script>
+<script>
+(function(){
+  var T = window.TOPICS, sel = document.getElementById('tp-text');
+  var names = Object.keys(T);
+  var o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Either text'; sel.appendChild(o0);
+  names.forEach(function(n){ var o = document.createElement('option'); o.value = n; o.textContent = n + ' (' + T[n].length + ' topics)'; sel.appendChild(o); });
+  document.getElementById('tp-draw').addEventListener('click', function(){
+    var pool = [];
+    names.forEach(function(n){ if (!sel.value || sel.value === n) T[n].forEach(function(t){ pool.push('[' + n + '] ' + t); }); });
+    document.getElementById('tp-topic').textContent = pool[Math.floor(Math.random() * pool.length)];
+  });
+  var total = 3600, left = 3600, iv = null;
+  var disp = document.getElementById('timer'), start = document.getElementById('t-start'),
+      pause = document.getElementById('t-pause'), reset = document.getElementById('t-reset'),
+      mins = document.getElementById('t-mins');
+  function fmt(s){ var m = Math.floor(s / 60), x = s %% 60; return m + ':' + (x < 10 ? '0' : '') + x; }
+  function draw(){ disp.textContent = fmt(left); disp.classList.toggle('t-low', left <= 300 && left > 0); }
+  function done(){ clearInterval(iv); iv = null; disp.textContent = "Time's up!"; disp.classList.add('t-done'); start.disabled = false; pause.disabled = true; }
+  start.addEventListener('click', function(){
+    if (iv) return;
+    if (left <= 0){ left = total; }
+    disp.classList.remove('t-done');
+    iv = setInterval(function(){ left--; if (left <= 0){ done(); return; } draw(); }, 1000);
+    start.disabled = true; pause.disabled = false;
+  });
+  pause.addEventListener('click', function(){ clearInterval(iv); iv = null; start.disabled = false; pause.disabled = true; });
+  reset.addEventListener('click', function(){ clearInterval(iv); iv = null; total = left = parseInt(mins.value, 10) * 60; disp.classList.remove('t-done'); draw(); start.disabled = false; pause.disabled = true; });
+  mins.addEventListener('change', function(){ if (!iv){ total = left = parseInt(mins.value, 10) * 60; draw(); } });
+  draw();
+})();
+</script>""" % json.dumps(topics_data, ensure_ascii=False)
+
+gl_items = "".join('<div class="gl-item" data-term="%s"><b>%s</b> <span class="gl-src">%s</span><p>%s</p></div>'
+                   % (html.escape(g["term"].lower()), html.escape(g["term"]), html.escape(g["src"]), html.escape(g["def"]))
+                   for g in glossary)
+gl_page = TOOL_LABEL + """<h1>Glossary of Techniques</h1>
+<p class="lede">Every film and persuasive technique from the guide in one alphabetical reference.</p>
+<div class="tool-bar"><input id="gl-filter" type="search" placeholder="Filter terms&hellip;" style="flex:1;max-width:340px"></div>
+<div class="gl-list" id="gl-list">%s</div>
+<script>
+(function(){
+  var inp = document.getElementById('gl-filter'), items = document.querySelectorAll('.gl-item');
+  inp.addEventListener('input', function(){
+    var q = inp.value.trim().toLowerCase();
+    items.forEach(function(it){ it.style.display = !q || it.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none'; });
+  });
+})();
+</script>""" % gl_items
+
+hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
+<p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
+<h2 class="in-part-head">Tools</h2>
+<div class="ch-list">
+  <a class="ch-card" href="flashcards.html"><span class="ch-num">1</span><span>Quote Flashcards</span></a>
+  <a class="ch-card" href="practice-topics.html"><span class="ch-num">2</span><span>Practice Topics &amp; Essay Timer</span></a>
+  <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
+</div>"""
+
+display_num += 1
+tools_num = display_num
+nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools.html",
+                  "chapters": [{"title": "Quote Flashcards", "file": "flashcards.html"},
+                               {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
+                               {"title": "Glossary of Techniques", "file": "glossary.html"}]})
+all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
+all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
+all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
+all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
+print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
+
 def rewrite_anchors(scope, current):
     for a in scope.find_all("a", href=True):
         if a["href"].startswith("#"):
@@ -204,7 +398,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s &middot; %s</title>
-<link rel="stylesheet" href="assets/style.css?v=5">
+<link rel="stylesheet" href="assets/style.css?v=6">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -231,7 +425,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=5"></script>
+<script src="assets/site.js?v=6"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, nav_html(active_nav, active_file), main_html, prevnext)
 
@@ -253,7 +447,8 @@ for pg in all_pages:
     elif "part" in pg:
         scope, part_title = pg["part"]["sec"], pg["part"]["title"]
     else:
-        search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"]})
+        _txt = re.sub(r"\s+", " ", BeautifulSoup(pg["html"], "html.parser").get_text(" "))[:1500]
+        search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"], "b": _txt.strip()})
         continue
     if "chapters" in pg and pg["chapters"]:
         search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"]})
@@ -261,8 +456,14 @@ for pg in all_pages:
     for h in scope.find_all(["h1", "h2", "h3", "h4", "h5"]):
         anc = h.find_parent("section")
         hid = anc.get("id") if anc else None
+        body = ""
+        if anc:
+            import copy as _copy
+            _cl = _copy.copy(anc)
+            for _sub in _cl.find_all("section"): _sub.decompose()
+            body = re.sub(r"\s+", " ", _cl.get_text(" "))[:1500].strip()
         search.append({"t": h.get_text(" ", strip=True), "p": part_title,
-                       "u": pg["file"] + ("#" + hid if hid else "")})
+                       "u": pg["file"] + ("#" + hid if hid else ""), "b": body})
 json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
 # ---------------- write pages ----------------
