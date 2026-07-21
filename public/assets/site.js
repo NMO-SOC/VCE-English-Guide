@@ -59,10 +59,6 @@
     var u=days<=7?'cd-final':days<=30?'cd-near':days<=100?'cd-mid':'';
     ['cd-mid','cd-near','cd-final'].forEach(function(c){el.classList.remove(c);});
     if(u)el.classList.add(u);
-    var chip=document.getElementById('cd-chip');
-    if(chip){chip.textContent='Exam: '+days+'d '+pad(Math.floor(diff/3600000)%24)+':'+pad(Math.floor(diff/60000)%60);
-      ['cd-mid','cd-near','cd-final'].forEach(function(c){chip.classList.remove(c);});
-      if(u)chip.classList.add(u);}
   }
   var iv=setInterval(tick,1000);tick();
 })();
@@ -91,12 +87,6 @@
     bar.style.width=(h>200?Math.min(100,window.scrollY/h*100):0)+'%';}
   window.addEventListener('scroll',upd,{passive:true});upd();
 
-  var chip=document.createElement('div');chip.id='cd-chip';document.body.appendChild(chip);
-  var banner=document.getElementById('countdown');
-  window.addEventListener('scroll',function(){
-    var out=banner?banner.getBoundingClientRect().bottom<0:window.scrollY>150;
-    chip.classList.toggle('show',out&&chip.textContent);
-  },{passive:true});
 
   document.addEventListener('click',function(e){
     var img=e.target.closest&&e.target.closest('img.content-img');
