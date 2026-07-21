@@ -326,3 +326,5 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 }
 a.btn-inline{font-family:var(--sans);font-weight:700;background:var(--accent);color:#fff;padding:10px 20px;border-radius:24px;font-size:14.5px;display:inline-block}
 a.btn-inline:hover{text-decoration:none;filter:brightness(1.1)}
+.inline-table-bar{font-family:var(--sans);margin:1.2em 0 .4em;text-align:right}
+.qt-table td:nth-child(2){white-space:nowrap}

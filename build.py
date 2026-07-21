@@ -96,6 +96,18 @@ for p in soup.find_all(["p", "div"]):
     m = pdf_pat.search(p.get_text())
     if not m: continue
     fname = m.group(1)
+    INLINE_TABLES = {"QuoteTableSummary.pdf": "quotetable.html",
+                     "Tracker.pdf": "tracker.html",
+                     "SymbolTable.pdf": "symboltable.html"}
+    if fname in INLINE_TABLES:
+        if os.path.exists(os.path.join(SRC, fname)) and fname not in copied_pdfs:
+            copy_if_changed(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
+        frag = open(os.path.join(BUILD, "snippets", INLINE_TABLES[fname]), encoding="utf-8").read()
+        enc = urllib.parse.quote(fname)
+        p.replace_with(BeautifulSoup(
+            '<div class="inline-table-bar"><a class="pdf-dl" href="assets/pdf/%s" download>Download as PDF &#8595;</a></div>%s'
+            % (enc, frag), "html.parser"))
+        continue
     if os.path.exists(os.path.join(SRC, fname)) and fname not in copied_pdfs:
         copy_if_changed(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
     enc = urllib.parse.quote(fname)
@@ -618,7 +630,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=12">
+<link rel="stylesheet" href="assets/style.css?v=13">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -646,7 +658,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=12"></script>
+<script src="assets/site.js?v=13"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)
