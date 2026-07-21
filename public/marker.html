@@ -1,0 +1,1618 @@
+<!DOCTYPE html><html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VCE English Essay Marker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --accent:      #1d4ed8;
+  --accent-soft: #eff6ff;
+  --accent-mid:  #bfdbfe;
+  --border:      #d1d5db;
+  --border-soft: #e5e7eb;
+  --surface:     #ffffff;
+  --surface2:    #f9fafb;
+  --surface3:    #f3f4f6;
+  --bg:          #f1f3f6;
+  --text:        #111827;
+  --text-2:      #374151;
+  --text-3:      #6b7280;
+  --success:     #166534;
+  --success-bg:  #f0fdf4;
+  --success-bd:  #86efac;
+  --warn:        #92400e;
+  --warn-bg:     #fffbeb;
+  --warn-bd:     #fcd34d;
+  --danger:      #991b1b;
+  --danger-bg:   #fef2f2;
+  --danger-bd:   #fca5a5;
+  --info:        #1e40af;
+  --info-bg:     #eff6ff;
+  --info-bd:     #93c5fd;
+  --radius:      8px;
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.06);
+  --shadow:      0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.06);
+}
+
+body.dark {
+  --accent:      #60a5fa;
+  --accent-soft: #1e2a3a;
+  --accent-mid:  #1e3a5f;
+  --border:      #374151;
+  --border-soft: #2d3748;
+  --surface:     #1a1f2e;
+  --surface2:    #141824;
+  --surface3:    #0f1219;
+  --bg:          #0c0f1a;
+  --text:        #f9fafb;
+  --text-2:      #e5e7eb;
+  --text-3:      #9ca3af;
+  --success:     #4ade80;
+  --success-bg:  #052e16;
+  --success-bd:  #166534;
+  --warn:        #fbbf24;
+  --warn-bg:     #1c1207;
+  --warn-bd:     #92400e;
+  --danger:      #f87171;
+  --danger-bg:   #1f0707;
+  --danger-bd:   #991b1b;
+  --info:        #93c5fd;
+  --info-bg:     #0c1a2e;
+  --info-bd:     #1e40af;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px 56px;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.header-left h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+.header-left p {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.theme-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.theme-btn:hover { background: var(--surface3); }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+  gap: 0;
+}
+.tab-btn {
+  padding: 9px 18px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.tab-btn:hover:not(.active) { color: var(--text-2); }
+.tab-btn small {
+  display: block;
+  font-size: 0.67rem;
+  font-weight: 400;
+  color: inherit;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.section-desc {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+/* ── Fields ── */
+.field { margin-bottom: 14px; }
+.field-row { display: flex; gap: 12px; }
+.field-row .field { flex: 1; margin-bottom: 0; }
+
+label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-3);
+  margin-bottom: 5px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+input[type="text"], select, textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.87rem;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.2s;
+  resize: vertical;
+  appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236b7280' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  padding-right: 28px;
+}
+textarea.essay-input {
+  min-height: 220px;
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.91rem;
+  line-height: 1.75;
+}
+textarea.source-input {
+  min-height: 130px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+.word-count {
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--text-3);
+  margin-top: 3px;
+}
+
+/* ── Criteria accordion ── */
+.criteria-toggle {
+  display: block;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-3);
+  cursor: pointer;
+  text-align: left;
+  margin-top: 10px;
+  transition: background 0.15s, color 0.15s;
+}
+.criteria-toggle:hover { background: var(--surface3); color: var(--text-2); }
+.criteria-detail {
+  display: none;
+  background: var(--surface2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-top: 6px;
+  font-size: 0.76rem;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.criteria-detail.open { display: block; }
+.criteria-detail strong { color: var(--text); }
+.criteria-detail ul { margin: 5px 0 12px 16px; }
+.criteria-detail li { margin-bottom: 3px; }
+.criteria-detail table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.criteria-detail td { padding: 4px 8px; border-bottom: 1px solid var(--border-soft); vertical-align: top; font-size: 0.73rem; }
+.criteria-detail td:first-child { font-weight: 600; color: var(--accent); width: 46px; white-space: nowrap; }
+.criteria-detail tr:last-child td { border: none; }
+
+/* ── Mark button ── */
+.mark-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  transition: background 0.15s;
+}
+.mark-btn:hover { background: #1e40af; }
+.mark-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+/* ── Error ── */
+.error-msg {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-bd);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  color: var(--danger);
+  font-size: 0.8rem;
+  margin-top: 8px;
+  display: none;
+}
+.error-msg.show { display: block; }
+
+/* ── Result card ── */
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 12px;
+  box-shadow: var(--shadow);
+  display: none;
+  transition: background 0.2s;
+}
+.result-card.show { display: block; }
+
+/* ── Score header ── */
+.score-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.score-box {
+  width: 72px; height: 72px;
+  border-radius: var(--radius);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex-shrink: 0; font-weight: 700;
+  border: 1px solid;
+}
+.score-box .num { font-size: 1.9rem; line-height: 1; letter-spacing: -1px; }
+.score-box .den { font-size: 0.68rem; opacity: 0.6; margin-top: 1px; }
+.sc-high { background: var(--success-bg); color: var(--success); border-color: var(--success-bd); }
+.sc-mid2 { background: var(--info-bg);    color: var(--info);    border-color: var(--info-bd); }
+.sc-mid  { background: var(--warn-bg);    color: var(--warn);    border-color: var(--warn-bd); }
+.sc-low  { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger-bd); }
+
+.score-meta { flex: 1; }
+.score-meta h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.score-meta p  { font-size: 0.81rem; color: var(--text-3); line-height: 1.5; }
+.band-tag {
+  display: inline-block;
+  font-size: 0.7rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px;
+  margin-top: 6px; letter-spacing: 0.2px;
+}
+.band-upper { background: var(--success-bg); color: var(--success); }
+.band-mid   { background: var(--warn-bg);    color: var(--warn); }
+.band-lower { background: var(--danger-bg);  color: var(--danger); }
+
+/* ── Criteria scores grid ── */
+.criteria-scores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.crit-score {
+  background: var(--surface2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.crit-score-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.crit-score-bar-wrap {
+  background: var(--border-soft);
+  border-radius: 4px;
+  height: 5px;
+  width: 100%;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.crit-score-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+.crit-score-val {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+}
+.crit-score-val strong { color: var(--text-2); font-weight: 600; }
+
+/* ── Filter bar ── */
+.filter-bar {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  margin-bottom: 10px; align-items: center;
+}
+.filter-bar > span {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  margin-right: 4px;
+}
+.filter-btn {
+  padding: 2px 9px;
+  border-radius: 4px;
+  border: 1px solid;
+  font-family: inherit;
+  font-size: 0.7rem; font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  letter-spacing: 0.1px;
+  background: transparent;
+}
+.filter-btn.off { opacity: 0.25; }
+.fb-Pos { border-color: #a16207; color: #a16207; }
+.fb-Str { border-color: #1d4ed8; color: #1d4ed8; }
+.fb-Ana { border-color: #6d28d9; color: #6d28d9; }
+.fb-Tec { border-color: #065f46; color: #065f46; }
+.fb-Rel { border-color: #c2410c; color: #c2410c; }
+
+/* ── Essay view ── */
+.essay-view {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.92rem;
+  line-height: 1.85;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.hl {
+  border-radius: 2px;
+  padding: 1px 1px;
+  transition: filter 0.1s;
+}
+.hl:hover { filter: brightness(0.86); }
+.hl-Pos, .hl-Positive  { background: rgba(234,179,8,0.18);  border-bottom: 1.5px solid #a16207; }
+.hl-Str, .hl-Structure { background: rgba(59,130,246,0.14); border-bottom: 1.5px solid #1d4ed8; }
+.hl-Ana, .hl-Analysis  { background: rgba(139,92,246,0.14); border-bottom: 1.5px solid #6d28d9; }
+.hl-Tec, .hl-Technical { background: rgba(16,185,129,0.14); border-bottom: 1.5px solid #065f46; }
+.hl-Rel, .hl-Relevance { background: rgba(234,88,12,0.14);  border-bottom: 1.5px solid #c2410c; }
+
+/* ── Tooltip ── */
+#hl-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  max-width: 280px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.79rem;
+  line-height: 1.5;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+#hl-tooltip.show { display: block; }
+.tt-type {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+/* ── Loading ── */
+.loading {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--text-3);
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading p { font-size: 0.82rem; }
+
+/* ── Feedback blocks ── */
+.feedback-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.fb {
+  background: var(--surface2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.fb.full { grid-column: 1 / -1; }
+.fb.tip-block {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+.fb h4 {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.fb p, .fb ul {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.fb ul { padding-left: 15px; }
+.fb li { margin-bottom: 4px; }
+
+/* ── Unmatched ── */
+.unmatched {
+  background: var(--surface2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.unmatched h4 {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.unmatched ul { padding-left: 15px; }
+.unmatched li { margin-bottom: 3px; }
+
+/* ── 9-10 button ── */
+.topband-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: center;
+}
+.topband-btn:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); }
+.topband-btn:disabled { color: var(--text-3); cursor: not-allowed; }
+
+.topband-result {
+  display: none;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.topband-result.show { display: block; }
+
+.topband-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.83rem;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+.topband-section:last-child { border-bottom: none; }
+.topband-section h4 {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.topband-section.rewrite-block {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+}
+.rewrite-block h4 { color: var(--accent); }
+.rewrite-text {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.89rem;
+  line-height: 1.8;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--accent-mid);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+}
+.rewrite-note {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* ── Image upload ── */
+.img-upload-area {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--text-3);
+}
+.img-upload-area:hover { border-color: var(--accent); background: var(--accent-soft); }
+.img-upload-area.has-image { border-style: solid; border-color: var(--accent-mid); }
+.img-upload-label {
+  font-size: 0.76rem;
+  margin-top: 6px;
+}
+.img-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-soft);
+  margin-top: 8px;
+  display: none;
+}
+.img-preview.show { display: block; }
+.transcribe-btn {
+  display: none;
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.transcribe-btn.show { display: block; }
+.transcribe-btn:hover:not(:disabled) { background: var(--accent-mid); }
+.transcribe-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div id="hl-tooltip"><div class="tt-type" id="tt-type"></div><div id="tt-text"></div></div>
+
+<div class="header">
+  <div class="header-left">
+    <h1>VCE English Essay Marker</h1>
+    <p>2024–2027 Study Design &nbsp;·&nbsp; Sections A, B and C &nbsp;·&nbsp; Official EQ Descriptors &nbsp;·&nbsp; Calibrated to 2024–25 Assessor Reports</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <label style="display:flex;align-items:center;gap:5px;margin:0;text-transform:none;letter-spacing:0;font-size:0.75rem;font-weight:500;color:var(--text-2);cursor:pointer" title="Marks three times independently and reports the median — slower but more reliable">
+      <input type="checkbox" id="precision-mode" style="width:auto;accent-color:var(--accent)"> Precision mode (3× median)
+    </label>
+    <select id="tone-select" style="width:auto;padding:5px 28px 5px 10px;font-size:0.75rem" title="Feedback voice only — never changes the score">
+      <option value="harsh">Examiner voice (direct)</option>
+      <option value="gentle">Coaching voice (encouraging)</option>
+    </select>
+    <a class="theme-btn" href="study-tools.html" style="text-decoration:none;display:inline-block">&#8592; Study Guide</a>
+    <button class="theme-btn" onclick="openSettings()" id="ai-btn">AI Settings</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">Dark mode</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('a')">
+    Section A <small>Text Response</small>
+  </button>
+  <button class="tab-btn" onclick="switchTab('b')">
+    Section B <small>Creating Texts</small>
+  </button>
+  <button class="tab-btn" onclick="switchTab('c')">
+    Section C <small>Argument Analysis</small>
+  </button>
+</div>
+
+<!-- SECTION A -->
+<div id="tab-a" class="tab-panel active">
+  <div class="card">
+    <div class="section-label">Section A</div>
+    <div class="section-title">Analytical Response to a Text</div>
+    <div class="section-desc">Write an essay responding to a topic about the ideas, concerns and values the author presents. Close reference to the text is required. Marked out of 10.</div>
+
+    <div class="field">
+      <label>Text</label>
+      <select id="a-text">
+        <option value="">Select a text</option>
+        <option value="Sunset Boulevard">Sunset Boulevard</option>
+        <option value="Rainbow's End">Rainbow's End</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Essay Topic / Question</label>
+      <input type="text" id="a-topic" placeholder="e.g. Sunset Boulevard both challenges and reinforces traditional gender expectations. Discuss.">
+    </div>
+    <div class="field">
+      <label>Your Essay</label>
+      <textarea class="essay-input" id="a-essay" placeholder="Paste your essay here." oninput="updateWC('a-essay','a-wc')"></textarea>
+      <div class="word-count" id="a-wc">0 words</div>
+    </div>
+
+    <div class="field">
+      <label>Or Upload Handwritten Work</label>
+      <div class="img-upload-area" id="a-img-area" onclick="document.getElementById('a-img-input').click()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="img-upload-label">Click to upload a photo of handwritten work — Claude will transcribe it</div>
+      </div>
+      <input type="file" id="a-img-input" accept="image/*" style="display:none" onchange="previewImage('a',this)">
+      <img id="a-img-preview" class="img-preview" alt="Handwriting preview">
+      <button class="transcribe-btn" id="a-transcribe-btn" onclick="transcribeImage('a')">Transcribe Handwriting and Fill Essay Box</button>
+      <div class="error-msg" id="a-img-error"></div>
+    </div>
+
+    <button class="criteria-toggle" onclick="toggleEl('a-crit')">View marking criteria and EQ descriptors</button>
+    <div class="criteria-detail" id="a-crit">
+      <strong>Assessment Criteria:</strong>
+      <ul>
+        <li>Knowledge and understanding of the text, its structure, and ideas, concerns and values</li>
+        <li>Development of a coherent analysis in response to the topic</li>
+        <li>Use of evidence from the text to support the analysis</li>
+        <li>Fluent expression and appropriate vocabulary / Standard Australian English</li>
+      </ul>
+      <strong>Expected Qualities:</strong>
+      <table>
+        <tr><td>9–10</td><td>Close/perceptive reading; explores complexities; perceptive topic understanding; cogent, well-substantiated discussion; precise/expressive language</td></tr>
+        <tr><td>8</td><td>Thoughtful reading; explores ideas through structure/language; understands implications; detailed, coherent discussion; fluent/confident language</td></tr>
+        <tr><td>7</td><td>Detailed knowledge; acknowledges structure/language; sustained, well-supported response; accurate/appropriate language</td></tr>
+        <tr><td>6</td><td>Clear knowledge; some elements of ideas; some structure/language awareness; supported by evidence; mostly accurate language</td></tr>
+        <tr><td>5</td><td>Adequate knowledge; some reference to ideas; understanding of topic with evidence; adequate communication</td></tr>
+        <tr><td>4</td><td>Basic knowledge; limited reference to ideas; some topic understanding; adequate expression</td></tr>
+        <tr><td>3</td><td>Familiarity with text; limited topic awareness; basic expression</td></tr>
+        <tr><td>1–2</td><td>Limited familiarity; very limited topic awareness; unclear language</td></tr>
+        <tr><td>0</td><td>No knowledge of text / no engagement with topic / minimal language control</td></tr>
+      </table>
+    </div>
+
+    <button class="mark-btn" onclick="markEssay('a')">Mark This Essay</button>
+    <div class="error-msg" id="a-error"></div>
+  </div>
+  <div class="result-card" id="a-result"></div>
+</div>
+
+<!-- SECTION B -->
+<div id="tab-b" class="tab-panel">
+  <div class="card">
+    <div class="section-label">Section B</div>
+    <div class="section-title">Creating a Text</div>
+    <div class="section-desc">Create an original text responding to a Framework of Ideas title and at least one piece of stimulus material. Any prose form is acceptable. Marked out of 10.</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Framework of Ideas</label>
+        <select id="b-framework">
+          <option value="">Select a framework</option>
+          <option value="Country">Country</option>
+          <option value="Protest">Protest</option>
+          <option value="Personal Journeys">Personal Journeys</option>
+          <option value="Play">Play</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Title Used</label>
+        <input type="text" id="b-title" placeholder="e.g. Connections, Resist and Persist">
+      </div>
+    </div>
+    <div class="field">
+      <label>Stimulus Material Used</label>
+      <input type="text" id="b-stimulus" placeholder="e.g. Stimulus 2 — image of lone figure standing against a wave">
+    </div>
+    <div class="field">
+      <label>Your Text</label>
+      <textarea class="essay-input" id="b-essay" placeholder="Paste your created text here." oninput="updateWC('b-essay','b-wc')"></textarea>
+      <div class="word-count" id="b-wc">0 words</div>
+    </div>
+
+    <div class="field">
+      <label>Or Upload Handwritten Work</label>
+      <div class="img-upload-area" id="b-img-area" onclick="document.getElementById('b-img-input').click()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="img-upload-label">Click to upload a photo of handwritten work — Claude will transcribe it</div>
+      </div>
+      <input type="file" id="b-img-input" accept="image/*" style="display:none" onchange="previewImage('b',this)">
+      <img id="b-img-preview" class="img-preview" alt="Handwriting preview">
+      <button class="transcribe-btn" id="b-transcribe-btn" onclick="transcribeImage('b')">Transcribe Handwriting and Fill Text Box</button>
+      <div class="error-msg" id="b-img-error"></div>
+    </div>
+
+    <button class="criteria-toggle" onclick="toggleEl('b-crit')">View marking criteria and EQ descriptors</button>
+    <div class="criteria-detail" id="b-crit">
+      <strong>Assessment Criteria:</strong>
+      <ul>
+        <li>Use of relevant ideas from a Framework of Ideas, the title, and at least one piece of stimulus material</li>
+        <li>Creation of a cohesive text with clear purpose(s) and appropriate voice</li>
+        <li>Use of suitable text structure(s) and language features</li>
+        <li>Fluent expression and appropriate vocabulary</li>
+      </ul>
+      <strong>Expected Qualities:</strong>
+      <table>
+        <tr><td>9–10</td><td>Insightful Framework ideas; cohesive text with explicit purpose and voice; sophisticated language/structure control; rich vocabulary</td></tr>
+        <tr><td>8</td><td>Astute exploration of Framework ideas; coherent text; confident language control; thoughtful vocabulary</td></tr>
+        <tr><td>7</td><td>Detailed connection to Framework ideas; coordinated text; sound control; clear vocabulary</td></tr>
+        <tr><td>6</td><td>Clear connection; connected text with clear purpose and voice; effective vocabulary</td></tr>
+        <tr><td>5</td><td>Adequate connection; organised text; adequate control</td></tr>
+        <tr><td>4</td><td>Basic connection; some purpose/voice awareness; basic control</td></tr>
+        <tr><td>3</td><td>Limited connection; limited purpose or voice awareness; limited language/structure</td></tr>
+        <tr><td>1–2</td><td>Little/no connection; little awareness of purpose; unclear language</td></tr>
+        <tr><td>0</td><td>No engagement with the task</td></tr>
+      </table>
+    </div>
+
+    <button class="mark-btn" onclick="markEssay('b')">Mark This Text</button>
+    <div class="error-msg" id="b-error"></div>
+  </div>
+  <div class="result-card" id="b-result"></div>
+</div>
+
+<!-- SECTION C -->
+<div id="tab-c" class="tab-panel">
+  <div class="card">
+    <div class="section-label">Section C</div>
+    <div class="section-title">Analysing Argument</div>
+    <div class="section-desc">Analyse how written and spoken language and visuals are used to present arguments and persuade the audience. This is an analytical response, not a persuasive essay. Marked out of 10.</div>
+
+    <div class="field">
+      <label>Source Text / Article Title and Author</label>
+      <input type="text" id="c-source-title" placeholder="e.g. 'Why We Must Act Now' by Jane Smith, The Age, 12 March 2025">
+    </div>
+    <div class="field">
+      <label>Source Text Content</label>
+      <textarea class="source-input" id="c-source" placeholder="Paste the article, speech or letter being analysed here."></textarea>
+    </div>
+    <div class="field">
+      <label>Your Analysis</label>
+      <textarea class="essay-input" id="c-essay" placeholder="Paste your analytical response here." oninput="updateWC('c-essay','c-wc')"></textarea>
+      <div class="word-count" id="c-wc">0 words</div>
+    </div>
+
+    <div class="field">
+      <label>Or Upload Handwritten Work</label>
+      <div class="img-upload-area" id="c-img-area" onclick="document.getElementById('c-img-input').click()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="img-upload-label">Click to upload a photo of handwritten work — Claude will transcribe it</div>
+      </div>
+      <input type="file" id="c-img-input" accept="image/*" style="display:none" onchange="previewImage('c',this)">
+      <img id="c-img-preview" class="img-preview" alt="Handwriting preview">
+      <button class="transcribe-btn" id="c-transcribe-btn" onclick="transcribeImage('c')">Transcribe Handwriting and Fill Analysis Box</button>
+      <div class="error-msg" id="c-img-error"></div>
+    </div>
+
+    <button class="criteria-toggle" onclick="toggleEl('c-crit')">View marking criteria and EQ descriptors</button>
+    <div class="criteria-detail" id="c-crit">
+      <strong>Assessment Criteria:</strong>
+      <ul>
+        <li>Understanding of contention, argument(s), and point of view</li>
+        <li>Analysis of the ways written/spoken language and visuals are used to present arguments and persuade the intended audience</li>
+        <li>Use of evidence from the text to support the analysis</li>
+        <li>Fluent expression and appropriate vocabulary / Standard Australian English</li>
+      </ul>
+      <strong>Expected Qualities:</strong>
+      <table>
+        <tr><td>9–10</td><td>Perceptive understanding of contention/argument; sophisticated insight into HOW language/visuals persuade; sophisticated/precise language</td></tr>
+        <tr><td>8</td><td>Thoughtful understanding; sound insight into how language/visuals build argument; confident language</td></tr>
+        <tr><td>7</td><td>Detailed understanding; insight into persuasive techniques; fluent expression</td></tr>
+        <tr><td>6</td><td>Clear understanding; some awareness of persuasive language/visuals; competent expression</td></tr>
+        <tr><td>5</td><td>Adequate understanding; basic awareness of techniques; adequate language</td></tr>
+        <tr><td>4</td><td>Basic understanding; describes rather than analyses; basic language</td></tr>
+        <tr><td>3</td><td>Limited knowledge of argument or point of view; limited technique knowledge</td></tr>
+        <tr><td>1–2</td><td>Little understanding; minimal task knowledge; unclear language</td></tr>
+        <tr><td>0</td><td>No understanding of task requirements</td></tr>
+      </table>
+    </div>
+
+    <button class="mark-btn" onclick="markEssay('c')">Mark This Analysis</button>
+    <div class="error-msg" id="c-error"></div>
+  </div>
+  <div class="result-card" id="c-result"></div>
+</div>
+
+<script>
+/* ── Theme ── */
+let dark = false;
+function toggleTheme() {
+  dark = !dark;
+  document.body.classList.toggle('dark', dark);
+  document.getElementById('theme-btn').textContent = dark ? 'Light mode' : 'Dark mode';
+}
+
+/* ── Tooltip (mousemove) ── */
+const TT = document.getElementById('hl-tooltip');
+document.addEventListener('mousemove', e => {
+  const hl = e.target && e.target.closest && e.target.closest('.hl');
+  if (hl && hl.dataset.comment) {
+    document.getElementById('tt-type').textContent = hl.dataset.type || '';
+    document.getElementById('tt-text').textContent  = hl.dataset.comment || '';
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + 290 > window.innerWidth)  x = e.clientX - 290;
+    if (y + 110 > window.innerHeight) y = e.clientY - 110;
+    TT.style.left = x + 'px'; TT.style.top = y + 'px';
+    TT.classList.add('show');
+  } else {
+    TT.classList.remove('show');
+  }
+});
+
+/* ── Filter ── */
+// Maps both short codes and full names to the same canonical key
+const TYPE_KEY = t => {
+  const s = (t||'').toLowerCase();
+  if(s.startsWith('pos')||s==='positive') return 'Positive';
+  if(s.startsWith('str')||s==='structure') return 'Structure';
+  if(s.startsWith('ana')||s==='analysis') return 'Analysis';
+  if(s.startsWith('tec')||s==='technical') return 'Technical';
+  if(s.startsWith('rel')||s==='relevance') return 'Relevance';
+  return t;
+};
+let activeF = new Set(['Positive','Structure','Analysis','Technical','Relevance']);
+function toggleFilter(type, btn) {
+  const k = TYPE_KEY(type);
+  if (activeF.has(k)) { activeF.delete(k); btn.classList.add('off'); }
+  else { activeF.add(k); btn.classList.remove('off'); }
+  document.querySelectorAll('.hl').forEach(el => {
+    const on = activeF.has(TYPE_KEY(el.dataset.type));
+    el.style.background   = on ? '' : 'transparent';
+    el.style.borderBottom = on ? '' : 'none';
+  });
+}
+
+/* ── Helpers ── */
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['a','b','c'][i] === t));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+}
+function updateWC(tid, wid) {
+  const v = document.getElementById(tid).value.trim();
+  document.getElementById(wid).textContent = (v ? v.split(/\s+/).length : 0) + ' words';
+}
+function toggleEl(id) { document.getElementById(id).classList.toggle('open'); }
+
+function sCls(s) { return s>=8?'sc-high':s>=6?'sc-mid2':s>=4?'sc-mid':'sc-low'; }
+function sLbl(s) {
+  if(s>=9)return'Outstanding';if(s===8)return'Excellent';if(s===7)return'Very Good';
+  if(s===6)return'Good';if(s===5)return'Satisfactory';if(s===4)return'Basic';
+  if(s===3)return'Limited';return'Very Limited';
+}
+function escH(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function norm(raw) {
+  if (typeof raw === 'string') return raw;
+  if (raw && typeof raw === 'object') return raw.text||raw.content||raw.result||raw.message||raw.response||JSON.stringify(raw);
+  return String(raw);
+}
+
+/* ── Prompts ── */
+const TONE = () => document.getElementById('tone-select').value === 'gentle'
+  ? `FEEDBACK VOICE: encouraging and constructive — name strengths genuinely, frame weaknesses as clear next steps. The voice NEVER changes the score; mark with full rigour.`
+  : `FEEDBACK VOICE: direct and academically rigorous, like a real examiner's report — no praise padding, state plainly what is weak and exactly what to do about it. The voice NEVER changes the score.`;
+
+const EXAMCTX = `
+EXAM CONTEXT (official VCAA examination specifications): the written exam has three equally weighted sections (A, B and C). Each section is marked out of 10 by each assessor and double-marked in the real exam (section total /20; exam total /60). Students have 3 hours writing time plus 15 minutes reading time — roughly 55–60 minutes of HANDWRITTEN work per section. Judge this response against what a Year 12 student can produce in about one hour by hand: do not penalise exam-appropriate length, and do not award take-home polish a higher band than its thinking deserves.`;
+
+const CALIB = `
+MARKING CALIBRATION — apply strictly:
+1. Mark as a real VCAA assessor, not a supportive teacher. Actual 2024–2025 exam distributions per section: mean 5.4–5.6/10; the modal scores are 5 and 6 (about 45% of the state); 7 ≈ 14–16%; 8 ≈ 8–9%; 9 ≈ 3%; 10 ≈ 1%. This describes the whole state, NOT a quota for the script in front of you — if this response meets a band's descriptor, award that band without hedging.
+2. Band-fit procedure: compare the response against the descriptors from 9–10 downward and award the BEST-FIT band — the one matching the response's dominant qualities. Do not demand perfection for the top band: real 9–10 scripts contain flaws. Equally, do not drift toward the middle out of caution — compressing scores toward 5–6 is as serious a marking error as inflation. Use the FULL range 0–10.
+2a. Under timed handwritten exam conditions, awkward syntax and occasional garbled sentences do NOT cap an otherwise perceptive response below the Upper Range. Expression quality differentiates WITHIN bands (a 9 from a 10, a 5 from a 6) — it only becomes the dominant factor when it genuinely obscures the thinking throughout.
+3. Length is not quality. Do not reward padding, formulaic scaffolds, or memorised material that has not been adapted to this exact task.
+4. Actively check for these common inflation traps and mark down when present:
+   - Retelling or describing instead of analysing
+   - Naming techniques without explaining HOW they position the audience or build meaning
+   - Generic sentences that could appear in any response on this text or task
+   - Ambitious vocabulary that is imprecise or misused
+5. Consistency check before finalising: the four criterion ratings must reconcile with the holistic score (a 9–10 response averages 4.5+/5 across criteria; a 5/10 response averages about 2.5/5). Adjust whichever is wrong.
+6. Every criterion comment must cite a short verbatim quote (3–8 words) from the student's writing as evidence for the rating.
+7. Marking is holistic: the three EQs are interrelated. The complexity of ideas (EQ1) carries into the quality of structure and substantiation (EQ2) and the demands placed on expression (EQ3) — judge the complete picture, not each element in isolation.`;
+
+const REPORT_A = `
+FROM THE 2024–2025 VCAA ASSESSOR REPORTS (Section A) — reward:
+- Engagement with the IMPLICATIONS of the topic: key terms AND modifying terms (e.g. 'unrelenting cruelty', not just 'cruelty'), and the relationship between concepts when two are offered
+- Strategic sequencing that guides a reading of the text, with summary sentences connecting ideas across paragraphs
+- A RANGE of evidence — linguistic elements, structure, setting, character — and their interplay, used as the basis for analysis
+- A conclusion that RESOLVES the topic (author's context, audience and purpose in relation to the topic)
+- Precise metalanguage and linking devices
+Mark down (assessor-identified limiting features):
+- Discussing only one concept of a two-concept topic; substituting the topic's concepts for more familiar ones; ignoring modifying terms
+- One-character-or-example-per-paragraph structures that 'prove' a contention rather than discuss the author's ideas
+- Quotations used as proof that events occurred, memorised quotes unrelated to the topic, evidence from beyond the text, or reliance on one part of the text only
+- Presenting evidence as 'facts' rather than interpretation; drifting off topic; no conclusion or a conclusion that merely restates`;
+
+const REPORT_B = `
+FROM THE 2024–2025 VCAA ASSESSOR REPORTS (Section B) — reward:
+- The title used as a CENTRAL component of the text's creation, with ideas strategically developed throughout
+- Stimulus imagery revisited to create cohesion; linguistic strategies that amplify and develop ideas
+- A voice that strategically connects to the reader to achieve the nominated purpose (explain, express, reflect or argue)
+- Trusting an adult reader to infer meaning, and guiding that inference strategically
+Mark down (assessor-identified limiting features):
+- Literal use of stimulus with no discernible Framework or title connection; ideas unrelated or minimally related to the Framework
+- Rambling texts with no observable purpose; free writing; writing for self rather than for the reader
+- Contorted pre-prepared responses; reliance solely on plot to convey ideas; few considered authorial choices in structure or language
+- Claiming expert or moral status (e.g. adopting a psychologist's voice) instead of legitimising a position through elaboration of ideas`;
+
+const REPORT_C = `
+FROM THE 2024–2025 VCAA ASSESSOR REPORTS (Section C) — the assessors' skill ladder; use it to place the response:
+- LOW (≈3–4): identifies or describes elements; claims rather than explains ('his tone is serious', 'this makes the reader feel shocked'); visual described only
+- LOW-MIDDLE (≈5): identifies with generic analysis of very familiar devices (inclusive language, rhetorical questions); overstates language's power ('forces the reader'); treats examples individually with no connection to purpose; self-evident conclusions ('uses comparison to compare')
+- HIGH-MIDDLE (≈6–8): methodical, systematic analysis with clear expression — but unselective (analyses everything in order rather than choosing the most powerful elements) and connects the text's elements only at single points
+- HIGH (≈9–10): strategic SELECTION of the most persuasive elements; integrated explanation of how argument, language and visuals interweave THROUGHOUT to position the intended audience; uses background information to infer audience values and the author-audience relationship
+Also reward: analysis of the strategic SEQUENCING of the argument (how each stage builds on the last to position the reader); visuals analysed for their contribution to the argument's development in interplay with the written text.
+Mark down: misreading contention, context or audience (a foundational failure — this caps the response low); simplistic argument overlays ('the argument begins… the argument ends…'); summarising; spending half the response on the visual; polysyllabic technique-naming in place of explaining persuasion.`;
+
+const CINSTR = `
+After the summary, output a JSON array of inline comments. Quote SHORT verbatim phrases (8–55 chars) from the student's text — aim for 12–18 comments distributed throughout the whole piece, not clustered at the start.
+Use ONLY these exact type strings: Positive | Structure | Analysis | Technical | Relevance
+- Positive: effective technique, strong idea, good writing
+- Structure: argument organisation, paragraph flow, sequencing
+- Analysis: depth of textual analysis, idea development
+- Technical: grammar, vocabulary, expression, conventions
+- Relevance: on/off topic, connection to question or framework
+Quotes must be copied EXACTLY verbatim from the student's text — do not paraphrase or alter punctuation. Spread comments across the full length of the piece.
+Output after the line COMMENTS_JSON: (valid JSON only, no trailing commas):
+COMMENTS_JSON:
+[{"quote":"exact phrase","comment":"your feedback","type":"Positive"},…]`;
+
+function buildA(text, topic, essay) {
+  return `You are a VCE Year 12 English examiner. Use Australian English spelling and conventions throughout. Mark this Section A essay out of 10 using the official 2024–2027 EQ descriptors.
+
+OFFICIAL EQ DESCRIPTORS:
+9–10: Close and perceptive reading; explores complexities of the text's structure and ideas; perceptive understanding of the topic; cogent, well-substantiated discussion; precise and expressive language
+8: Thoughtful reading; explores ideas through structure and language; understands the implications of the topic; detailed, coherent discussion; fluent, confident language
+7: Detailed knowledge of the text; acknowledges structure and language; sustained, well-supported response; accurate, appropriate language
+6: Clear knowledge; engages with some elements of ideas; some awareness of structure and language; supported by evidence; mostly accurate language
+5: Adequate knowledge; some reference to ideas; understanding of the topic with some evidence; adequate communication
+4: Basic knowledge; limited reference to ideas; some topic understanding; adequate expression
+3: Familiarity with the text; limited topic awareness; basic expression
+1–2: Limited familiarity; very limited topic awareness; unclear language
+0: No knowledge of text / no engagement with topic / minimal language control
+${EXAMCTX}
+${CALIB}
+${REPORT_A}
+SECTION A SPECIFIC: an essay that does not engage with the specific wording and key terms of THIS topic is capped at 5, regardless of textual knowledge. Reward genuine complexity — challenging, qualifying or extending the topic — over safe agreement. The task assesses the ideas, concerns and values the AUTHOR presents and how meaning is constructed — characters must be treated as authorial constructions, not real people.
+9–10 BENCHMARK: a real perfect-scoring timed essay showed: a contention engaging both concepts of the topic with a resolved position; every paragraph analysing HOW the author constructs meaning (metalanguage — tricolon, sibilance, synecdoche — tied to interpretive claims, never decorative); context cues anchoring analysis to narrative structure; a contextual/critical lens deepening rather than replacing textual analysis; and a conclusion synthesising via a key moment. An essay demonstrating these qualities MUST receive 9–10 — do not withhold the top band because interpretive claims are asserted with confidence; perceptive readings ARE assertive, and requiring every claim to be exhaustively derived describes an impossible script, not a 10.
+${TONE()}
+
+Mark HOLISTICALLY against the best-fit descriptor. TEXT: ${text} | TOPIC: ${topic}
+
+ESSAY:
+${essay}
+
+Reply in this EXACT format — one value per line, no extra text between fields:
+SCORE: [0–10]
+EQ BAND: [Upper Range / Mid Range / Lower Range]
+OVERALL: [2–3 sentence holistic judgement]
+CRIT1: [rating out of 5 then colon then brief comment — Knowledge and understanding of text]
+CRIT2: [rating out of 5 then colon then brief comment — Coherent analysis in response to topic]
+CRIT3: [rating out of 5 then colon then brief comment — Use of textual evidence]
+CRIT4: [rating out of 5 then colon then brief comment — Fluent expression and vocabulary]
+EQ1: [ideas and topic interpretation feedback]
+EQ2: [argument structure and substantiation feedback]
+EQ3: [expression and communication feedback]
+TIP: [one actionable tip for the next band]
+${CINSTR}`;
+}
+
+function buildB(fw, title, stim, essay) {
+  return `You are a VCE Year 12 English examiner. Use Australian English spelling and conventions throughout. Mark this Section B created text out of 10 using the official 2024–2027 EQ descriptors.
+
+OFFICIAL EQ DESCRIPTORS:
+9–10: Insightful use of ideas from the Framework; cohesive text with explicit purpose and voice; sophisticated control of language and structure; rich vocabulary
+8: Astute exploration of Framework ideas; coherent text; confident language control; thoughtful vocabulary
+7: Detailed connection to Framework ideas; coordinated text; sound control; clear vocabulary
+6: Clear connection; connected text with clear purpose and voice; effective vocabulary
+5: Adequate connection; organised text; adequate control
+4: Basic connection; some awareness of purpose and voice; basic control
+3: Limited connection; limited awareness of purpose or voice; limited language and structure
+1–2: Little or no connection; little awareness of purpose; unclear language
+0: No engagement with the task
+${EXAMCTX}
+${CALIB}
+${REPORT_B}
+SECTION B SPECIFIC: a text with only token connection to the Framework, title or stimulus is capped at 4. Purpose and voice must be SUSTAINED across the whole text, not just established in the opening. Reward deliberate, controlled choices of form and language over decorative flourishes. Per the specifications: any prose form is acceptable, there is no preferred VCAA style or content, and mentor texts need not be referenced. The purpose must be one or more of those in the study design (to explain, express, reflect or argue). Remember the secondary audience: an unknown adult assessor reads the text, so appropriateness for that audience matters.
+CALIBRATION NOTE: do not hold texts to a literary-fiction standard — VCAA's published high-scoring Section B samples include advertisements, letters, speeches and reflective pieces; a persuasive or expository text with a commanding, sustained voice and purposefully developed Framework ideas belongs at 7–8 even if its ideas are accessible rather than profound, and reaches 9–10 when its authorial choices (structure, imagery revisited for cohesion, linguistic strategies amplifying ideas) are consistently deliberate. Judge the text by how well it achieves ITS OWN purpose for its intended audience, not by whether the ideas are intellectually complex.
+${TONE()}
+
+FRAMEWORK: ${fw} | TITLE: ${title} | STIMULUS: ${stim||'not specified'}
+
+TEXT:
+${essay}
+
+Reply in this EXACT format:
+SCORE: [0–10]
+EQ BAND: [Upper Range / Mid Range / Lower Range]
+OVERALL: [2–3 sentence holistic judgement]
+CRIT1: [rating out of 5 then colon then brief comment — Relevant ideas from Framework/title/stimulus]
+CRIT2: [rating out of 5 then colon then brief comment — Cohesive text with clear purpose and voice]
+CRIT3: [rating out of 5 then colon then brief comment — Suitable text structure and language features]
+CRIT4: [rating out of 5 then colon then brief comment — Fluent expression and vocabulary]
+EQ1: [ideas and framework connection feedback]
+EQ2: [cohesion, voice and purpose feedback]
+EQ3: [language features and expression feedback]
+TIP: [one actionable tip for the next band]
+${CINSTR}`;
+}
+
+function buildC(src, srcBody, essay) {
+  return `You are a VCE Year 12 English examiner. Use Australian English spelling and conventions throughout. Mark this Section C analytical response out of 10 using the official 2024–2027 EQ descriptors.
+
+OFFICIAL EQ DESCRIPTORS:
+9–10: Perceptive understanding of contention and arguments; sophisticated insight into HOW language and visuals persuade the intended audience; sophisticated, precise language
+8: Thoughtful understanding; sound insight into how language and visuals build the argument; confident language
+7: Detailed understanding; insight into persuasive techniques; fluent expression
+6: Clear understanding; some awareness of persuasive language and visuals; competent expression
+5: Adequate understanding; basic awareness of techniques; adequate language
+4: Basic understanding; describes rather than analyses; basic language
+3: Limited knowledge of argument or point of view; limited technique knowledge
+1–2: Little understanding; minimal task knowledge; unclear language
+0: No understanding of task requirements
+${EXAMCTX}
+${CALIB}
+${REPORT_C}
+SECTION C SPECIFIC: a response that lists or labels techniques without analysing their intended effect on the audience is capped at 4. For 7 and above, the response must track how the argument DEVELOPS across the text. Expect analysis of visuals only when visual material is included or described in the source provided above — if none is supplied, do not penalise its absence. A response demonstrating the HIGH ladder qualities (strategic selection, sustained audience-effect analysis organised around the argument's sequence) MUST receive 9–10 even though such scripts are rare statewide — rarity is not a reason to withhold the band. Per the specifications, the task is to analyse HOW arguments, written and spoken language and visuals are used to persuade the intended audience — students are NOT required to evaluate whether the persuasion succeeds, so do not expect or reward evaluative judgements of effectiveness; analysis of intended positioning is what earns marks.
+9/10 BENCHMARKS (two real VCAA-marked scripts): both scored 9/10 despite noticeably imperfect expression — awkward syntax, some garbled or malformed sentences. Both earned 9 because they: identified contention, audience, form and purpose precisely in the opening; organised the analysis around the AUTHOR'S sequence of arguments (establishing credibility → building the case → attacking opponents → resolving) rather than a technique checklist; consistently analysed HOW each choice (anecdote, appeal to logic, characterisation of opponents, metaphor, tonal shift, guilt and shame appeals) positions the AUDIENCE to think or feel; and tracked the interplay of argument, language and tone across the whole text. Calibrate accordingly: sustained, specific audience-effect analysis anchored in the argument's strategic sequence outweighs surface polish — but expression errors of that kind are exactly what separate 9 from 10.
+${TONE()}
+
+SOURCE: ${src}
+${srcBody?'SOURCE TEXT:\n'+srcBody.slice(0,1500):''}
+
+STUDENT ANALYSIS:
+${essay}
+
+Reply in this EXACT format:
+SCORE: [0–10]
+EQ BAND: [Upper Range / Mid Range / Lower Range]
+OVERALL: [2–3 sentence holistic judgement]
+CRIT1: [rating out of 5 then colon then brief comment — Understanding of contention and argument]
+CRIT2: [rating out of 5 then colon then brief comment — Analysis of persuasive language and visuals]
+CRIT3: [rating out of 5 then colon then brief comment — Use of evidence from text]
+CRIT4: [rating out of 5 then colon then brief comment — Fluent expression and vocabulary]
+EQ1: [contention and argument understanding feedback]
+EQ2: [analysis of persuasive language feedback]
+EQ3: [expression and communication feedback]
+TIP: [one actionable tip for the next band]
+${CINSTR}`;
+}
+
+/* ── Mark ── */
+async function markEssay(s) {
+  const rEl = document.getElementById(s+'-result');
+  const eEl = document.getElementById(s+'-error');
+  const btn = document.querySelector('#tab-'+s+' .mark-btn');
+  eEl.classList.remove('show');
+
+  let prompt='', ok=true;
+  if(s==='a'){
+    const t=document.getElementById('a-text').value, q=document.getElementById('a-topic').value.trim(), e=document.getElementById('a-essay').value.trim();
+    if(!t||!q||!e){ok=false;eEl.textContent='Please select a text, enter the topic and paste your essay.';}
+    else prompt=buildA(t,q,e);
+  } else if(s==='b'){
+    const fw=document.getElementById('b-framework').value, ti=document.getElementById('b-title').value.trim(), st=document.getElementById('b-stimulus').value.trim(), e=document.getElementById('b-essay').value.trim();
+    if(!fw||!ti||!e){ok=false;eEl.textContent='Please select a framework, enter the title and paste your text.';}
+    else prompt=buildB(fw,ti,st,e);
+  } else {
+    const sr=document.getElementById('c-source-title').value.trim(), sb=document.getElementById('c-source').value.trim(), e=document.getElementById('c-essay').value.trim();
+    if(!sr||!e){ok=false;eEl.textContent='Please enter the source title and paste your analysis.';}
+    else prompt=buildC(sr,sb,e);
+  }
+  if(!ok){eEl.classList.add('show');return;}
+
+  window['__prompt_'+s] = prompt;
+  const precision = document.getElementById('precision-mode').checked;
+  btn.disabled=true;
+  rEl.classList.add('show');
+  rEl.innerHTML=`<div class="loading"><div class="spinner"></div><p>${precision?'Marking three times independently — this takes longer…':'Marking your response…'}</p></div>`;
+
+  try {
+    if (precision) {
+      const passes = await Promise.all([1,2,3].map(n =>
+        askAI(prompt + `\n\n(Independent marking pass ${n} of a moderation panel: form your judgement entirely from scratch.)`, [])
+          .then(r => norm(r)).catch(() => null)
+      ));
+      const scored = passes.filter(t => t && /SCORE:\s*\d+/i.test(t))
+        .map(t => ({ t, sc: parseInt(t.match(/SCORE:\s*(\d+)/i)[1]) }))
+        .sort((a,b) => a.sc - b.sc);
+      if (!scored.length) throw new Error('All three marking passes failed — try again.');
+      const median = scored[Math.floor((scored.length-1)/2)];
+      renderResult(s, median.t, rEl);
+      const all = scored.map(x=>x.sc);
+      const spread = Math.max(...all) - Math.min(...all);
+      const note = document.createElement('div');
+      note.className = 'unmatched';
+      note.style.marginTop = '12px';
+      note.innerHTML = `<h4>Precision mode — panel of ${scored.length}</h4><p>Independent marks: <strong>${all.join(', ')}</strong> /10 · median shown${spread>=2?' — <strong style="color:var(--danger)">spread of '+spread+' marks: borderline script, read it yourself</strong>':spread===1?' — 1-mark spread, within examiner tolerance':' — all passes agree'}.</p>`;
+      rEl.appendChild(note);
+    } else {
+      renderResult(s, await askAI(prompt,[]), rEl);
+    }
+  } catch(e) {
+    rEl.innerHTML=`<div class="fb full"><h4>Error</h4><p style="font-family:monospace;font-size:0.75rem;color:var(--danger);white-space:pre-wrap">${escH(String(e))}</p></div>`;
+    eEl.textContent='Marking failed — see detail above.';
+    eEl.classList.add('show');
+  } finally { btn.disabled=false; }
+}
+
+/* ── Annotate ── */
+function annotate(text, comments) {
+  const found=[];
+  for(const c of comments){const i=text.indexOf(c.quote);if(i!==-1)found.push({s:i,e:i+c.quote.length,c});}
+  found.sort((a,b)=>a.s-b.s);
+  const clean=[]; let cur=0;
+  for(const f of found){if(f.s>=cur){clean.push(f);cur=f.e;}}
+  let html='',pos=0;
+  for(const f of clean){
+    html+=escH(text.slice(pos,f.s));
+    html+=`<mark class="hl hl-${f.c.type}" data-type="${f.c.type}" data-comment="${escH(f.c.comment)}">${escH(text.slice(f.s,f.e))}</mark>`;
+    pos=f.e;
+  }
+  return html+escH(text.slice(pos));
+}
+
+/* ── Criteria score bar ── */
+function critBar(label, raw) {
+  const m = raw ? raw.match(/^(\d)/) : null;
+  const v = m ? parseInt(m[1]) : 0;
+  const comment = raw ? raw.replace(/^\d\s*:?\s*/,'').trim() : '';
+  const pct = Math.min(v/5*100, 100);
+  return `<div class="crit-score">
+    <div class="crit-score-label">${label}</div>
+    <div class="crit-score-bar-wrap"><div class="crit-score-bar" style="width:${pct}%"></div></div>
+    <div class="crit-score-val"><strong>${v}/5</strong><span>${escH(comment)}</span></div>
+  </div>`;
+}
+
+/* ── Render ── */
+function renderResult(s, raw, rEl) {
+  const txt = norm(raw);
+  const get = (key, nxt) => {
+    const m = txt.match(new RegExp(key+':\\s*([\\s\\S]*?)(?='+(nxt||'COMMENTS_JSON:|$')+')', 'i'));
+    return m ? m[1].trim() : '';
+  };
+
+  const sm = txt.match(/SCORE:\s*(\d+)/i);
+  const score   = sm ? parseInt(sm[1]) : null;
+  const band    = get('EQ BAND','OVERALL:|CRIT1:|EQ1:|COMMENTS_JSON:');
+  const overall = get('OVERALL','CRIT1:|EQ1:|COMMENTS_JSON:');
+  const crit1   = get('CRIT1','CRIT2:|EQ1:|COMMENTS_JSON:');
+  const crit2   = get('CRIT2','CRIT3:|EQ1:|COMMENTS_JSON:');
+  const crit3   = get('CRIT3','CRIT4:|EQ1:|COMMENTS_JSON:');
+  const crit4   = get('CRIT4','EQ1:|COMMENTS_JSON:');
+  const eq1     = get('EQ1','EQ2:|COMMENTS_JSON:');
+  const eq2     = get('EQ2','EQ3:|COMMENTS_JSON:');
+  const eq3     = get('EQ3','TIP:|COMMENTS_JSON:');
+  const tip     = get('TIP','COMMENTS_JSON:|$');
+
+  let comments=[];
+  const jStart = txt.indexOf('COMMENTS_JSON:');
+  if (jStart !== -1) {
+    const afterKey = txt.slice(jStart + 'COMMENTS_JSON:'.length).trim();
+    const arrStart = afterKey.indexOf('[');
+    if (arrStart !== -1) {
+      // find the matching closing bracket
+      let depth=0, i=arrStart, arr='';
+      for(; i<afterKey.length; i++){
+        if(afterKey[i]==='[') depth++;
+        else if(afterKey[i]===']') { depth--; if(depth===0){arr=afterKey.slice(arrStart,i+1);break;} }
+      }
+      if(arr) try{ comments=JSON.parse(arr); }catch(e){}
+    }
+  }
+  // normalise type names
+  comments = comments.map(c=>({...c, type: TYPE_KEY(c.type)}));
+
+  const essayId = s==='a'?'a-essay':s==='b'?'b-essay':'c-essay';
+  const essayTxt = document.getElementById(essayId).value;
+
+  const bandCls = band.toLowerCase().includes('upper')?'band-upper':band.toLowerCase().includes('lower')?'band-lower':'band-mid';
+
+  const critLabels = {
+    a: ['Knowledge and understanding','Coherent analysis','Use of evidence','Expression and vocabulary'],
+    b: ['Framework ideas and stimulus','Cohesive text, purpose and voice','Structure and language features','Expression and vocabulary'],
+    c: ['Contention and argument','Analysis of persuasive language','Use of evidence','Expression and vocabulary']
+  }[s];
+
+  const eq1L = {a:'Ideas and Topic Interpretation',b:'Ideas and Framework Connection',c:'Contention and Argument Understanding'}[s];
+  const eq2L = {a:'Argument Structure and Substantiation',b:'Cohesion, Voice and Purpose',c:'Analysis of Persuasive Language'}[s];
+
+  const types  = [['Pos','Positive'],['Str','Structure'],['Ana','Analysis'],['Tec','Technical'],['Rel','Relevance']];
+  const fBtns  = types.map(([k,l]) => `<button class="filter-btn fb-${k}" onclick="toggleFilter('${l}',this)">${l}</button>`).join('');
+
+  const annotated = annotate(essayTxt, comments);
+  const matchedQ  = new Set(comments.filter(c=>essayTxt.includes(c.quote)).map(c=>c.quote));
+  const unmatched = comments.filter(c=>!matchedQ.has(c.quote));
+
+  rEl.dataset.s=s; rEl.dataset.sc=score;
+  rEl.dataset.e1=eq1; rEl.dataset.e2=eq2; rEl.dataset.e3=eq3;
+
+  rEl.innerHTML = `
+    <div class="score-header">
+      <div class="score-box ${sCls(score)}">
+        <div class="num">${score!==null?score:'?'}</div>
+        <div class="den">/10</div>
+      </div>
+      <div class="score-meta">
+        <h3>${sLbl(score)}</h3>
+        <p>${escH(overall)||'See detailed feedback below.'}</p>
+        <span class="band-tag ${bandCls}">${escH(band)||'See feedback'}</span>
+      </div>
+    </div>
+
+    <div class="criteria-scores">
+      ${critBar(critLabels[0], crit1)}
+      ${critBar(critLabels[1], crit2)}
+      ${critBar(critLabels[2], crit3)}
+      ${critBar(critLabels[3], crit4)}
+    </div>
+
+    <div class="filter-bar"><span>Hover to read feedback — filter by type:</span>${fBtns}</div>
+
+    <div class="card" style="margin:0 0 12px;padding:16px 18px">
+      <div class="essay-view">${annotated}</div>
+    </div>
+
+    ${unmatched.length?`<div class="unmatched"><h4>Additional Comments</h4><ul>${unmatched.map(c=>`<li><strong>${escH(c.type)}:</strong> ${escH(c.comment)}</li>`).join('')}</ul></div>`:''}
+
+    <div class="feedback-grid">
+      ${eq1?`<div class="fb"><h4>${eq1L}</h4><p>${escH(eq1)}</p></div>`:''}
+      ${eq2?`<div class="fb"><h4>${eq2L}</h4><p>${escH(eq2)}</p></div>`:''}
+      ${eq3?`<div class="fb full"><h4>Expression and Communication</h4><p>${escH(eq3)}</p></div>`:''}
+      ${tip?`<div class="fb full tip-block"><h4>Examiner Tip</h4><p>${escH(tip)}</p></div>`:''}
+    </div>
+
+    <button class="topband-btn" onclick="topBand(this)">How do I get 9–10/10?</button>
+    <div class="topband-result" id="${s}-topband"></div>
+
+    <button class="topband-btn" onclick="secondOpinion(this)">Second opinion — blind re-mark</button>
+    <div class="topband-result" id="${s}-secondop"></div>`;
+
+  activeF = new Set(['Positive','Structure','Analysis','Technical','Relevance']);
+  rEl.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('off'));
+}
+
+/* ── Second opinion (blind re-mark for moderation) ── */
+async function secondOpinion(btn) {
+  const rEl = btn.closest('.result-card');
+  const s = rEl.dataset.s;
+  const first = parseInt(rEl.dataset.sc);
+  const base = window['__prompt_'+s];
+  const out = document.getElementById(s+'-secondop');
+  if (!base) return;
+
+  btn.disabled = true; btn.textContent = 'Re-marking independently…';
+  out.innerHTML = `<div class="loading"><div class="spinner"></div><p>Second examiner marking blind…</p></div>`;
+  out.classList.add('show');
+
+  const prompt = base + `
+
+CROSS-MARKING PASS: You are a DIFFERENT examiner cross-marking this script blind at a moderation meeting. You have NOT seen any other examiner's mark. Form your own judgement from scratch, applying the calibration rules with full rigour. IGNORE the output format above. Reply ONLY in this exact format and nothing else:
+SCORE: [0–10]
+EQ BAND: [Upper Range / Mid Range / Lower Range]
+JUSTIFY: [3–4 sentences citing verbatim evidence for why this score, and why not the band above or the band below]`;
+
+  try {
+    const txt = norm(await askAI(prompt, []));
+    const sm = txt.match(/SCORE:\s*(\d+)/i);
+    const second = sm ? parseInt(sm[1]) : null;
+    const bm = txt.match(/EQ BAND:\s*(.*)/i);
+    const jm = txt.match(/JUSTIFY:\s*([\s\S]*?)(?=COMMENTS_JSON:|$)/i);
+    const diff = (second !== null && !isNaN(first)) ? Math.abs(second - first) : null;
+    const verdict = diff === null ? '' :
+      diff === 0 ? '<strong style="color:var(--success)">Scores agree — this mark is reliable.</strong>' :
+      diff === 1 ? `<strong style="color:var(--info)">1 mark apart — within normal examiner tolerance. Suggested final mark: ${Math.round((first+second)/2)}.</strong>` :
+      `<strong style="color:var(--danger)">${diff} marks apart — outside tolerance. Read the script yourself before finalising this mark.</strong>`;
+    out.innerHTML = `
+      <div class="topband-section"><h4>Moderation result</h4>
+        <p>First examiner: <strong>${isNaN(first)?'?':first}/10</strong> &nbsp;·&nbsp; Second examiner: <strong>${second!==null?second:'?'}/10</strong>${bm?' — '+escH(bm[1].trim()):''}</p>
+        <p style="margin-top:6px">${verdict}</p></div>
+      ${jm&&jm[1].trim()?`<div class="topband-section"><h4>Second examiner's justification</h4><p>${escH(jm[1].trim())}</p></div>`:''}`;
+  } catch(e) {
+    out.innerHTML = `<div class="topband-section"><p style="color:var(--danger)">Failed: ${escH(String(e))}</p></div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Second opinion — blind re-mark';
+  }
+}
+
+/* ── Image transcription ── */
+function previewImage(s, input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById(s+'-img-preview');
+    prev.src = e.target.result;
+    prev.classList.add('show');
+    const btn = document.getElementById(s+'-transcribe-btn');
+    btn.classList.add('show');
+    btn.textContent = s==='a'?'Transcribe Handwriting and Fill Essay Box':s==='b'?'Transcribe Handwriting and Fill Text Box':'Transcribe Handwriting and Fill Analysis Box';
+    btn.style.background=''; btn.style.borderColor=''; btn.style.color='';
+    document.getElementById(s+'-img-area').classList.add('has-image');
+    window['__img_'+s] = { data: e.target.result.split(',')[1], mediaType: file.type||'image/jpeg' };
+  };
+  reader.readAsDataURL(file);
+}
+
+async function transcribeImage(s) {
+  const imgData = window['__img_'+s];
+  if (!imgData) return;
+  const btn  = document.getElementById(s+'-transcribe-btn');
+  const errEl = document.getElementById(s+'-img-error');
+  btn.disabled = true;
+  btn.textContent = 'Transcribing handwriting…';
+  errEl.classList.remove('show');
+  try {
+    const prompt = 'Transcribe this handwritten student essay exactly as written. Preserve all paragraph breaks, punctuation, capitalisation and spelling exactly as the student wrote them — including any errors. Output only the transcribed text with no commentary, headings or extra formatting.';
+    const raw = await askAI(prompt, [{
+      type: 'image',
+      source: { type: 'base64', media_type: imgData.mediaType, data: imgData.data }
+    }]);
+    const txt = norm(raw);
+    document.getElementById(s+'-essay').value = txt;
+    updateWC(s+'-essay', s+'-wc');
+    btn.textContent = 'Transcribed — review and edit above if needed';
+    btn.style.background = 'var(--success-bg)';
+    btn.style.borderColor = 'var(--success-bd)';
+    btn.style.color = 'var(--success)';
+  } catch(e) {
+    errEl.textContent = 'Transcription failed: ' + String(e);
+    errEl.classList.add('show');
+    const lbl = s==='a'?'Transcribe Handwriting and Fill Essay Box':s==='b'?'Transcribe Handwriting and Fill Text Box':'Transcribe Handwriting and Fill Analysis Box';
+    btn.textContent = lbl;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ── 9–10 advice + paragraph rewrite ── */
+async function topBand(btn) {
+  const rEl = btn.closest('.result-card');
+  const s=rEl.dataset.s, score=rEl.dataset.sc;
+  const eq1=rEl.dataset.e1, eq2=rEl.dataset.e2, eq3=rEl.dataset.e3;
+  const essayId=s==='a'?'a-essay':s==='b'?'b-essay':'c-essay';
+  const essay=document.getElementById(essayId).value;
+  const out=document.getElementById(s+'-topband');
+  const sName=s==='a'?'Section A (Text Response)':s==='b'?'Section B (Creating a Text)':'Section C (Argument Analysis)';
+
+  btn.disabled=true; btn.textContent='Generating advice…';
+  out.innerHTML=`<div class="loading"><div class="spinner"></div><p>Analysing what this response needs for top marks…</p></div>`;
+  out.classList.add('show');
+
+  const prompt=`You are a VCE Year 12 English examiner. Use Australian English spelling and conventions throughout. A student scored ${score}/10 on ${sName}.
+
+Current weaknesses:
+EQ1: ${eq1}
+EQ2: ${eq2}
+EQ3: ${eq3}
+
+Their writing (first 1000 chars): ${essay.slice(0,1000)}
+
+Provide your response in this EXACT format with these exact headings:
+
+HOLDING_BACK:
+[2–3 sentences identifying the specific gap between their current mark and 9–10, referencing their actual writing]
+
+MUST_DO:
+- [specific action 1]
+- [specific action 2]
+- [specific action 3]
+- [specific action 4]
+
+REWRITE_PARA:
+[Select one paragraph from their writing that most limits the mark. Rewrite it to 9–10 standard. Keep it in their voice but elevate the ideas, analysis, language and precision significantly. The rewrite should be clearly superior.]
+
+REWRITE_NOTE:
+[2–3 sentences explaining specifically what you changed and why each change lifts the writing to 9–10 standard]`;
+
+  try {
+    const txt = norm(await askAI(prompt,[]));
+    const g = (k,n) => { const m=txt.match(new RegExp(k+':\\s*([\\s\\S]*?)(?='+n+'|$)','i')); return m?m[1].trim():''; };
+    const hb = g('HOLDING_BACK','MUST_DO:|REWRITE_PARA:');
+    const md = g('MUST_DO','REWRITE_PARA:|REWRITE_NOTE:');
+    const rp = g('REWRITE_PARA','REWRITE_NOTE:');
+    const rn = g('REWRITE_NOTE','$');
+
+    out.innerHTML=`
+      <div class="topband-section"><h4>What is holding you back</h4><p>${escH(hb)}</p></div>
+      <div class="topband-section"><h4>To reach 9–10 you must</h4><ul>${md.split('\n').filter(l=>l.trim().startsWith('-')).map(l=>`<li>${escH(l.replace(/^-\s*/,''))}</li>`).join('')}</ul></div>
+      ${rp?`<div class="topband-section rewrite-block"><h4>Paragraph rewritten to 9–10 standard</h4><div class="rewrite-text">${escH(rp)}</div>${rn?`<p class="rewrite-note">${escH(rn)}</p>`:''}</div>`:''}`;
+  } catch(e) {
+    out.innerHTML=`<div class="topband-section"><p style="color:var(--danger)">Failed: ${escH(String(e))}</p></div>`;
+  } finally {
+    btn.disabled=false; btn.textContent='How do I get 9–10/10?';
+  }
+}
+</script>
+
+<div id="ai-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;max-width:520px;width:100%;padding:24px;max-height:90vh;overflow-y:auto">
+    <h2 style="font-size:1rem;margin-bottom:6px">Connect an AI</h2>
+    <p style="font-size:.8rem;color:var(--text-3);margin-bottom:14px">The marker runs in your browser and needs an AI to mark with. Your token is stored only on this device and sent only to the provider you choose.</p>
+    <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:4px">Provider</label>
+    <select id="ai-provider" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);margin-bottom:12px" onchange="aiProviderHelp()">
+      <option value="github">GitHub Models — free with a GitHub account</option>
+      <option value="anthropic">Anthropic API — paid key, marks with Claude</option>
+    </select>
+    <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:4px">Token / API key</label>
+    <input id="ai-token" type="password" placeholder="Paste token here" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);margin-bottom:12px">
+    <label style="font-size:.75rem;font-weight:600;display:block;margin-bottom:4px">Model</label>
+    <input id="ai-model" type="text" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);margin-bottom:12px">
+    <div id="ai-help" style="font-size:.75rem;color:var(--text-3);background:var(--surface3);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.5"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="theme-btn" onclick="document.getElementById('ai-modal').style.display='none'">Cancel</button>
+      <button class="theme-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveAI()">Save</button>
+    </div>
+  </div>
+</div>
+<script>
+function aiCfg(){ try { return JSON.parse(localStorage.getItem('markerAI')||'{}'); } catch(e){ return {}; } }
+function aiProviderHelp(){
+  var p = document.getElementById('ai-provider').value;
+  var model = document.getElementById('ai-model');
+  var help = document.getElementById('ai-help');
+  if (p === 'github') {
+    if (!model.value || model.value.indexOf('claude') === 0) model.value = 'openai/gpt-4o';
+    help.innerHTML = 'Free for anyone with a GitHub account. Create a token at <b>github.com &rarr; Settings &rarr; Developer settings &rarr; Fine-grained tokens</b> with only the <b>Models: Read-only</b> account permission. Free-tier rate limits apply.';
+  } else {
+    if (!model.value || model.value.indexOf('openai') === 0) model.value = 'claude-sonnet-4-5';
+    help.innerHTML = 'Uses your Anthropic API key from <b>console.anthropic.com</b>. This is the engine the marker was calibrated on. Usage is billed to your key.';
+  }
+}
+function openSettings(){
+  var c = aiCfg();
+  document.getElementById('ai-provider').value = c.provider || 'github';
+  document.getElementById('ai-token').value = c.token || '';
+  document.getElementById('ai-model').value = c.model || '';
+  aiProviderHelp();
+  if (c.model) document.getElementById('ai-model').value = c.model;
+  document.getElementById('ai-modal').style.display = 'flex';
+}
+function saveAI(){
+  localStorage.setItem('markerAI', JSON.stringify({
+    provider: document.getElementById('ai-provider').value,
+    token: document.getElementById('ai-token').value.trim(),
+    model: document.getElementById('ai-model').value.trim()
+  }));
+  document.getElementById('ai-modal').style.display = 'none';
+  document.getElementById('ai-btn').textContent = 'AI Settings ✓';
+}
+async function askAI(prompt, files){
+  var cfg = aiCfg();
+  if (!cfg.token){ openSettings(); throw new Error('No AI connected yet. Click "AI Settings" (top right), add a free GitHub Models token or an Anthropic API key, then try again.'); }
+  files = files || [];
+  if (cfg.provider === 'anthropic'){
+    var content = files.concat([{ type:'text', text: prompt }]);
+    var r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'x-api-key':cfg.token,
+                'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model: cfg.model || 'claude-sonnet-4-5', max_tokens: 4000,
+                             messages:[{ role:'user', content: content }] })
+    });
+    if (!r.ok) throw new Error('Anthropic API error ' + r.status + ': ' + (await r.text()).slice(0, 300));
+    var j = await r.json();
+    return j.content.map(function(b){ return b.text || ''; }).join('');
+  } else {
+    var msg;
+    if (files.length){
+      msg = [{ type:'text', text: prompt }].concat(files.map(function(f){
+        return { type:'image_url', image_url:{ url: 'data:' + f.source.media_type + ';base64,' + f.source.data } };
+      }));
+    } else { msg = prompt; }
+    var r2 = await fetch('https://models.github.ai/inference/chat/completions', {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'authorization':'Bearer ' + cfg.token },
+      body: JSON.stringify({ model: cfg.model || 'openai/gpt-4o', max_tokens: 4000,
+                             messages:[{ role:'user', content: msg }] })
+    });
+    if (!r2.ok) throw new Error('GitHub Models error ' + r2.status + ': ' + (await r2.text()).slice(0, 300) +
+      (r2.status === 0 || r2.status === 403 ? ' — if this is a CORS/network error, try the Anthropic provider.' : ''));
+    var j2 = await r2.json();
+    return j2.choices[0].message.content;
+  }
+}
+(function(){
+  if (aiCfg().token) document.getElementById('ai-btn').textContent = 'AI Settings ✓';
+  var p = new URLSearchParams(location.search);
+  var sec = (p.get('section') || '').toLowerCase();
+  if (sec === 'a' || sec === 'b' || sec === 'c') { try { switchTab(sec); } catch(e){} }
+  var topic = p.get('topic');
+  if (topic){ var el = document.getElementById('a-topic'); if (el) el.value = topic; }
+})();
+</script>
+</body>
+</html>
