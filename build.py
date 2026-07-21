@@ -628,7 +628,7 @@ for k, pg in enumerate(all_pages):
 BLURB = {
  "How to Use This Site": "Quick orientation: search, sections, practice exams and suggested study routes.",
  "Sunset Boulevard": "Billy Wilder's film — context, themes, quote banks, scene analyses, techniques, symbols and exemplar essays.",
- "Rainbow's End": "Jane Harrison's play — context, characters, themes, quotes and sample responses.",
+ "Rainbow’s End": "Jane Harrison's play — context, characters, themes, quotes and sample responses.",
  "Analytical Text Response Essays": "Planning, structure, and proofreading a text-response essay.",
  "Creating Texts": "Audience, purpose, personal journeys and practice stimuli.",
  "Analysing Argument": "Language analysis — written & visual, sample articles and essays.",
