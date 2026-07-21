@@ -150,3 +150,5 @@ a.inpath{text-decoration:underline}
 .note-card{background:var(--accent-soft);border:1px solid #e3cdc8;border-radius:14px;padding:6px 22px;margin:2em 0}
 .note-card p{font-size:15.5px;line-height:1.6}
 .src-note{font-family:var(--sans);font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:2.5em}
+.content p br{content:"";display:block;margin-top:.55em}
+.content li br,.content td br,.content th br{margin-top:.15em}
