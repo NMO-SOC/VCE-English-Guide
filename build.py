@@ -66,6 +66,12 @@ for _t in soup.find_all("table"):
     if not _t.find("thead"):
         _t["class"] = _t.get("class", []) + ["no-thead"]
 
+# paragraph breaks: LaTeX \\ inside paragraphs became <br>; give them real spacing
+for _br in soup.find_all("br"):
+    if _br.parent and _br.parent.name == "p":
+        _sp = soup.new_tag("span"); _sp["class"] = "pbr"
+        _br.replace_with(_sp)
+
 # de-duplicate longtable header rows (LaTeX firsthead + continuation head)
 for _t in soup.find_all("table"):
     _rows = _t.find_all("tr")
@@ -184,10 +190,14 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s &middot; %s</title>
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=5">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
+<div class="exam-banner" id="countdown" data-target="2026-10-27T09:00:00+11:00">
+  <span class="eb-label">English exam &middot; Tue 27 October, 9:00 am</span>
+  <span class="eb-time"><b id="cd-d">&ndash;</b> days <b id="cd-h">&ndash;</b> hrs <b id="cd-m">&ndash;</b> min <b id="cd-s">&ndash;</b> sec</span>
+</div>
 <button id="menu-toggle" aria-label="Menu">&#9776;</button>
 <div class="layout">
   <aside class="sidebar" id="sidebar">
@@ -207,7 +217,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js"></script>
+<script src="assets/site.js?v=5"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, nav_html(active_nav, active_file), main_html, prevnext)
 
@@ -305,7 +315,8 @@ landing = """
     <img class="hero-logo" src="assets/img/SOC%%20LOGO_VERTICAL.png" alt="South Oakleigh College logo">
     <div class="hero-badge">South Oakleigh College</div>
     <h1>VCE English<br>Exam Preparation Guide</h1>
-    <p class="hero-sub">Units 3/4 English &middot; For the VCE English Cohort of 2026 &middot; Compiled by Mr. Morlin &middot; Version 3.1</p>
+    <p class="hero-sub">Units 3/4 English &middot; For the VCE English Cohort of 2026</p>
+    <p class="hero-sub hero-sub2">Compiled by Mr. Morlin &middot; Version 4.2</p>
     <p class="hero-lede">Exemplar essays, thematic and character quote banks, scene analyses, argument-analysis frameworks, full practice exams, marking criteria and study strategies &mdash; the complete booklet, now browsable.</p>
     <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a></div>
   </div>
