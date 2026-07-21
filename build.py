@@ -361,6 +361,68 @@ gl_page = TOOL_LABEL + """<h1>Glossary of Techniques</h1>
 })();
 </script>""" % gl_items
 
+qz_page = TOOL_LABEL + """<h1>Technique Quiz</h1>
+<p class="lede">A definition appears &mdash; pick the technique it describes. Ten questions per round, drawn from the glossary.</p>
+<div class="tool-bar">
+  <span class="tool-count" id="qz-progress" style="margin-left:0"></span>
+  <span class="tool-count" id="qz-score"></span>
+</div>
+<div class="qz-box">
+  <div class="qz-def" id="qz-def"></div>
+  <div class="qz-opts" id="qz-opts"></div>
+  <div class="qz-feedback" id="qz-feedback"></div>
+</div>
+<div class="tool-bar">
+  <button id="qz-next" style="display:none">Next question &#8594;</button>
+  <button id="qz-restart" style="display:none">New round</button>
+</div>
+<script>window.QUIZ = %s;</script>
+<script>
+(function(){
+  var all = window.QUIZ, round = [], qi = 0, score = 0, answered = false;
+  function shuffle(a){ for (var j = a.length - 1; j > 0; j--){ var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; } return a; }
+  function start(){
+    round = shuffle(all.slice()).slice(0, 10); qi = 0; score = 0;
+    document.getElementById('qz-restart').style.display = 'none';
+    ask();
+  }
+  function ask(){
+    answered = false;
+    var q = round[qi];
+    var pool = shuffle(all.filter(function(g){ return g.term !== q.term; })).slice(0, 3);
+    var opts = shuffle(pool.concat([q]));
+    document.getElementById('qz-progress').textContent = 'Question ' + (qi + 1) + ' of ' + round.length;
+    document.getElementById('qz-score').textContent = 'Score: ' + score;
+    document.getElementById('qz-def').textContent = q.def;
+    document.getElementById('qz-feedback').textContent = '';
+    document.getElementById('qz-next').style.display = 'none';
+    var box = document.getElementById('qz-opts'); box.innerHTML = '';
+    opts.forEach(function(o){
+      var b = document.createElement('button'); b.className = 'qz-opt'; b.textContent = o.term;
+      b.addEventListener('click', function(){ pick(b, o, q); });
+      box.appendChild(b);
+    });
+  }
+  function pick(btn, o, q){
+    if (answered) return;
+    answered = true;
+    var btns = document.querySelectorAll('.qz-opt');
+    btns.forEach(function(b){ b.disabled = true; if (b.textContent === q.term) b.classList.add('qz-right'); });
+    if (o.term === q.term){ score++; document.getElementById('qz-feedback').textContent = 'Correct.'; }
+    else { btn.classList.add('qz-wrong'); document.getElementById('qz-feedback').textContent = 'Not quite \u2014 this one is \u201c' + q.term + '\u201d.'; }
+    document.getElementById('qz-score').textContent = 'Score: ' + score;
+    if (qi < round.length - 1){ document.getElementById('qz-next').style.display = ''; }
+    else {
+      document.getElementById('qz-feedback').textContent += ' Round over: ' + score + ' / ' + round.length + '.';
+      document.getElementById('qz-restart').style.display = '';
+    }
+  }
+  document.getElementById('qz-next').addEventListener('click', function(){ qi++; ask(); });
+  document.getElementById('qz-restart').addEventListener('click', start);
+  start();
+})();
+</script>""" % json.dumps([{"term": g["term"], "def": g["def"]} for g in glossary], ensure_ascii=False)
+
 hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
 <p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
 <h2 class="in-part-head">Tools</h2>
@@ -369,6 +431,7 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="practice-topics.html"><span class="ch-num">2</span><span>Practice Topics &amp; Essay Timer</span></a>
   <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
   <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
+  <a class="ch-card" href="technique-quiz.html"><span class="ch-num">5</span><span>Technique Quiz</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -378,11 +441,13 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                   "chapters": [{"title": "Quote Flashcards", "file": "flashcards.html"},
                                {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
                                {"title": "Glossary of Techniques", "file": "glossary.html"},
-                               {"title": "Essay Marker", "file": "marker.html"}]})
+                               {"title": "Essay Marker", "file": "marker.html"},
+                               {"title": "Technique Quiz", "file": "technique-quiz.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
+all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
 def rewrite_anchors(scope, current):
@@ -418,7 +483,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s &middot; %s</title>
-<link rel="stylesheet" href="assets/style.css?v=7">
+<link rel="stylesheet" href="assets/style.css?v=8">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -445,7 +510,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=7"></script>
+<script src="assets/site.js?v=8"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, nav_html(active_nav, active_file), main_html, prevnext)
 
