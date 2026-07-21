@@ -451,27 +451,76 @@ qz_page = TOOL_LABEL + """<h1>Technique Quiz</h1>
 })();
 </script>""" % json.dumps([{"term": g["term"], "def": g["def"]} for g in glossary], ensure_ascii=False)
 
-N_EXAMS = len([f for f in os.listdir(os.path.join(BUILD, "examgen", "out")) if f.endswith(".docx")])
+EXAMGEN = json.load(open(os.path.join(BUILD, "examgen", "examgen.json"), encoding="utf-8"))
+SLOTCFG = json.load(open(os.path.join(BUILD, "examgen", "slots.json"), encoding="utf-8"))
 eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
-<p class="lede">Download a randomly generated three-section practice examination &mdash; the complete task book as a Word document, identical in format to the real paper: cover page, instructions, Section A topics for both texts, a Creating Texts prompt with stimulus material, Section C source material and the assessment criteria.</p>
+<p class="lede">Generate a unique three-section practice examination on the spot &mdash; the complete task book as a Word document, identical in format to the real paper: cover page, instructions, Section A topics for both texts, a Creating Texts prompt with stimulus material, Section C source material and the assessment criteria.</p>
 <div class="tool-bar">
   <button id="eg-go">Generate exam &#8595;</button>
   <span class="tool-count" id="eg-note"></span>
 </div>
-<p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">Each click downloads a different randomly assembled paper. Print it and sit it under timed conditions &mdash; then mark it against the <a href="part-09-exam-assessment-criteria.html">assessment criteria</a> or with the <a href="marker.html">Essay Marker</a>.</p>
+<p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">Every exam is assembled fresh from the question banks the moment you click. Print it and sit it under timed conditions &mdash; then mark it against the <a href="part-09-exam-assessment-criteria.html">assessment criteria</a> or with the <a href="marker.html">Essay Marker</a>.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>window.EG_DATA = %s; window.EG_SLOTS = %s;</script>
 <script>
 (function(){
-  var N = %d;
+  var D = window.EG_DATA, S = window.EG_SLOTS, note = document.getElementById('eg-note');
+  function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+  function two(a){ var x = pick(a), y = pick(a), t = 0;
+    while (y === x && a.length > 1 && t++ < 12) y = pick(a);
+    return [x, y]; }
+  function xesc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fill(s){ return s.split(String.fromCharCode(10)).map(xesc)
+    .join('</w:t><w:br/><w:t xml:space="preserve">'); }
+  function loadImg(url){ return new Promise(function(res, rej){
+    var im = new Image(); im.onload = function(){ res(im); }; im.onerror = rej; im.src = url; }); }
+  function slotPng(im, px){ var c = document.createElement('canvas');
+    c.width = px[0]; c.height = px[1];
+    var g = c.getContext('2d');
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height);
+    if (im){ var r = Math.min(c.width / im.width, c.height / im.height);
+      var w = im.width * r, h = im.height * r;
+      g.drawImage(im, (c.width - w) / 2, (c.height - h) / 2, w, h); }
+    return c.toDataURL('image/png').split(',')[1]; }
   document.getElementById('eg-go').addEventListener('click', function(){
-    var n = Math.floor(Math.random() * N) + 1;
-    var f = 'practice-exam-' + (n < 10 ? '0' : '') + n + '.docx';
-    var a = document.createElement('a');
-    a.href = 'assets/exams/' + f; a.download = f;
-    document.body.appendChild(a); a.click(); a.remove();
-    document.getElementById('eg-note').textContent = 'Downloaded ' + f;
+    note.textContent = 'Assembling exam\u2026';
+    fetch('assets/exam/web-template.docx').then(function(r){
+      if (!r.ok) throw new Error('template fetch failed');
+      return r.arrayBuffer();
+    }).then(function(buf){ return JSZip.loadAsync(buf); }).then(function(zip){
+      return zip.file('word/document.xml').async('string').then(function(xml){
+        var sb = two(D.sb), re = two(D.re), b = pick(D.b),
+            c = pick(D.c.filter(function(x){ return x.imgs.length; }));
+        var repl = { '{A7}': sb[0], '{A8}': sb[1], '{A10}': re[0], '{A11}': re[1],
+                     '{G9}': b.title || '', '{G11}': b.s1 || '', '{G15}': b.s3 || '' };
+        Object.keys(repl).forEach(function(k){ xml = xml.split(k).join(fill(repl[k])); });
+        zip.file('word/document.xml', xml);
+        var jobs = [];
+        function put(slot, url){
+          jobs.push((url ? loadImg(url) : Promise.resolve(null)).then(function(im){
+            zip.file(S.slots[slot], slotPng(im, S.px[slot]), { base64: true });
+          }));
+        }
+        put('g13', b.img ? 'assets/exam/b/' + b.img : null);
+        ['n13', 'n16', 'n17'].forEach(function(slot, k){
+          put(slot, c.imgs[k] ? 'assets/exam/c/' + encodeURIComponent(c.imgs[k]) : null);
+        });
+        return Promise.all(jobs).then(function(){
+          return zip.generateAsync({ type: 'blob',
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        });
+      });
+    }).then(function(blob){
+      var id = Math.random().toString(36).slice(2, 7).toUpperCase();
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Practice-Exam-' + id + '.docx';
+      document.body.appendChild(a); a.click(); a.remove();
+      note.textContent = 'Downloaded Practice-Exam-' + id + '.docx';
+    }).catch(function(e){ note.textContent = 'Generation failed: ' + e; });
   });
 })();
-</script>""" % N_EXAMS
+</script>""" % (json.dumps(EXAMGEN, ensure_ascii=False), json.dumps(SLOTCFG))
 
 hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
 <p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
@@ -501,11 +550,12 @@ all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Es
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
 all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
 all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "html": eg_page, "nav": "study-tools.html"})
-_d = os.path.join(PUBLIC, "assets", "exams")
-os.makedirs(_d, exist_ok=True)
-for _f in os.listdir(os.path.join(BUILD, "examgen", "out")):
-    if _f.endswith(".docx"):
-        copy_if_changed(os.path.join(BUILD, "examgen", "out", _f), os.path.join(_d, _f))
+_ed = os.path.join(PUBLIC, "assets", "exam")
+for _sub in ("b", "c"):
+    os.makedirs(os.path.join(_ed, _sub), exist_ok=True)
+    for _f in os.listdir(os.path.join(BUILD, "examgen", _sub)):
+        copy_if_changed(os.path.join(BUILD, "examgen", _sub, _f), os.path.join(_ed, _sub, _f))
+copy_if_changed(os.path.join(BUILD, "examgen", "web-template.docx"), os.path.join(_ed, "web-template.docx"))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
 def rewrite_anchors(scope, current):
