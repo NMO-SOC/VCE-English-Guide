@@ -342,3 +342,19 @@ a.btn-inline:hover{text-decoration:none;filter:brightness(1.1)}
 [data-theme="dark"] .saml-no{color:#f09595}
 [data-theme="dark"] .saml-yes{color:#97c459}
 .saml-note{font-family:var(--sans);font-size:13.5px;color:var(--muted);margin-top:12px}
+.ob-field{margin:0 0 12px}
+.ob-field label{font-family:var(--sans);font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);display:block;margin-bottom:4px}
+.ob-field textarea{width:100%;font-family:var(--serif);font-size:15.5px;line-height:1.55;padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);resize:vertical}
+.ob-para{background:var(--tint2);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:0 0 16px}
+.ob-para-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-family:var(--sans)}
+.ob-rm{font-family:var(--sans);font-size:12px;padding:4px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;color:var(--muted)}
+.ob-rm:hover{color:var(--accent);border-color:var(--accent)}
+.ob-preview{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 24px 18px;margin-top:1.4em}
+.vu-out{margin-top:.6em}
+.vu-render{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;line-height:1.9;font-size:16.5px}
+.vu-flag{position:relative;background:var(--accent-soft);color:var(--accent);font-weight:700;border-bottom:2px solid var(--accent);border-radius:4px 4px 0 0;padding:1px 4px;cursor:pointer}
+.vu-pop{display:none;position:absolute;left:0;top:100%;z-index:60;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.18);padding:6px;white-space:nowrap}
+.vu-flag:hover .vu-pop,.vu-flag:focus .vu-pop,.vu-flag:focus-within .vu-pop{display:block}
+.vu-sw{display:block;width:100%;text-align:left;font-family:var(--sans);font-size:13.5px;font-weight:600;padding:6px 12px;border:none;background:none;border-radius:6px;cursor:pointer;color:var(--ink)}
+.vu-sw:hover{background:var(--accent-soft);color:var(--accent)}
+@media print{.ob-field textarea{border:none}.tool-bar{display:none!important}}
