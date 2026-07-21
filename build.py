@@ -714,6 +714,20 @@ copy_if_changed(os.path.join(BUILD, "marker.html"), os.path.join(PUBLIC, "marker
 json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
 # ---------------- write pages ----------------
+PRACTICE_LINKS = """
+<h2>Trial exams hosted on Studocu</h2>
+<p>The following commercially produced trial exams are hosted externally on Studocu (a free account may be required to view them). They open in a new tab.</p>
+<ul class="exp-list">
+<li><a href="https://www.studocu.com/en-au/document/hillcrest-christian-college/english/vce-english-section-c-exam-practice-2024-insight-publications/144053159" target="_blank" rel="noopener">VCE English Section C Exam Practice 2024 (Insight Publications)</a></li>
+<li><a href="https://www.studocu.com/en-au/document/kew-high-school/vce-english/vce-english-practice-exam-analyzing-boxing-risks-vs-ama-credibility/127292037" target="_blank" rel="noopener">VCE English Practice Exam &mdash; Analysing Boxing Risks vs AMA Credibility</a></li>
+<li><a href="https://www.studocu.com/en-au/document/john-monash-science-school/chemistry-unit-4/vce-english-year-12-trial-exam-paper-2024-comprehensive-task-book/163993956" target="_blank" rel="noopener">VCE English Year 12 Trial Exam Paper 2024 &mdash; Comprehensive Task Book</a></li>
+<li><a href="https://www.studocu.com/en-au/document/melbourne-high-school/english/2025-tssm-vce-english-trial-exam-question-answer-book/142530772" target="_blank" rel="noopener">2025 TSSM VCE English Trial Exam &mdash; Question &amp; Answer Book</a></li>
+<li><a href="https://www.studocu.com/en-au/document/melbourne-high-school/english/2025-vce-english-year-12-trial-exam-task-book/143045324" target="_blank" rel="noopener">2025 VCE English Year 12 Trial Exam Task Book (Melbourne High)</a></li>
+<li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-year-12-trial-exam-task-book/141298123" target="_blank" rel="noopener">2025 VCE English Year 12 Trial Exam Task Book (Loreto Mandeville Hall)</a></li>
+<li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-trial-examination-comprehensive-study-guide/141298120" target="_blank" rel="noopener">2025 VCE English Trial Examination &mdash; Comprehensive Study Guide</a></li>
+</ul>
+"""
+
 for k, pg in enumerate(all_pages):
     prev_a = ('<a class="pn prev" href="%s"><span>&#8592; Previous</span><b>%s</b></a>'
               % (all_pages[k-1]["file"], html.escape(all_pages[k-1]["title"]))) if k else "<span></span>"
@@ -765,6 +779,8 @@ for k, pg in enumerate(all_pages):
         if h1: h1.insert_before(BeautifulSoup('<div class="part-label">Part %02d</div>' % num, "html.parser"))
         body = page_toc(sec) + sec.decode()
 
+    if pg["file"] == "part-08-practice-exams.html":
+        body += PRACTICE_LINKS
     open(os.path.join(PUBLIC, pg["file"]), "w", encoding="utf-8").write(
         shell(pg["title"], pg["nav"], pg["file"], body, pn))
 
