@@ -168,6 +168,18 @@ for pm in part_meta:
         for c in ch_pages:
             all_pages.append({"file": c["file"], "title": c["title"], "html": c["html"], "nav": f25})
 
+VOCAB_HTML = open(os.path.join(BUILD, "snippets", "vocab.html"), encoding="utf-8").read()
+P06 = "part-06-analysing-argument.html"
+for _it in nav_items:
+    if _it["file"] == P06:
+        _it["chapters"].append({"title": "High-Scoring Vocabulary Bank", "file": "vocabulary.html"})
+for _pg in all_pages:
+    if _pg["file"] == P06 and "chapters" in _pg:
+        _pg["chapters"].append({"title": "High-Scoring Vocabulary Bank", "file": "vocabulary.html"})
+_last6 = max(i for i, p in enumerate(all_pages) if p.get("nav") == P06)
+all_pages.insert(_last6 + 1, {"file": "vocabulary.html", "title": "High-Scoring Vocabulary Bank",
+                              "html": VOCAB_HTML, "nav": P06})
+
 for e in exemplars:
     e["url"] = (id_to_page.get(e["id"], "index.html") + "#" + e["id"]) if e["id"] else "index.html"
 
@@ -357,7 +369,6 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="practice-topics.html"><span class="ch-num">2</span><span>Practice Topics &amp; Essay Timer</span></a>
   <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
   <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
-  <a class="ch-card" href="vocabulary.html"><span class="ch-num">5</span><span>Vocabulary Bank</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -367,15 +378,11 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                   "chapters": [{"title": "Quote Flashcards", "file": "flashcards.html"},
                                {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
                                {"title": "Glossary of Techniques", "file": "glossary.html"},
-                               {"title": "Essay Marker", "file": "marker.html"},
-                               {"title": "Vocabulary Bank", "file": "vocabulary.html"}]})
+                               {"title": "Essay Marker", "file": "marker.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
-all_pages.append({"file": "vocabulary.html", "title": "High-Scoring Vocabulary Bank",
-                  "html": open(os.path.join(BUILD, "snippets", "vocab.html"), encoding="utf-8").read(),
-                  "nav": "study-tools.html"})
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
 def rewrite_anchors(scope, current):
@@ -411,7 +418,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s &middot; %s</title>
-<link rel="stylesheet" href="assets/style.css?v=6">
+<link rel="stylesheet" href="assets/style.css?v=7">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -438,7 +445,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=6"></script>
+<script src="assets/site.js?v=7"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, nav_html(active_nav, active_file), main_html, prevnext)
 
@@ -496,7 +503,8 @@ for k, pg in enumerate(all_pages):
         body = re.sub(r'<div class="part-label">Part \d+</div>', '<div class="part-label">Part %02d</div>' % num, body)
     elif "chapters" in pg and pg["chapters"]:
         sec = pg["part"]["sec"]
-        for c in pg["chapters"]: c["sec"].extract()
+        for c in pg["chapters"]:
+            if "sec" in c: c["sec"].extract()
         rewrite_anchors(sec, pg["file"])
         h1 = sec.find("h1")
         if h1: h1.insert_before(BeautifulSoup('<div class="part-label">Part %02d</div>' % num, "html.parser"))
