@@ -283,6 +283,7 @@ tp_page = TOOL_LABEL + """<h1>Practice Topics &amp; Essay Timer</h1>
 <div class="tool-bar">
   <select id="tp-text"></select>
   <button id="tp-draw">Draw a topic</button>
+  <a id="tp-mark" href="#" style="display:none;font-family:var(--sans);font-weight:700;background:var(--accent);color:#fff;padding:9px 16px;border-radius:9px">Mark my essay &#8594;</a>
 </div>
 <div class="tp-topic" id="tp-topic">Press &ldquo;Draw a topic&rdquo; to begin.</div>
 <div class="timer-wrap">
@@ -303,8 +304,12 @@ tp_page = TOOL_LABEL + """<h1>Practice Topics &amp; Essay Timer</h1>
   names.forEach(function(n){ var o = document.createElement('option'); o.value = n; o.textContent = n + ' (' + T[n].length + ' topics)'; sel.appendChild(o); });
   document.getElementById('tp-draw').addEventListener('click', function(){
     var pool = [];
-    names.forEach(function(n){ if (!sel.value || sel.value === n) T[n].forEach(function(t){ pool.push('[' + n + '] ' + t); }); });
-    document.getElementById('tp-topic').textContent = pool[Math.floor(Math.random() * pool.length)];
+    names.forEach(function(n){ if (!sel.value || sel.value === n) T[n].forEach(function(t){ pool.push({n: n, t: t}); }); });
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    document.getElementById('tp-topic').textContent = '[' + pick.n + '] ' + pick.t;
+    var mk = document.getElementById('tp-mark');
+    mk.href = 'marker.html?section=a&topic=' + encodeURIComponent(pick.t);
+    mk.style.display = '';
   });
   var total = 3600, left = 3600, iv = null;
   var disp = document.getElementById('timer'), start = document.getElementById('t-start'),
@@ -351,14 +356,17 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="flashcards.html"><span class="ch-num">1</span><span>Quote Flashcards</span></a>
   <a class="ch-card" href="practice-topics.html"><span class="ch-num">2</span><span>Practice Topics &amp; Essay Timer</span></a>
   <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
-</div>"""
+  <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
+</div>
+<p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
 display_num += 1
 tools_num = display_num
 nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools.html",
                   "chapters": [{"title": "Quote Flashcards", "file": "flashcards.html"},
                                {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
-                               {"title": "Glossary of Techniques", "file": "glossary.html"}]})
+                               {"title": "Glossary of Techniques", "file": "glossary.html"},
+                               {"title": "Essay Marker", "file": "marker.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
@@ -464,6 +472,9 @@ for pg in all_pages:
             body = re.sub(r"\s+", " ", _cl.get_text(" "))[:1500].strip()
         search.append({"t": h.get_text(" ", strip=True), "p": part_title,
                        "u": pg["file"] + ("#" + hid if hid else ""), "b": body})
+search.append({"t": "Essay Marker", "p": "Study Tools", "u": "marker.html",
+               "b": "ai essay marker score feedback section a b c criteria calibrated marking precision mode second opinion handwriting transcription"})
+shutil.copy(os.path.join(BUILD, "marker.html"), os.path.join(PUBLIC, "marker.html"))
 json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
 # ---------------- write pages ----------------
