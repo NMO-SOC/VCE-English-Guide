@@ -149,10 +149,24 @@ for pm in part_meta:
     if pm["title"].startswith("Key Takeaways from the 2024"):
         display_num += 1
         f25 = "part-13-key-takeaways-from-the-2025-assessment-report.html"
+        chs25 = [("General Exam Advice", "r25-general"),
+                 ("Section A: Analytical Response to a Text", "r25-section-a"),
+                 ("Section B: Creating a Text", "r25-section-b"),
+                 ("Section C: Analysis of Argument and Language", "r25-section-c"),
+                 ("Priority Checklist for 2026", "r25-checklist")]
+        ch_pages = [{"title": t, "file": sn + ".html",
+                     "html": open(os.path.join(BUILD, "snippets", sn + ".html"), encoding="utf-8").read()}
+                    for t, sn in chs25]
+        hub_html = open(os.path.join(BUILD, "snippets", "r25-hub.html"), encoding="utf-8").read()
+        hub_html += '<h2 class="in-part-head">In this part</h2><div class="ch-list">%s</div>' % "".join(
+            '<a class="ch-card" href="%s"><span class="ch-num">%d</span><span>%s</span></a>'
+            % (c["file"], j + 1, html.escape(c["title"])) for j, c in enumerate(ch_pages))
         nav_items.append({"num": display_num, "title": "Key Takeaways from the 2025 Assessment Report",
-                          "file": f25, "chapters": []})
+                          "file": f25, "chapters": [{"title": c["title"], "file": c["file"]} for c in ch_pages]})
         all_pages.append({"file": f25, "title": "Key Takeaways from the 2025 Assessment Report",
-                          "html": R2025, "nav": f25})
+                          "html": hub_html, "nav": f25})
+        for c in ch_pages:
+            all_pages.append({"file": c["file"], "title": c["title"], "html": c["html"], "nav": f25})
 
 for e in exemplars:
     e["url"] = (id_to_page.get(e["id"], "index.html") + "#" + e["id"]) if e["id"] else "index.html"
