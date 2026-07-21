@@ -654,6 +654,10 @@ def nav_html(active_nav, active_file):
                        % (cls, it["file"], num, html.escape(it["title"])))
     return "\n".join(out)
 
+QUOTE_FIX = re.compile(r"(^|[\s\(\[\u2014\u2013>])\u2019(?=\S)")
+def fix_quotes(html_str):
+    return QUOTE_FIX.sub("\\1\u2018", html_str)
+
 def shell(title, active_nav, active_file, main_html, prevnext=""):
     return """<!DOCTYPE html>
 <html lang="en">
@@ -702,7 +706,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <script src="assets/site.js?v=16"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
-</html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)
+</html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
 
 def page_toc(scope):
     lis = []
