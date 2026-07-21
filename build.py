@@ -594,11 +594,11 @@ _fi = os.path.join(PUBLIC, "assets", "img", "pdffrag")
 os.makedirs(_fi, exist_ok=True)
 for _f in os.listdir(os.path.join(BUILD, "pdffrag", "img")):
     copy_if_changed(os.path.join(BUILD, "pdffrag", "img", _f), os.path.join(_fi, _f))
-os.makedirs(os.path.join(PUBLIC, "assets", "pdf"), exist_ok=True)
-copy_if_changed(os.path.join(BUILD, "localpdf", "practice-exam-viii.pdf"),
-                os.path.join(PUBLIC, "assets", "pdf", "practice-exam-viii.pdf"))
-copy_if_changed(os.path.join(BUILD, "localpdf", "practice-exam-ix.pdf"),
-                os.path.join(PUBLIC, "assets", "pdf", "practice-exam-ix.pdf"))
+for _sub in ("viii", "ix"):
+    _pd = os.path.join(PUBLIC, "assets", "exampages", _sub)
+    os.makedirs(_pd, exist_ok=True)
+    for _f in os.listdir(os.path.join(BUILD, "pdfpages", _sub)):
+        copy_if_changed(os.path.join(BUILD, "pdfpages", _sub, _f), os.path.join(_pd, _f))
 copy_if_changed(os.path.join(BUILD, "examgen", "web-template.docx"), os.path.join(_ed, "web-template.docx"))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
@@ -645,7 +645,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=13">
+<link rel="stylesheet" href="assets/style.css?v=14">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -673,7 +673,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=13"></script>
+<script src="assets/site.js?v=14"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)
@@ -732,21 +732,12 @@ PRACTICE_LINKS = """
 <li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-trial-examination-comprehensive-study-guide/141298120" target="_blank" rel="noopener">Practice Exam VII</a></li>
 </ul>
 <h2>Practice Exam VIII with Model Section C</h2>
-<p>The complete trial exam question book with a sample high-level Section C response. View below or download for printing.</p>
-<div class="pdf-embed">
-  <div class="pdf-embed-bar"><span class="pdf-name">Practice Exam VIII with Model Section C</span>
-  <a class="pdf-open" href="assets/pdf/practice-exam-viii.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
-  <a class="pdf-dl" href="assets/pdf/practice-exam-viii.pdf" download>Download &#8595;</a></div>
-  <iframe class="pdf-frame" src="assets/pdf/practice-exam-viii.pdf#view=FitH" loading="lazy" title="Practice Exam VIII"></iframe>
-</div>
+<p>The complete trial exam question book with a sample high-level Section C response. View-only: read the paper below.</p>
+<div class="pdf-pages" oncontextmenu="return false"><img src="assets/exampages/viii/pg-01.png" alt="Practice Exam VIII page 1" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-02.png" alt="Practice Exam VIII page 2" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-03.png" alt="Practice Exam VIII page 3" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-04.png" alt="Practice Exam VIII page 4" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-05.png" alt="Practice Exam VIII page 5" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-06.png" alt="Practice Exam VIII page 6" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-07.png" alt="Practice Exam VIII page 7" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-08.png" alt="Practice Exam VIII page 8" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-09.png" alt="Practice Exam VIII page 9" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-10.png" alt="Practice Exam VIII page 10" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-11.png" alt="Practice Exam VIII page 11" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-12.png" alt="Practice Exam VIII page 12" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-13.png" alt="Practice Exam VIII page 13" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-14.png" alt="Practice Exam VIII page 14" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-15.png" alt="Practice Exam VIII page 15" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-16.png" alt="Practice Exam VIII page 16" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-17.png" alt="Practice Exam VIII page 17" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-18.png" alt="Practice Exam VIII page 18" draggable="false" loading="lazy"><img src="assets/exampages/viii/pg-19.png" alt="Practice Exam VIII page 19" draggable="false" loading="lazy"></div>
 <h2>Practice Exam IX</h2>
-<p>View below or download for printing.</p>
-<div class="pdf-embed">
-  <div class="pdf-embed-bar"><span class="pdf-name">Practice Exam IX</span>
-  <a class="pdf-open" href="assets/pdf/practice-exam-ix.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
-  <a class="pdf-dl" href="assets/pdf/practice-exam-ix.pdf" download>Download &#8595;</a></div>
-  <iframe class="pdf-frame" src="assets/pdf/practice-exam-ix.pdf#view=FitH" loading="lazy" title="Practice Exam IX"></iframe>
-</div>
+<p>View-only: read the paper below.</p>
+<div class="pdf-pages" oncontextmenu="return false"><img src="assets/exampages/ix/pg-01.png" alt="Practice Exam IX page 1" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-02.png" alt="Practice Exam IX page 2" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-03.png" alt="Practice Exam IX page 3" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-04.png" alt="Practice Exam IX page 4" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-05.png" alt="Practice Exam IX page 5" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-06.png" alt="Practice Exam IX page 6" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-07.png" alt="Practice Exam IX page 7" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-08.png" alt="Practice Exam IX page 8" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-09.png" alt="Practice Exam IX page 9" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-10.png" alt="Practice Exam IX page 10" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-11.png" alt="Practice Exam IX page 11" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-12.png" alt="Practice Exam IX page 12" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-13.png" alt="Practice Exam IX page 13" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-14.png" alt="Practice Exam IX page 14" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-15.png" alt="Practice Exam IX page 15" draggable="false" loading="lazy"><img src="assets/exampages/ix/pg-16.png" alt="Practice Exam IX page 16" draggable="false" loading="lazy"></div>
+<p class="src-note">&copy; Practice Exams VIII and IX are commercially produced materials purchased under licence by South Oakleigh College for the exclusive use of its students. Please do not share, repost or distribute them outside the school.</p>
 """
 
 for k, pg in enumerate(all_pages):

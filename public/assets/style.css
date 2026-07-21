@@ -328,3 +328,6 @@ a.btn-inline{font-family:var(--sans);font-weight:700;background:var(--accent);co
 a.btn-inline:hover{text-decoration:none;filter:brightness(1.1)}
 .inline-table-bar{font-family:var(--sans);margin:1.2em 0 .4em;text-align:right}
 .qt-table td:nth-child(2){white-space:nowrap}
+.pdf-pages{border:1px solid var(--line);border-radius:12px;background:#525659;padding:14px;max-height:82vh;overflow-y:auto;user-select:none;-webkit-user-select:none}
+.pdf-pages img{display:block;width:100%;max-width:820px;margin:0 auto 14px;border-radius:4px;background:#fff;pointer-events:none}
+@media print{.pdf-pages{display:none!important}}
