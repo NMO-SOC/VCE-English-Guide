@@ -24,7 +24,13 @@ for d in (PUBLIC, IMG_DIR, PDF_DIR, FILES_DIR):
 tex = open(os.path.join(SRC, "main.tex"), encoding="utf-8").read()
 # replace the exe-download generator text with a pointer to the web tool
 tex = re.sub(r"(\\section\{English Exam Generator\}).*?(?=\\clearpage)",
-             r"\1\nThe exam generator now runs directly on this site. It assembles a complete three-section practice paper from the question banks and downloads it as a Word document in the authentic task-book format.\n\n\\href{ZZFILE::__EXAMGEN__}{Open the Exam Generator}\n\n", tex, flags=re.S)
+             r"\1\nThe exam generator now runs directly on this site. It assembles a complete three-section practice paper from the question banks and downloads it as a Word document in the authentic task-book format.\n\n\\href{ZZFILE::__EXAMGEN__}{Open the Exam Generator}\n\nOfficial past VCE English examinations and examiner reports are published by the VCAA:\n\n\\href{https://www.vcaa.vic.edu.au/assessment/vce/examination-specifications-past-examinations-and-examination-reports/english}{Past VCE English examinations (VCAA)}\n\n", tex, flags=re.S)
+
+# script section: link out instead of hosting the PDF
+tex = tex.replace("Click the link below to open the Script:\\\\  \n\\textattachfile{SBScript.pdf}{Open SBScript.pdf}",
+                  "The full script is available online:\n\n\\href{https://www.dailyscript.com/scripts/sunset_bld_3_21_49.html}{Read the Sunset Boulevard script at Daily Script}")
+tex = re.sub(r"\\textattachfile\{SBScript\.pdf\}\{[^}]*\}",
+             r"\\href{https://www.dailyscript.com/scripts/sunset_bld_3_21_49.html}{Read the Sunset Boulevard script at Daily Script}", tex)
 
 # remove the seven copyrighted practice exam sections (site keeps the generator instead)
 tex = re.sub(r"\\section\{Practice Exam I\}.*?(?=\\section\{English Exam Generator\})", "", tex, flags=re.S)
