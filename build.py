@@ -37,6 +37,22 @@ for img in soup.find_all("img"):
         img["src"] = "assets/img/" + urllib.parse.quote(base)
         img["loading"] = "lazy"; img["class"] = ["content-img"]
 n_imgs = len(copied)
+# favicon + social logo (no-space filename)
+try:
+    from PIL import Image
+    _logo = Image.open(os.path.join(SRC, "SOC LOGO_VERTICAL.png")).convert("RGBA")
+    _bgw = Image.new("RGBA", _logo.size, (255, 255, 255, 255))
+    _bgw.paste(_logo, (0, 0), _logo)
+    _sq = _bgw.convert("RGB")
+    _w, _h = _sq.size
+    _side = max(_w, _h)
+    _canvas = Image.new("RGB", (_side, _side), (255, 255, 255))
+    _canvas.paste(_sq, ((_side - _w) // 2, (_side - _h) // 2))
+    _canvas.resize((48, 48)).save(os.path.join(PUBLIC, "assets", "favicon.png"))
+    _canvas.resize((180, 180)).save(os.path.join(PUBLIC, "assets", "apple-touch-icon.png"))
+    _canvas.resize((512, 512)).save(os.path.join(IMG_DIR, "soc-logo.png"))
+except Exception as _e:
+    print("icon generation skipped:", _e)
 
 for a in soup.find_all("a", href=True):
     if a["href"].startswith("ZZFILE::"):
@@ -143,9 +159,9 @@ for pm in part_meta:
     nav_items.append({"num": display_num, "title": pm["title"], "file": hub,
                       "chapters": [{"title": c["title"], "file": c["file"]} for c in chapters]})
     all_pages.append({"file": hub, "title": pm["title"], "part": pm, "chapters": chapters, "nav": hub})
-    for c in chapters:
+    for _ci, c in enumerate(chapters, 1):
         all_pages.append({"file": c["file"], "title": c["title"], "chapter": c,
-                          "part": pm, "nav": hub})
+                          "part": pm, "nav": hub, "chidx": _ci, "chtotal": len(chapters)})
     if pm["title"].startswith("Key Takeaways from the 2024"):
         display_num += 1
         f25 = "part-13-key-takeaways-from-the-2025-assessment-report.html"
@@ -483,7 +499,17 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s &middot; %s</title>
-<link rel="stylesheet" href="assets/style.css?v=8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:site_name" content="VCE English Exam Preparation Guide">
+<meta property="og:title" content="%s">
+<meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
+<meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
+<script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<link rel="stylesheet" href="assets/style.css?v=9">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -495,6 +521,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <a class="brand" href="index.html">
+      <img class="brand-logo" src="assets/img/soc-logo.png" alt="South Oakleigh College">
       <span class="brand-title">VCE English</span>
       <span class="brand-sub">Exam Prep Guide</span>
     </a>
@@ -510,9 +537,9 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=8"></script>
+<script src="assets/site.js?v=9"></script>
 </body>
-</html>""" % (html.escape(title), SITE_TITLE, nav_html(active_nav, active_file), main_html, prevnext)
+</html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)
 
 def page_toc(scope):
     lis = []
@@ -578,11 +605,14 @@ for k, pg in enumerate(all_pages):
         body = sec.decode() + '<h2 class="in-part-head">In this part</h2><div class="ch-list">%s</div>' % cards
     elif "chapter" in pg:
         sec = pg["chapter"]["sec"]
+        if "quote-bank" in pg["file"]:
+            sec["class"] = sec.get("class", []) + ["quotes-page"]
         rewrite_anchors(sec, pg["file"])
         hh = sec.find(["h2", "h3", "h4"])
         if hh: hh.name = "h1"
-        crumb = ('<div class="part-label"><a href="%s">Part %02d &middot; %s</a></div>'
-                 % (pg["part"]["file"], num, html.escape(pg["part"]["title"])))
+        pos = ('<span class="ch-pos">Chapter %d of %d</span>' % (pg["chidx"], pg["chtotal"])) if pg.get("chidx") else ""
+        crumb = ('<div class="part-label"><a href="%s">Part %02d &middot; %s</a>%s</div>'
+                 % (pg["part"]["file"], num, html.escape(pg["part"]["title"]), pos))
         body = crumb + page_toc(sec) + sec.decode()
     else:
         sec = pg["part"]["sec"]
