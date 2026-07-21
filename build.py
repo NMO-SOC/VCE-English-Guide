@@ -694,6 +694,16 @@ for k, pg in enumerate(all_pages):
         cards = "".join('<a class="ch-card" href="%s"><span class="ch-num">%d</span><span>%s</span></a>'
                         % (c["file"], j+1, html.escape(c["title"])) for j, c in enumerate(pg["chapters"]))
         body = sec.decode() + '<h2 class="in-part-head">In this part</h2><div class="ch-list">%s</div>' % cards
+    elif pg["file"] == "p08-english-exam-generator.html":
+        crumb = ('<div class="part-label"><a href="%s">Part %02d &middot; %s</a>'
+                 '<span class="ch-pos">Chapter %d of %d</span></div>'
+                 % (pg["part"]["file"], num, html.escape(pg["part"]["title"]),
+                    pg.get("chidx", 8), pg.get("chtotal", 8)))
+        body = crumb + """<h1>English Exam Generator</h1>
+<p>The exam generator now runs directly on this site &mdash; no download needed. It assembles a full three-section practice paper from the question banks: a random analytical topic for your text, a Creating Texts prompt with stimulus material, and an Analysing Argument source. You can print the result for timed practice.</p>
+<p><a class="btn" style="background:var(--accent);color:#fff" href="exam-generator.html">Open the Exam Generator &#8594;</a></p>
+<p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">The original desktop version (Windows) is still available:
+<a class="file-dl" href="assets/files/ExamGenerator.exe" download>ExamGenerator.exe</a></p>"""
     elif "chapter" in pg:
         sec = pg["chapter"]["sec"]
         if "quote-bank" in pg["file"]:
