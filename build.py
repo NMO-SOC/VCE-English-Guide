@@ -594,6 +594,9 @@ _fi = os.path.join(PUBLIC, "assets", "img", "pdffrag")
 os.makedirs(_fi, exist_ok=True)
 for _f in os.listdir(os.path.join(BUILD, "pdffrag", "img")):
     copy_if_changed(os.path.join(BUILD, "pdffrag", "img", _f), os.path.join(_fi, _f))
+os.makedirs(os.path.join(PUBLIC, "assets", "pdf"), exist_ok=True)
+copy_if_changed(os.path.join(BUILD, "localpdf", "practice-exam-viii.pdf"),
+                os.path.join(PUBLIC, "assets", "pdf", "practice-exam-viii.pdf"))
 copy_if_changed(os.path.join(BUILD, "examgen", "web-template.docx"), os.path.join(_ed, "web-template.docx"))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
@@ -726,6 +729,14 @@ PRACTICE_LINKS = """
 <li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-year-12-trial-exam-task-book/141298123" target="_blank" rel="noopener">Practice Exam VI</a></li>
 <li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-trial-examination-comprehensive-study-guide/141298120" target="_blank" rel="noopener">Practice Exam VII</a></li>
 </ul>
+<h2>Practice Exam VIII with Model Section C</h2>
+<p>The complete trial exam question book with a sample high-level Section C response. View below or download for printing.</p>
+<div class="pdf-embed">
+  <div class="pdf-embed-bar"><span class="pdf-name">Practice Exam VIII with Model Section C</span>
+  <a class="pdf-open" href="assets/pdf/practice-exam-viii.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
+  <a class="pdf-dl" href="assets/pdf/practice-exam-viii.pdf" download>Download &#8595;</a></div>
+  <iframe class="pdf-frame" src="assets/pdf/practice-exam-viii.pdf#view=FitH" loading="lazy" title="Practice Exam VIII"></iframe>
+</div>
 """
 
 for k, pg in enumerate(all_pages):
