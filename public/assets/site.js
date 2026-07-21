@@ -30,3 +30,25 @@
       if(!out.contains(e.target)&&e.target!==box)out.classList.remove('show');});
   }
 })();
+(function(){
+  var el=document.getElementById('countdown');
+  if(!el)return;
+  var target=new Date(el.getAttribute('data-target')).getTime();
+  var d=document.getElementById('cd-d'),h=document.getElementById('cd-h'),
+      m=document.getElementById('cd-m'),s=document.getElementById('cd-s');
+  function pad(n){return n<10?'0'+n:''+n;}
+  function tick(){
+    var diff=target-Date.now();
+    if(diff<=0){
+      el.classList.add('cd-done');
+      el.querySelector('.cd-label').textContent='The English exam is here. You are ready — good luck!';
+      el.querySelector('.cd-units').style.display='none';
+      clearInterval(iv);return;
+    }
+    d.textContent=Math.floor(diff/86400000);
+    h.textContent=pad(Math.floor(diff/3600000)%24);
+    m.textContent=pad(Math.floor(diff/60000)%60);
+    s.textContent=pad(Math.floor(diff/1000)%60);
+  }
+  var iv=setInterval(tick,1000);tick();
+})();
