@@ -61,7 +61,8 @@ a:hover{text-decoration:underline}
 .content table{border-collapse:collapse;width:100%;margin:1.2em 0;font-size:15px;font-family:var(--sans);
   display:block;overflow-x:auto}
 .content th,.content td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
-.content thead th,.content tr:first-child td{background:var(--accent);color:#fff;font-weight:600;border-color:var(--accent)}
+.content thead th,.content thead td{background:var(--accent);color:#fff;font-weight:600;border-color:var(--accent)}
+.content table.no-thead tr:first-child td{background:var(--accent);color:#fff;font-weight:600;border-color:var(--accent)}
 .content tbody tr:nth-child(even){background:#fbf9f5}
 .content img.content-img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line);
   margin:1em 0;box-shadow:0 4px 14px rgba(0,0,0,.06)}
