@@ -62,6 +62,10 @@ for p in soup.find_all(["p", "div"]):
         '<iframe class="pdf-frame" src="assets/pdf/%s#view=FitH" loading="lazy" title="%s"></iframe></div>'
         % (html.escape(fname), enc, enc, enc, html.escape(fname)), "html.parser"))
 
+for _t in soup.find_all("table"):
+    if not _t.find("thead"):
+        _t["class"] = _t.get("class", []) + ["no-thead"]
+
 # de-duplicate longtable header rows (LaTeX firsthead + continuation head)
 for _t in soup.find_all("table"):
     _rows = _t.find_all("tr")
