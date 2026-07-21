@@ -225,10 +225,10 @@ a.inpath{text-decoration:underline}
 
 /* ---- dark mode ---- */
 [data-theme="dark"]{
-  --bg:#17130f; --panel:#1f1a15; --ink:#ece5da; --muted:#a89f92; --line:#3a332b;
-  --accent:#d08d80; --accent-soft:#3a2521; --gold:#d3a648;
-  --card:#262019; --soft:#2a231b; --soft-bd:#483d2f; --tint:#2b241d; --tint2:#231e18;
-  --tint3:#2f2820; --body2:#cbc1b3; --stripe:#211c16; --field:#262019;
+  --bg:#121212; --panel:#1a1a1c; --ink:#e8e6e3; --muted:#9d9a94; --line:#2e2e32;
+  --accent:#d98b7e; --accent-soft:#33211e; --gold:#d4a94e;
+  --card:#202023; --soft:#26231d; --soft-bd:#3d382c; --tint:#242427; --tint2:#1e1e21;
+  --tint3:#2a2a2e; --body2:#c6c3bd; --stripe:#1d1d20; --field:#232326;
 }
 [data-theme="dark"] .content img.content-img{opacity:.88;background:#fff}
 [data-theme="dark"] .content thead th,[data-theme="dark"] .content thead td,
