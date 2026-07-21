@@ -96,12 +96,18 @@ for p in soup.find_all(["p", "div"]):
     m = pdf_pat.search(p.get_text())
     if not m: continue
     fname = m.group(1)
-    INLINE_TABLES = {"QuoteTableSummary.pdf": "quotetable.html",
-                     "Tracker.pdf": "tracker.html",
-                     "SymbolTable.pdf": "symboltable.html"}
-    if fname in INLINE_TABLES:
-        if os.path.exists(os.path.join(SRC, fname)) and fname not in copied_pdfs:
-            copy_if_changed(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
+    INLINE_FRAGS = {"QuoteTableSummary.pdf": "quotetable.html",
+                    "Tracker.pdf": "tracker.html",
+                    "SymbolTable.pdf": "symboltable.html",
+                    "ShotAnalysis.pdf": "shotanalysis.html",
+                    "SS.pdf": "ss.html",
+                    "PJ1.pdf": "pj1.html",
+                    "PJ2.pdf": "pj2.html"}
+    if fname in INLINE_FRAGS:
+        frag = open(os.path.join(BUILD, "snippets", INLINE_FRAGS[fname]), encoding="utf-8").read()
+        p.replace_with(BeautifulSoup(frag, "html.parser"))
+        copied_pdfs.add(fname)
+        continue
         frag = open(os.path.join(BUILD, "snippets", INLINE_TABLES[fname]), encoding="utf-8").read()
         enc = urllib.parse.quote(fname)
         p.replace_with(BeautifulSoup(
@@ -584,6 +590,10 @@ for _sub in ("b", "c"):
     os.makedirs(os.path.join(_ed, _sub), exist_ok=True)
     for _f in os.listdir(os.path.join(BUILD, "examgen", _sub)):
         copy_if_changed(os.path.join(BUILD, "examgen", _sub, _f), os.path.join(_ed, _sub, _f))
+_fi = os.path.join(PUBLIC, "assets", "img", "pdffrag")
+os.makedirs(_fi, exist_ok=True)
+for _f in os.listdir(os.path.join(BUILD, "pdffrag", "img")):
+    copy_if_changed(os.path.join(BUILD, "pdffrag", "img", _f), os.path.join(_fi, _f))
 copy_if_changed(os.path.join(BUILD, "examgen", "web-template.docx"), os.path.join(_ed, "web-template.docx"))
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
