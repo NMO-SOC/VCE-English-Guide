@@ -12,14 +12,18 @@
       var q=box.value.trim().toLowerCase();
       if(q.length<2){out.classList.remove('show');out.innerHTML='';return;}
       load().then(function(data){
-        var res=[];
+        var res=[],seen={};
         for(var i=0;i<data.length&&res.length<40;i++){
-          var t=data[i].t.toLowerCase(),p=data[i].p.toLowerCase();
-          if(t.indexOf(q)>-1||p.indexOf(q)>-1)res.push(data[i]);
+          var t=data[i].t.toLowerCase(),p=data[i].p.toLowerCase(),b=(data[i].b||'').toLowerCase();
+          var hit=t.indexOf(q)>-1||p.indexOf(q)>-1?1:(b.indexOf(q)>-1?2:0);
+          if(hit&&!seen[data[i].u]){seen[data[i].u]=1;
+            var r={t:data[i].t,p:data[i].p,u:data[i].u,s:''};
+            if(hit===2){var k=b.indexOf(q);r.s=(k>40?'\u2026':'')+((data[i].b||'').substring(Math.max(0,k-40),k+60))+'\u2026';}
+            res.push(r);}
         }
         if(!res.length){out.innerHTML='<div class="nores">No matches for &ldquo;'+esc(box.value)+'&rdquo;</div>';out.classList.add('show');return;}
         out.innerHTML=res.map(function(r){
-          return '<a href="'+r.u+'">'+esc(r.t)+'<small>'+esc(r.p)+'</small></a>';
+          return '<a href="'+r.u+'">'+esc(r.t)+'<small>'+esc(r.p)+(r.s?' \u2014 '+esc(r.s):'')+'</small></a>';
         }).join('');
         out.classList.add('show');
       });
