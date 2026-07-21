@@ -9,6 +9,12 @@ PUBLIC = os.path.join(BUILD, "public")
 IMG_DIR = os.path.join(PUBLIC, "assets", "img")
 PDF_DIR = os.path.join(PUBLIC, "assets", "pdf")
 FILES_DIR = os.path.join(PUBLIC, "assets", "files")
+def copy_if_changed(a, b):
+    try:
+        if os.path.exists(b) and os.path.getsize(b) == os.path.getsize(a): return
+    except OSError: pass
+    shutil.copy(a, b)
+
 SITE_TITLE = "VCE English Exam Preparation Guide"
 
 for d in (PUBLIC, IMG_DIR, PDF_DIR, FILES_DIR):
@@ -24,7 +30,12 @@ tex = re.sub(r"\\addcontentsline\{exp\}\{examples\}\{([^}]+)\}",
              lambda m: "\n\nZZEXP %s ZZEXPEND\n\n" % m.group(1), tex)
 open(os.path.join(BUILD, "_pre.tex"), "w", encoding="utf-8").write(tex)
 os.system('cd "%s" && pandoc "%s/_pre.tex" -f latex -t html5 --section-divs --wrap=none -o "%s/_body.html"' % (SRC, BUILD, BUILD))
-soup = BeautifulSoup(open(os.path.join(BUILD, "_body.html"), encoding="utf-8").read(), "html.parser")
+try:
+    import lxml  # noqa
+    _PARSER = "lxml"
+except ImportError:
+    _PARSER = "html.parser"
+soup = BeautifulSoup(open(os.path.join(BUILD, "_body.html"), encoding="utf-8").read(), _PARSER)
 
 # ---------------- assets ----------------
 copied = set()
@@ -33,7 +44,7 @@ for img in soup.find_all("img"):
     sp = os.path.join(SRC, base)
     if os.path.exists(sp):
         if base not in copied:
-            shutil.copy(sp, os.path.join(IMG_DIR, base)); copied.add(base)
+            copy_if_changed(sp, os.path.join(IMG_DIR, base)); copied.add(base)
         img["src"] = "assets/img/" + urllib.parse.quote(base)
         img["loading"] = "lazy"; img["class"] = ["content-img"]
 n_imgs = len(copied)
@@ -58,7 +69,7 @@ for a in soup.find_all("a", href=True):
     if a["href"].startswith("ZZFILE::"):
         fn = a["href"].split("::", 1)[1]
         if os.path.exists(os.path.join(SRC, fn)):
-            shutil.copy(os.path.join(SRC, fn), os.path.join(FILES_DIR, fn))
+            copy_if_changed(os.path.join(SRC, fn), os.path.join(FILES_DIR, fn))
         a["href"] = "assets/files/" + urllib.parse.quote(fn)
         a["class"] = ["file-dl"]; a["download"] = ""
 
@@ -69,7 +80,7 @@ for p in soup.find_all(["p", "div"]):
     if not m: continue
     fname = m.group(1)
     if os.path.exists(os.path.join(SRC, fname)) and fname not in copied_pdfs:
-        shutil.copy(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
+        copy_if_changed(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
     enc = urllib.parse.quote(fname)
     p.replace_with(BeautifulSoup(
         '<div class="pdf-embed"><div class="pdf-embed-bar"><span class="pdf-name">%s</span>'
@@ -538,6 +549,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 <script src="assets/site.js?v=9"></script>
+<script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), main_html, prevnext)
 
@@ -578,7 +590,7 @@ for pg in all_pages:
                        "u": pg["file"] + ("#" + hid if hid else ""), "b": body})
 search.append({"t": "Essay Marker", "p": "Study Tools", "u": "marker.html",
                "b": "ai essay marker score feedback section a b c criteria calibrated marking precision mode second opinion handwriting transcription"})
-shutil.copy(os.path.join(BUILD, "marker.html"), os.path.join(PUBLIC, "marker.html"))
+copy_if_changed(os.path.join(BUILD, "marker.html"), os.path.join(PUBLIC, "marker.html"))
 json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
 # ---------------- write pages ----------------
