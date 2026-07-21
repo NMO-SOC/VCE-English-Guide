@@ -168,11 +168,10 @@ a.inpath{text-decoration:underline}
 .ch-num{font-weight:800;color:var(--gold);font-size:15px;min-width:22px}
 .in-part-head{margin-top:1.5em}
 .part-label a{color:var(--gold)}
-.countdown{margin:0 0 1.6em}
-.cd-label{font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);font-weight:700;margin-bottom:10px}
-.cd-units{display:flex;gap:12px;flex-wrap:wrap}
-.cd-unit{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:10px 0;text-align:center;min-width:86px}
-.cd-num{display:block;font-family:var(--sans);font-weight:800;font-size:30px;color:#fff;font-variant-numeric:tabular-nums;line-height:1.1}
-.cd-word{display:block;font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#e9c9c1;margin-top:2px}
-.cd-done .cd-label{color:#fff}
-@media(max-width:640px){.cd-unit{min-width:70px}.cd-num{font-size:24px}}
+
+.exam-banner{display:flex;justify-content:center;align-items:baseline;gap:18px;flex-wrap:wrap;background:var(--accent);color:#fff;font-family:var(--sans);font-size:13.5px;padding:9px 16px;letter-spacing:.3px}
+.eb-label{text-transform:uppercase;letter-spacing:1.5px;font-size:11.5px;font-weight:700;color:#e9c9c1}
+.eb-time{font-variant-numeric:tabular-nums}
+.eb-time b{font-size:15px;font-weight:800;color:#fff}
+.exam-banner.cd-done .eb-label{color:#fff}
+@media(max-width:960px){.exam-banner{padding-left:66px}}

@@ -8,3 +8,7 @@
 *.synctex.gz
 *.atfi
 *.exp
+
+# stray rsync temp file
+.*.uNCYW1
+.ExamGenerator.exe.*

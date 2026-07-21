@@ -41,8 +41,8 @@
     var diff=target-Date.now();
     if(diff<=0){
       el.classList.add('cd-done');
-      el.querySelector('.cd-label').textContent='The English exam is here. You are ready — good luck!';
-      el.querySelector('.cd-units').style.display='none';
+      el.querySelector('.eb-label').textContent='The English exam is here. Good luck!';
+      el.querySelector('.eb-time').style.display='none';
       clearInterval(iv);return;
     }
     d.textContent=Math.floor(diff/86400000);
