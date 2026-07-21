@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a multi-page static website from the VCE English Exam Prep LaTeX booklet."""
+"""Build a multi-page static website (part hubs + chapter subpages) from the VCE booklet."""
 import os, re, shutil, json, html, urllib.parse
 from bs4 import BeautifulSoup
 
@@ -9,146 +9,169 @@ PUBLIC = os.path.join(BUILD, "public")
 IMG_DIR = os.path.join(PUBLIC, "assets", "img")
 PDF_DIR = os.path.join(PUBLIC, "assets", "pdf")
 FILES_DIR = os.path.join(PUBLIC, "assets", "files")
-
-for d in (PUBLIC, IMG_DIR, PDF_DIR, FILES_DIR, os.path.join(PUBLIC, "assets")):
-    os.makedirs(d, exist_ok=True)
-
 SITE_TITLE = "VCE English Exam Preparation Guide"
 
-with open(os.path.join(SRC, "main.tex"), encoding="utf-8") as f:
-    tex = f.read()
+for d in (PUBLIC, IMG_DIR, PDF_DIR, FILES_DIR):
+    os.makedirs(d, exist_ok=True)
 
-def pdf_repl(m):
-    fname = m.group(2).strip()
-    if not fname.lower().endswith(".pdf"):
-        fname += ".pdf"
-    return "\n\nZZPDFEMBED " + fname + " ZZEND\n\n"
-tex = re.sub(r"\\includepdf(\[[^\]]*\])?\s*\{([^}]+)\}", pdf_repl, tex)
+# ---------------- preprocess LaTeX ----------------
+tex = open(os.path.join(SRC, "main.tex"), encoding="utf-8").read()
+tex = re.sub(r"\\includepdf(\[[^\]]*\])?\s*\{([^}]+)\}",
+             lambda m: "\n\nZZPDFEMBED %s ZZEND\n\n" % (m.group(2).strip() if m.group(2).strip().lower().endswith(".pdf") else m.group(2).strip() + ".pdf"), tex)
+tex = re.sub(r"\\textattachfile\{([^}]+)\}\{([^}]+)\}",
+             lambda m: r"\href{ZZFILE::%s}{%s}" % (m.group(1).strip(), m.group(2).strip()), tex)
+tex = re.sub(r"\\addcontentsline\{exp\}\{examples\}\{([^}]+)\}",
+             lambda m: "\n\nZZEXP %s ZZEXPEND\n\n" % m.group(1), tex)
+open(os.path.join(BUILD, "_pre.tex"), "w", encoding="utf-8").write(tex)
+os.system('cd "%s" && pandoc "%s/_pre.tex" -f latex -t html5 --section-divs --wrap=none -o "%s/_body.html"' % (SRC, BUILD, BUILD))
+soup = BeautifulSoup(open(os.path.join(BUILD, "_body.html"), encoding="utf-8").read(), "html.parser")
 
-def att_repl(m):
-    return r"\href{ZZFILE::%s}{%s}" % (m.group(1).strip(), m.group(2).strip())
-tex = re.sub(r"\\textattachfile\{([^}]+)\}\{([^}]+)\}", att_repl, tex)
-
-pre_tex = os.path.join(BUILD, "_pre.tex")
-with open(pre_tex, "w", encoding="utf-8") as f:
-    f.write(tex)
-
-os.system('cd "%s" && pandoc "%s" -f latex -t html5 --section-divs --wrap=none -o "%s/_body.html"'
-          % (SRC, pre_tex, BUILD))
-
-with open(os.path.join(BUILD, "_body.html"), encoding="utf-8") as f:
-    soup = BeautifulSoup(f.read(), "html.parser")
-
-copied_imgs = set()
+# ---------------- assets ----------------
+copied = set()
 for img in soup.find_all("img"):
-    src = img.get("src", "")
-    base = os.path.basename(src)
-    srcpath = os.path.join(SRC, base)
-    if os.path.exists(srcpath):
-        if base not in copied_imgs:
-            shutil.copy(srcpath, os.path.join(IMG_DIR, base))
-            copied_imgs.add(base)
+    base = os.path.basename(img.get("src", ""))
+    sp = os.path.join(SRC, base)
+    if os.path.exists(sp):
+        if base not in copied:
+            shutil.copy(sp, os.path.join(IMG_DIR, base)); copied.add(base)
         img["src"] = "assets/img/" + urllib.parse.quote(base)
-        img["loading"] = "lazy"
-        cls = img.get("class", [])
-        img["class"] = (cls if isinstance(cls, list) else [cls]) + ["content-img"]
+        img["loading"] = "lazy"; img["class"] = ["content-img"]
+n_imgs = len(copied)
 
 for a in soup.find_all("a", href=True):
     if a["href"].startswith("ZZFILE::"):
         fn = a["href"].split("::", 1)[1]
-        srcpath = os.path.join(SRC, fn)
-        if os.path.exists(srcpath):
-            shutil.copy(srcpath, os.path.join(FILES_DIR, fn))
+        if os.path.exists(os.path.join(SRC, fn)):
+            shutil.copy(os.path.join(SRC, fn), os.path.join(FILES_DIR, fn))
         a["href"] = "assets/files/" + urllib.parse.quote(fn)
-        a["class"] = a.get("class", []) + ["file-dl"]
-        a["download"] = ""
+        a["class"] = ["file-dl"]; a["download"] = ""
 
 pdf_pat = re.compile(r"ZZPDFEMBED\s+(\S+?\.pdf)\s+ZZEND", re.I)
 copied_pdfs = set()
 for p in soup.find_all(["p", "div"]):
-    txt = p.get_text()
-    m = pdf_pat.search(txt)
-    if not m:
-        continue
+    m = pdf_pat.search(p.get_text())
+    if not m: continue
     fname = m.group(1)
-    srcpath = os.path.join(SRC, fname)
-    if os.path.exists(srcpath) and fname not in copied_pdfs:
-        shutil.copy(srcpath, os.path.join(PDF_DIR, fname))
-        copied_pdfs.add(fname)
+    if os.path.exists(os.path.join(SRC, fname)) and fname not in copied_pdfs:
+        shutil.copy(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
     enc = urllib.parse.quote(fname)
-    block = BeautifulSoup(
-        '<div class="pdf-embed">'
-        '<div class="pdf-embed-bar"><span class="pdf-name">%s</span>'
+    p.replace_with(BeautifulSoup(
+        '<div class="pdf-embed"><div class="pdf-embed-bar"><span class="pdf-name">%s</span>'
         '<a class="pdf-open" href="assets/pdf/%s" target="_blank" rel="noopener">Open in new tab &#8599;</a>'
         '<a class="pdf-dl" href="assets/pdf/%s" download>Download &#8595;</a></div>'
-        '<iframe class="pdf-frame" src="assets/pdf/%s#view=FitH" loading="lazy" title="%s"></iframe>'
-        '</div>' % (html.escape(fname), enc, enc, enc, html.escape(fname)),
-        "html.parser")
-    p.replace_with(block)
+        '<iframe class="pdf-frame" src="assets/pdf/%s#view=FitH" loading="lazy" title="%s"></iframe></div>'
+        % (html.escape(fname), enc, enc, enc, html.escape(fname)), "html.parser"))
 
-parts = [s for s in soup.find_all("section", class_="level1", recursive=True)
-         if s.find_parent("section") is None]
+exp_pat = re.compile(r"ZZEXP\s+(.+?)\s+ZZEXPEND")
+exemplars = []
+for _p in soup.find_all("p"):
+    _m = exp_pat.search(_p.get_text())
+    if _m:
+        _s = _p.find_parent("section")
+        exemplars.append({"title": _m.group(1).strip(), "id": _s.get("id") if _s else None})
+        _p.decompose()
 
-def slugify(txt):
-    s = re.sub(r"[^a-z0-9]+", "-", txt.lower()).strip("-")
-    return s or "section"
+# ---------------- structure: parts -> chapters ----------------
+def slugify(t):
+    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-") or "section"
+
+parts = [s for s in soup.find_all("section", class_="level1") if s.find_parent("section") is None]
+
+HOWTO = open(os.path.join(BUILD, "snippets/howto.html"), encoding="utf-8").read()
+R2025 = open(os.path.join(BUILD, "snippets/report2025.html"), encoding="utf-8").read()
+
+nav_items = []   # {num,title,file,chapters:[{title,file}],pages:[page dicts in order]}
+all_pages = []   # linear order for prev/next: {file,title,content_fn,nav_key,chapter_file_or_None}
+id_to_page = {}
 
 part_meta = []
 for i, sec in enumerate(parts, 1):
     h1 = sec.find("h1")
     title = h1.get_text(" ", strip=True) if h1 else "Part %d" % i
-    slug = slugify(title)
-    part_meta.append({"idx": i, "title": title, "slug": slug,
-                      "file": "part-%02d-%s.html" % (i, slug), "sec": sec})
+    part_meta.append({"idx": i, "title": title, "slug": slugify(title),
+                      "file": "part-%02d-%s.html" % (i, slugify(title)), "sec": sec})
 
-id_to_page = {}
+display_num = 0
 for pm in part_meta:
-    for el in pm["sec"].find_all(id=True):
-        id_to_page[el["id"]] = pm["file"]
-    if pm["sec"].get("id"):
-        id_to_page[pm["sec"]["id"]] = pm["file"]
+    display_num += 1
+    sec = pm["sec"]; hub = pm["file"]
+    if pm["idx"] == 1:
+        nav_items.append({"num": display_num, "title": "How to Use This Site", "file": hub, "chapters": []})
+        all_pages.append({"file": hub, "title": "How to Use This Site", "html": HOWTO, "nav": hub})
+        id_to_page[sec.get("id", "preface")] = hub
+        continue
+    children = sec.find_all("section", recursive=False)
+    chapters = []
+    used_cf = set()
+    if len(children) >= 2:
+        for j, ch in enumerate(children, 1):
+            hh = ch.find(["h2", "h3", "h4"])
+            ct = hh.get_text(" ", strip=True) if hh else "Section %d" % j
+            cf = "p%02d-%s.html" % (pm["idx"], slugify(ct)[:60])
+            if cf in used_cf:
+                k = 2
+                while "p%02d-%s-%d.html" % (pm["idx"], slugify(ct)[:60], k) in used_cf: k += 1
+                cf = "p%02d-%s-%d.html" % (pm["idx"], slugify(ct)[:60], k)
+            used_cf.add(cf)
+            chapters.append({"title": ct, "file": cf, "sec": ch})
+            for el in ch.find_all(id=True): id_to_page[el["id"]] = cf
+            if ch.get("id"): id_to_page[ch["id"]] = cf
+        for el in sec.find_all(id=True):
+            if el["id"] not in id_to_page: id_to_page[el["id"]] = hub
+        if sec.get("id"): id_to_page[sec["id"]] = hub
+    else:
+        for el in sec.find_all(id=True): id_to_page[el["id"]] = hub
+        if sec.get("id"): id_to_page[sec["id"]] = hub
+    nav_items.append({"num": display_num, "title": pm["title"], "file": hub,
+                      "chapters": [{"title": c["title"], "file": c["file"]} for c in chapters]})
+    all_pages.append({"file": hub, "title": pm["title"], "part": pm, "chapters": chapters, "nav": hub})
+    for c in chapters:
+        all_pages.append({"file": c["file"], "title": c["title"], "chapter": c,
+                          "part": pm, "nav": hub})
+    if pm["title"].startswith("Key Takeaways from the 2024"):
+        display_num += 1
+        f25 = "part-13-key-takeaways-from-the-2025-assessment-report.html"
+        nav_items.append({"num": display_num, "title": "Key Takeaways from the 2025 Assessment Report",
+                          "file": f25, "chapters": []})
+        all_pages.append({"file": f25, "title": "Key Takeaways from the 2025 Assessment Report",
+                          "html": R2025, "nav": f25})
 
-def heading_tree(sec):
-    out = []
-    for h in sec.find_all(["h2", "h3", "h4", "h5"]):
-        anchor = h.find_parent("section")
-        out.append({"id": anchor.get("id") if anchor else None,
-                    "text": h.get_text(" ", strip=True), "level": int(h.name[1])})
-    return out
+for e in exemplars:
+    e["url"] = (id_to_page.get(e["id"], "index.html") + "#" + e["id"]) if e["id"] else "index.html"
 
-search_index = []
-for pm in part_meta:
-    for h in pm["sec"].find_all(["h1", "h2", "h3", "h4", "h5"]):
-        anchor = h.find_parent("section")
-        hid = anchor.get("id") if anchor else None
-        search_index.append({"t": h.get_text(" ", strip=True), "p": pm["title"],
-                             "u": pm["file"] + ("#" + hid if hid else "")})
-with open(os.path.join(PUBLIC, "assets", "search.json"), "w", encoding="utf-8") as f:
-    json.dump(search_index, f, ensure_ascii=False)
-
-def rewrite_anchors(scope, current_file):
+def rewrite_anchors(scope, current):
     for a in scope.find_all("a", href=True):
-        href = a["href"]
-        if href.startswith("#"):
-            page = id_to_page.get(href[1:])
-            if page and page != current_file:
-                a["href"] = page + href
+        if a["href"].startswith("#"):
+            pg = id_to_page.get(a["href"][1:])
+            if pg and pg != current: a["href"] = pg + a["href"]
 
-def nav_html(active_file):
-    items = []
-    for pm in part_meta:
-        cls = ' class="active"' if pm["file"] == active_file else ""
-        items.append('<li%s><a href="%s"><span class="num">%02d</span>%s</a></li>'
-                     % (cls, pm["file"], pm["idx"], html.escape(pm["title"])))
-    return "\n".join(items)
+# ---------------- nav / shell ----------------
+def nav_html(active_nav, active_file):
+    out = []
+    for it in nav_items:
+        num = "%02d" % it["num"]
+        if it["chapters"]:
+            is_open = " open" if it["file"] == active_nav else ""
+            cls = ' class="active"' if active_file == it["file"] else ""
+            subs = "".join('<li%s><a href="%s">%s</a></li>' %
+                           (' class="active"' if c["file"] == active_file else "", c["file"], html.escape(c["title"]))
+                           for c in it["chapters"])
+            out.append('<li class="grp"><details%s><summary><a%s href="%s"><span class="num">%s</span>%s</a></summary>'
+                       '<ul class="subnav">%s</ul></details></li>'
+                       % (is_open, cls, it["file"], num, html.escape(it["title"]), subs))
+        else:
+            cls = ' class="active"' if it["file"] == active_file else ""
+            out.append('<li%s><a href="%s"><span class="num">%s</span>%s</a></li>'
+                       % (cls, it["file"], num, html.escape(it["title"])))
+    return "\n".join(out)
 
-def page_shell(title, active_file, main_html, prevnext=""):
+def shell(title, active_nav, active_file, main_html, prevnext=""):
     return """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>%(title)s &middot; %(site)s</title>
+<title>%s &middot; %s</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -164,41 +187,90 @@ def page_shell(title, active_file, main_html, prevnext=""):
       <input id="search" type="search" placeholder="Search the guide&hellip;" autocomplete="off">
       <div id="search-results"></div>
     </div>
-    <nav class="toc"><ol>%(nav)s</ol></nav>
+    <nav class="toc"><ol>%s</ol></nav>
     <div class="side-foot">South Oakleigh College &middot; 2026</div>
   </aside>
   <main class="content" id="main">
-    %(main)s
-    %(prevnext)s
+    %s
+    %s
   </main>
 </div>
 <script src="assets/site.js"></script>
 </body>
-</html>""" % {"title": html.escape(title), "site": SITE_TITLE,
-             "nav": nav_html(active_file), "main": main_html, "prevnext": prevnext}
+</html>""" % (html.escape(title), SITE_TITLE, nav_html(active_nav, active_file), main_html, prevnext)
 
-for i, pm in enumerate(part_meta):
-    sec = pm["sec"]
-    rewrite_anchors(sec, pm["file"])
-    tree = heading_tree(sec)
-    lis = ['<li class="lvl%d"><a href="#%s">%s</a></li>' % (h["level"], h["id"], html.escape(h["text"]))
-           for h in tree if h["id"] and h["level"] <= 4]
-    toc_items = ('<details class="page-toc" open><summary>On this page</summary><ul>%s</ul></details>'
-                 % "".join(lis)) if lis else ""
+def page_toc(scope):
+    lis = []
+    heads = scope.find_all(["h2", "h3", "h4", "h5"])
+    for h in heads[1:] if heads else []:
+        anc = h.find_parent("section")
+        if anc and anc.get("id"):
+            lis.append('<li class="lvl%s"><a href="#%s">%s</a></li>'
+                       % (h.name[1], anc["id"], html.escape(h.get_text(" ", strip=True))))
+    return ('<details class="page-toc" open><summary>On this page</summary><ul>%s</ul></details>' % "".join(lis)) if lis else ""
+
+# ---------------- search index ----------------
+search = []
+for pg in all_pages:
+    if "chapter" in pg:
+        scope, part_title = pg["chapter"]["sec"], pg["part"]["title"]
+    elif "part" in pg:
+        scope, part_title = pg["part"]["sec"], pg["part"]["title"]
+    else:
+        search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"]})
+        continue
+    if "chapters" in pg and pg["chapters"]:
+        search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"]})
+        continue
+    for h in scope.find_all(["h1", "h2", "h3", "h4", "h5"]):
+        anc = h.find_parent("section")
+        hid = anc.get("id") if anc else None
+        search.append({"t": h.get_text(" ", strip=True), "p": part_title,
+                       "u": pg["file"] + ("#" + hid if hid else "")})
+json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encoding="utf-8"), ensure_ascii=False)
+
+# ---------------- write pages ----------------
+for k, pg in enumerate(all_pages):
     prev_a = ('<a class="pn prev" href="%s"><span>&#8592; Previous</span><b>%s</b></a>'
-              % (part_meta[i-1]["file"], html.escape(part_meta[i-1]["title"]))) if i > 0 else "<span></span>"
+              % (all_pages[k-1]["file"], html.escape(all_pages[k-1]["title"]))) if k else "<span></span>"
     next_a = ('<a class="pn next" href="%s"><span>Next &#8594;</span><b>%s</b></a>'
-              % (part_meta[i+1]["file"], html.escape(part_meta[i+1]["title"]))) if i < len(part_meta)-1 else "<span></span>"
-    prevnext = '<nav class="prevnext">%s%s</nav>' % (prev_a, next_a)
-    h1 = sec.find("h1")
-    if h1:
-        h1.insert_before(BeautifulSoup('<div class="part-label">Part %02d</div>' % pm["idx"], "html.parser"))
-    out = page_shell(pm["title"], pm["file"], toc_items + sec.decode(), prevnext=prevnext)
-    with open(os.path.join(PUBLIC, pm["file"]), "w", encoding="utf-8") as f:
-        f.write(out)
+              % (all_pages[k+1]["file"], html.escape(all_pages[k+1]["title"]))) if k < len(all_pages)-1 else "<span></span>"
+    pn = '<nav class="prevnext">%s%s</nav>' % (prev_a, next_a)
+    num = next(it["num"] for it in nav_items if it["file"] == pg["nav"])
 
+    if "html" in pg:
+        body = pg["html"]
+        body = re.sub(r'<div class="part-label">Part \d+</div>', '<div class="part-label">Part %02d</div>' % num, body)
+    elif "chapters" in pg and pg["chapters"]:
+        sec = pg["part"]["sec"]
+        for c in pg["chapters"]: c["sec"].extract()
+        rewrite_anchors(sec, pg["file"])
+        h1 = sec.find("h1")
+        if h1: h1.insert_before(BeautifulSoup('<div class="part-label">Part %02d</div>' % num, "html.parser"))
+        cards = "".join('<a class="ch-card" href="%s"><span class="ch-num">%d</span><span>%s</span></a>'
+                        % (c["file"], j+1, html.escape(c["title"])) for j, c in enumerate(pg["chapters"]))
+        body = sec.decode() + '<h2 class="in-part-head">In this part</h2><div class="ch-list">%s</div>' % cards
+    elif "chapter" in pg:
+        sec = pg["chapter"]["sec"]
+        rewrite_anchors(sec, pg["file"])
+        hh = sec.find(["h2", "h3", "h4"])
+        if hh: hh.name = "h1"
+        crumb = ('<div class="part-label"><a href="%s">Part %02d &middot; %s</a></div>'
+                 % (pg["part"]["file"], num, html.escape(pg["part"]["title"])))
+        body = crumb + page_toc(sec) + sec.decode()
+    else:
+        sec = pg["part"]["sec"]
+        rewrite_anchors(sec, pg["file"])
+        h1 = sec.find("h1")
+        if h1: h1.insert_before(BeautifulSoup('<div class="part-label">Part %02d</div>' % num, "html.parser"))
+        body = page_toc(sec) + sec.decode()
+
+    open(os.path.join(PUBLIC, pg["file"]), "w", encoding="utf-8").write(
+        shell(pg["title"], pg["nav"], pg["file"], body, pn))
+
+# ---------------- landing ----------------
 BLURB = {
- "Preface": "Welcome and how to use this guide.",
+ "How to Use This Site": "Quick orientation: search, sections, practice exams and suggested study routes.",
  "Sunset Boulevard": "Billy Wilder's film — context, themes, quote banks, scene analyses, techniques, symbols and exemplar essays.",
  "Rainbow's End": "Jane Harrison's play — context, characters, themes, quotes and sample responses.",
  "Analytical Text Response Essays": "Planning, structure, and proofreading a text-response essay.",
@@ -208,36 +280,33 @@ BLURB = {
  "Practice Exams": "Full practice papers and past exams.",
  "Exam Assessment Criteria": "How Sections A, B and C are marked.",
  "Exam Checklists": "Ready-reference checklists for exam day.",
- "Key Takeaways from the 2024 Assessment Report": "What VCAA assessors flagged, section by section.",
+ "Key Takeaways from the 2024 Assessment Report": "What VCAA assessors flagged in 2024, section by section.",
+ "Key Takeaways from the 2025 Assessment Report": "What VCAA assessors flagged in 2025 — topic verbs, Framework choices and the interplay discriminator.",
  "Effectively Studying For Exams": "Study habits, schedules, recall and wellbeing.",
 }
-cards = []
-for pm in part_meta:
-    cards.append('<a class="card" href="%s"><div class="card-num">%02d</div>'
-                 '<div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
-                 % (pm["file"], pm["idx"], html.escape(pm["title"]),
-                    html.escape(BLURB.get(pm["title"], ""))))
-
-landing_main = """
+cards = "".join('<a class="card" href="%s"><div class="card-num">%02d</div><div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
+                % (it["file"], it["num"], html.escape(it["title"]), html.escape(BLURB.get(it["title"], "")))
+                for it in nav_items)
+landing = """
 <section class="hero">
   <div class="hero-inner">
+    <img class="hero-logo" src="assets/img/SOC%%20LOGO_VERTICAL.png" alt="South Oakleigh College logo">
     <div class="hero-badge">South Oakleigh College</div>
     <h1>VCE English<br>Exam Preparation Guide</h1>
-    <p class="hero-sub">Units 3/4 English &middot; Cohort of 2026 &middot; Version 3.1</p>
+    <p class="hero-sub">Units 3/4 English &middot; For the VCE English Cohort of 2026 &middot; Compiled by Mr. Morlin &middot; Version 3.1</p>
     <p class="hero-lede">Exemplar essays, thematic and character quote banks, scene analyses, argument-analysis frameworks, full practice exams, marking criteria and study strategies &mdash; the complete booklet, now browsable.</p>
-    <div class="hero-cta">
-      <a class="btn" href="%s">Start reading &#8594;</a>
-      <a class="btn ghost" href="assets/pdf/Exam1.pdf" target="_blank" rel="noopener">Practice exam</a>
-    </div>
+    <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a></div>
   </div>
 </section>
 <h2 class="section-head">Contents</h2>
 <div class="cards">%s</div>
-""" % (part_meta[0]["file"], "".join(cards))
+<h2 class="section-head">Examples of high marking responses</h2>
+<ul class="exp-list">%s</ul>
+""" % (nav_items[0]["file"], cards,
+       "".join('<li><a href="%s">%s</a></li>' % (e["url"], html.escape(e["title"])) for e in exemplars))
+open(os.path.join(PUBLIC, "index.html"), "w", encoding="utf-8").write(shell("Home", "", "index.html", landing))
 
-with open(os.path.join(PUBLIC, "index.html"), "w", encoding="utf-8") as f:
-    f.write(page_shell("Home", "index.html", landing_main))
-
-print("PARTS:", len(part_meta), "IMAGES:", len(copied_imgs), "PDFS:", len(copied_pdfs), "SEARCH:", len(search_index))
-for pm in part_meta:
-    print("  %02d %-45s -> %s" % (pm["idx"], pm["title"][:45], pm["file"]))
+print("PAGES:", len(all_pages) + 1, "| PARTS:", len(nav_items), "| IMGS:", n_imgs, "| PDFS:", len(copied_pdfs),
+      "| SEARCH:", len(search), "| EXEMPLARS:", len(exemplars))
+for it in nav_items:
+    print(" %02d %-46s %d chapters" % (it["num"], it["title"][:46], len(it["chapters"])))
