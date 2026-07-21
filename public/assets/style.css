@@ -324,3 +324,5 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
   .eg-sec{page-break-before:always}
   .eg-sec:first-of-type,#eg-a .eg-sec{page-break-before:avoid}
 }
+a.btn-inline{font-family:var(--sans);font-weight:700;background:var(--accent);color:#fff;padding:10px 20px;border-radius:24px;font-size:14.5px;display:inline-block}
+a.btn-inline:hover{text-decoration:none;filter:brightness(1.1)}

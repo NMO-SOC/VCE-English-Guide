@@ -22,6 +22,13 @@ for d in (PUBLIC, IMG_DIR, PDF_DIR, FILES_DIR):
 
 # ---------------- preprocess LaTeX ----------------
 tex = open(os.path.join(SRC, "main.tex"), encoding="utf-8").read()
+# replace the exe-download generator text with a pointer to the web tool
+tex = re.sub(r"(\\section\{English Exam Generator\}).*?(?=\\clearpage)",
+             r"\1\nThe exam generator now runs directly on this site. It assembles a complete three-section practice paper from the question banks and downloads it as a Word document in the authentic task-book format.\n\n\\href{ZZFILE::__EXAMGEN__}{Open the Exam Generator}\n\n", tex, flags=re.S)
+
+# remove the seven copyrighted practice exam sections (site keeps the generator instead)
+tex = re.sub(r"\\section\{Practice Exam I\}.*?(?=\\section\{English Exam Generator\})", "", tex, flags=re.S)
+
 tex = re.sub(r"\\includepdf(\[[^\]]*\])?\s*\{([^}]+)\}",
              lambda m: "\n\nZZPDFEMBED %s ZZEND\n\n" % (m.group(2).strip() if m.group(2).strip().lower().endswith(".pdf") else m.group(2).strip() + ".pdf"), tex)
 tex = re.sub(r"\\textattachfile\{([^}]+)\}\{([^}]+)\}",
@@ -66,6 +73,10 @@ except Exception as _e:
     print("icon generation skipped:", _e)
 
 for a in soup.find_all("a", href=True):
+    if a["href"] == "ZZFILE::__EXAMGEN__":
+        a["href"] = "exam-generator.html"
+        a["class"] = ["btn-inline"]
+        continue
     if a["href"].startswith("ZZFILE::"):
         fn = a["href"].split("::", 1)[1]
         if os.path.exists(os.path.join(SRC, fn)):
