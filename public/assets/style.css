@@ -209,3 +209,6 @@ a.inpath{text-decoration:underline}
   .hero h1,.hero-lede,.hero-sub{color:#000}
   .ch-card,.card,.gl-item,.path,.route,.how-card{break-inside:avoid}
 }
+.vocab-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0.6em 0 1.4em}
+.vocab-chips span{font-family:var(--sans);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:6px 14px;cursor:pointer}
+.vocab-chips span:hover{border-color:var(--accent);background:var(--accent-soft)}

@@ -357,6 +357,7 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="practice-topics.html"><span class="ch-num">2</span><span>Practice Topics &amp; Essay Timer</span></a>
   <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
   <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
+  <a class="ch-card" href="vocabulary.html"><span class="ch-num">5</span><span>Vocabulary Bank</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -366,11 +367,15 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                   "chapters": [{"title": "Quote Flashcards", "file": "flashcards.html"},
                                {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
                                {"title": "Glossary of Techniques", "file": "glossary.html"},
-                               {"title": "Essay Marker", "file": "marker.html"}]})
+                               {"title": "Essay Marker", "file": "marker.html"},
+                               {"title": "Vocabulary Bank", "file": "vocabulary.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
+all_pages.append({"file": "vocabulary.html", "title": "High-Scoring Vocabulary Bank",
+                  "html": open(os.path.join(BUILD, "snippets", "vocab.html"), encoding="utf-8").read(),
+                  "nav": "study-tools.html"})
 print("TOOLS: flashcards=%d topics=%s glossary=%d" % (len(flashcards), {k: len(v) for k, v in topics_data.items()}, len(glossary)))
 
 def rewrite_anchors(scope, current):
