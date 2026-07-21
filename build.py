@@ -62,6 +62,14 @@ for p in soup.find_all(["p", "div"]):
         '<iframe class="pdf-frame" src="assets/pdf/%s#view=FitH" loading="lazy" title="%s"></iframe></div>'
         % (html.escape(fname), enc, enc, enc, html.escape(fname)), "html.parser"))
 
+# de-duplicate longtable header rows (LaTeX firsthead + continuation head)
+for _t in soup.find_all("table"):
+    _rows = _t.find_all("tr")
+    while len(_rows) >= 2 and _rows[0].get_text("|", strip=True) and \
+          _rows[0].get_text("|", strip=True) == _rows[1].get_text("|", strip=True):
+        _rows[1].decompose()
+        _rows = _t.find_all("tr")
+
 exp_pat = re.compile(r"ZZEXP\s+(.+?)\s+ZZEXPEND")
 exemplars = []
 for _p in soup.find_all("p"):
