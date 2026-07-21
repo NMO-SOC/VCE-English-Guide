@@ -24,7 +24,7 @@ for d in (PUBLIC, IMG_DIR, PDF_DIR, FILES_DIR):
 tex = open(os.path.join(SRC, "main.tex"), encoding="utf-8").read()
 # replace the exe-download generator text with a pointer to the web tool
 tex = re.sub(r"(\\section\{English Exam Generator\}).*?(?=\\clearpage)",
-             r"\1\nThe exam generator now runs directly on this site. It assembles a complete three-section practice paper from the question banks and downloads it as a Word document in the authentic task-book format.\n\n\\href{ZZFILE::__EXAMGEN__}{Open the Exam Generator}\n\nOfficial past VCE English examinations and examiner reports are published by the VCAA:\n\n\\href{https://www.vcaa.vic.edu.au/assessment/vce/examination-specifications-past-examinations-and-examination-reports/english}{Past VCE English examinations (VCAA)}\n\n", tex, flags=re.S)
+             r"\1\nThe exam generator now runs directly on this site. It assembles a complete three-section practice paper from the question banks and downloads it as a Word document in the authentic task-book format.\n\n\\href{ZZFILE::__EXAMGEN__}{Open the Exam Generator}\n\n", tex, flags=re.S)
 
 # script section: link out instead of hosting the PDF
 tex = tex.replace("Click the link below to open the Script:\\\\  \n\\textattachfile{SBScript.pdf}{Open SBScript.pdf}",
@@ -720,6 +720,8 @@ json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encod
 
 # ---------------- write pages ----------------
 PRACTICE_LINKS = """
+<p>Official past VCE English examinations and examiner reports are published by the VCAA:</p>
+<p><a class="btn-inline" href="https://www.vcaa.vic.edu.au/assessment/vce/examination-specifications-past-examinations-and-examination-reports/english" target="_blank" rel="noopener">Past VCE English examinations (VCAA)</a></p>
 <h2>Practice exams</h2>
 <p>The following practice exams are hosted externally (a free account may be required to view them). They open in a new tab.</p>
 <ul class="exp-list">
