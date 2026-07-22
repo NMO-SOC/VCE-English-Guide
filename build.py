@@ -1164,7 +1164,7 @@ landing = """
     <div class="hero-badge">South Oakleigh College</div>
     <h1>VCE English<br>Exam Preparation Guide</h1>
     <p class="hero-sub">Units 3/4 English &middot; For the VCE English Cohort of 2026</p>
-    <p class="hero-sub hero-sub2">Compiled by Mr. Morlin &middot; Version 4.2</p>
+    <p class="hero-sub hero-sub2">Compiled by Mr. Morlin &middot; Version 4.5</p>
     <p class="hero-lede">Exemplar essays, thematic and character quote banks, scene analyses, argument-analysis frameworks, full practice exams, marking criteria and study strategies &mdash; the complete booklet, now browsable.</p>
     <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a></div>
   </div>
