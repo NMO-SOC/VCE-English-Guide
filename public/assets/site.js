@@ -119,3 +119,29 @@
     }
   }catch(e){}
 })();
+(function(){
+  document.addEventListener('click',function(e){
+    var mk=e.target.closest&&e.target.closest('mark.anno');
+    document.querySelectorAll('mark.anno.open').forEach(function(m){if(m!==mk)m.classList.remove('open');});
+    if(mk){
+      mk.classList.toggle('open');
+      if(mk.classList.contains('open')){
+        var r=mk.getBoundingClientRect();
+        mk.classList.toggle('tip-up',r.bottom>window.innerHeight-260);
+      }
+      e.stopPropagation();
+    }
+    var lg=e.target.closest&&e.target.closest('.lg[data-cat]');
+    if(lg){
+      var cat=lg.dataset.cat,was=lg.classList.contains('active');
+      document.querySelectorAll('.lg').forEach(function(b){b.classList.remove('active');});
+      document.querySelectorAll('mark.anno').forEach(function(m){m.classList.remove('anno-match');});
+      if(was){document.body.classList.remove('anno-filtered');}
+      else{
+        lg.classList.add('active');
+        document.body.classList.add('anno-filtered');
+        document.querySelectorAll('mark.anno-'+cat).forEach(function(m){m.classList.add('anno-match');});
+      }
+    }
+  });
+})();
