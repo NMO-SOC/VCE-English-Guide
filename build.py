@@ -905,6 +905,9 @@ _fi = os.path.join(PUBLIC, "assets", "img", "pdffrag")
 os.makedirs(_fi, exist_ok=True)
 for _f in os.listdir(os.path.join(BUILD, "pdffrag", "img")):
     copy_if_changed(os.path.join(BUILD, "pdffrag", "img", _f), os.path.join(_fi, _f))
+os.makedirs(os.path.join(PUBLIC, "assets", "pdf"), exist_ok=True)
+copy_if_changed(os.path.join(BUILD, "localpdf", "persuasive-techniques-reference.pdf"),
+                os.path.join(PUBLIC, "assets", "pdf", "persuasive-techniques-reference.pdf"))
 for _sub in ("viii", "ix"):
     _pd = os.path.join(PUBLIC, "assets", "exampages", _sub)
     os.makedirs(_pd, exist_ok=True)
@@ -960,7 +963,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=18">
+<link rel="stylesheet" href="assets/style.css?v=20">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -988,7 +991,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=18"></script>
+<script src="assets/site.js?v=20"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
@@ -1108,6 +1111,15 @@ for k, pg in enumerate(all_pages):
         if h1: h1.insert_before(BeautifulSoup('<div class="part-label">Part %02d</div>' % num, "html.parser"))
         body = page_toc(sec) + sec.decode()
 
+    if pg["file"] == "p06-analysing-written-language.html":
+        body += """<h2>Persuasive Techniques Reference (printable)</h2>
+<p>The full reference table &mdash; techniques, definitions, examples and intended effects &mdash; as a document you can view or print.</p>
+<div class="pdf-embed">
+  <div class="pdf-embed-bar"><span class="pdf-name">Analysing Argument: Persuasive Techniques</span>
+  <a class="pdf-open" href="assets/pdf/persuasive-techniques-reference.pdf" target="_blank" rel="noopener">Open in new tab &#8599;</a>
+  <a class="pdf-dl" href="assets/pdf/persuasive-techniques-reference.pdf" download>Download &#8595;</a></div>
+  <iframe class="pdf-frame" src="assets/pdf/persuasive-techniques-reference.pdf#view=FitH" loading="lazy" title="Persuasive Techniques Reference"></iframe>
+</div>"""
     if pg["file"] == "part-08-practice-exams.html":
         _g = re.search(r'(<section[^>]*id="english-exam-generator".*?</section>)', body, re.S)
         if _g:
@@ -1157,6 +1169,7 @@ BLURB = {
 cards = "".join('<a class="card" href="%s">%s<div class="card-num">%02d</div><div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
                 % (it["file"], icon_svg(it["title"]), it["num"], html.escape(it["title"]), html.escape(BLURB.get(it["title"], "")))
                 for it in nav_items)
+
 landing = """
 <section class="hero">
   <div class="hero-inner">
