@@ -257,6 +257,20 @@ for pm in part_meta:
             all_pages.append({"file": c["file"], "title": c["title"], "html": c["html"], "nav": f25})
 
 PROMPT_HTML = open(os.path.join(BUILD, "snippets", "prompt-types.html"), encoding="utf-8").read()
+PTRE_HTML = open(os.path.join(BUILD, "snippets", "prompt-types-re.html"), encoding="utf-8").read()
+REV_HTML = open(os.path.join(BUILD, "snippets", "revision-program.html"), encoding="utf-8").read()
+for _pf, _cf, _ct, _ch in [
+    ("part-03-rainbow-s-end.html", "prompt-types-re.html", "Prompt Types: Discuss, To What Extent, How Does\u2026", PTRE_HTML),
+    ("part-12-effectively-studying-for-exams.html", "revision-program.html", "Week-by-Week Revision Program", REV_HTML)]:
+    for _it in nav_items:
+        if _it["file"] == _pf:
+            _it["chapters"].append({"title": _ct, "file": _cf})
+    for _pg in all_pages:
+        if _pg["file"] == _pf and "chapters" in _pg:
+            _pg["chapters"].append({"title": _ct, "file": _cf})
+    _li = max(i for i, p in enumerate(all_pages) if p.get("nav") == _pf)
+    all_pages.insert(_li + 1, {"file": _cf, "title": _ct, "html": _ch, "nav": _pf})
+
 P04 = "part-04-analytical-text-response-essays.html"
 for _it in nav_items:
     if _it["file"] == P04:
@@ -986,7 +1000,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=23">
+<link rel="stylesheet" href="assets/style.css?v=24">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1014,7 +1028,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=23"></script>
+<script src="assets/site.js?v=24"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
