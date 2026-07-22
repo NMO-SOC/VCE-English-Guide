@@ -256,6 +256,18 @@ for pm in part_meta:
         for c in ch_pages:
             all_pages.append({"file": c["file"], "title": c["title"], "html": c["html"], "nav": f25})
 
+PROMPT_HTML = open(os.path.join(BUILD, "snippets", "prompt-types.html"), encoding="utf-8").read()
+P04 = "part-04-analytical-text-response-essays.html"
+for _it in nav_items:
+    if _it["file"] == P04:
+        _it["chapters"].append({"title": "Prompt Types: Discuss, To What Extent, How Does\u2026", "file": "prompt-types.html"})
+for _pg in all_pages:
+    if _pg["file"] == P04 and "chapters" in _pg:
+        _pg["chapters"].append({"title": "Prompt Types: Discuss, To What Extent, How Does\u2026", "file": "prompt-types.html"})
+_last4 = max(i for i, p in enumerate(all_pages) if p.get("nav") == P04)
+all_pages.insert(_last4 + 1, {"file": "prompt-types.html", "title": "Prompt Types: Discuss, To What Extent, How Does\u2026",
+                              "html": PROMPT_HTML, "nav": P04})
+
 VOCAB_HTML = open(os.path.join(BUILD, "snippets", "vocab.html"), encoding="utf-8").read()
 P06 = "part-06-analysing-argument.html"
 for _it in nav_items:
