@@ -942,6 +942,22 @@ def nav_html(active_nav, active_file):
                        % (cls, it["file"], num, html.escape(it["title"])))
     return "\n".join(out)
 
+ANNOTATIONS = json.load(open(os.path.join(BUILD, "annotations.json"), encoding="utf-8"))
+def apply_annotations(page_file, body):
+    notes = ANNOTATIONS.get(page_file)
+    if not notes:
+        return body, 0
+    hit = 0
+    for a in notes:
+        q, n = a["q"], a["n"]
+        if q in body:
+            body = body.replace(q, '<mark class="anno" tabindex="0">%s<span class="anno-tip">%s</span></mark>' % (q, n), 1)
+            hit += 1
+    if hit:
+        body = ('<div class="anno-hint">Highlighted passages are annotated &mdash; hover or tap them to see '
+                'what earns marks in that moment.</div>') + body
+    return body, hit
+
 QUOTE_FIX = re.compile(r"(^|[\s\(\[\u2014\u2013>])\u2019(?=\S)")
 def fix_quotes(html_str):
     return QUOTE_FIX.sub("\\1\u2018", html_str)
@@ -963,7 +979,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=20">
+<link rel="stylesheet" href="assets/style.css?v=21">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -991,7 +1007,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=20"></script>
+<script src="assets/site.js?v=21"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
@@ -1120,6 +1136,8 @@ for k, pg in enumerate(all_pages):
   <a class="pdf-dl" href="assets/pdf/persuasive-techniques-reference.pdf" download>Download &#8595;</a></div>
   <iframe class="pdf-frame" src="assets/pdf/persuasive-techniques-reference.pdf#view=FitH" loading="lazy" title="Persuasive Techniques Reference"></iframe>
 </div>"""
+    body = fix_quotes(body)
+    body, _ah = apply_annotations(pg["file"], body)
     if pg["file"] == "part-08-practice-exams.html":
         _g = re.search(r'(<section[^>]*id="english-exam-generator".*?</section>)', body, re.S)
         if _g:
