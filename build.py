@@ -1169,6 +1169,25 @@ for k, pg in enumerate(all_pages):
         shell(pg["title"], pg["nav"], pg["file"], body, pn))
 
 # ---------------- landing ----------------
+def exemplar_groups_html(exemplars):
+    GROUPS = [("Section A \u00b7 Sunset Boulevard", "p02-"),
+              ("Section A \u00b7 Rainbow\u2019s End", "p03-"),
+              ("Section B \u00b7 Creating Texts", "p05-"),
+              ("Section C \u00b7 Analysing Argument", "p06-")]
+    out = []
+    used = set()
+    for label, prefix in GROUPS:
+        items = [e for e in exemplars if e["url"].startswith(prefix)]
+        if not items: continue
+        used.update(id(e) for e in items)
+        out.append('<div class="group-head">%s</div><ul class="exp-list">%s</ul>'
+                   % (label, "".join('<li><a href="%s">%s</a></li>' % (e["url"], html.escape(e["title"])) for e in items)))
+    rest = [e for e in exemplars if id(e) not in used]
+    if rest:
+        out.append('<div class="group-head">Other</div><ul class="exp-list">%s</ul>'
+                   % "".join('<li><a href="%s">%s</a></li>' % (e["url"], html.escape(e["title"])) for e in rest))
+    return "".join(out)
+
 ICONS = {
  "How to Use This Site": '<circle cx="12" cy="12" r="9"/><path d="M12 8l3 7-7-3z"/>',
  "Sunset Boulevard": '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M3 8l3-4 4 3 4-3 4 3 3-2v3"/>',
@@ -1224,9 +1243,9 @@ landing = """
 <h2 class="section-head">Contents</h2>
 <div class="cards">%s</div>
 <h2 class="section-head">Examples of high marking responses</h2>
-<ul class="exp-list">%s</ul>
+%s
 """ % (nav_items[0]["file"], cards,
-       "".join('<li><a href="%s">%s</a></li>' % (e["url"], html.escape(e["title"])) for e in exemplars))
+       exemplar_groups_html(exemplars))
 open(os.path.join(PUBLIC, "index.html"), "w", encoding="utf-8").write(shell("Home", "", "index.html", landing))
 
 nf = """
