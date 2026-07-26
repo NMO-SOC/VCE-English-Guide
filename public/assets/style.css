@@ -397,3 +397,5 @@ mark.anno .anno-cat{display:block;font-size:10px;font-weight:800;letter-spacing:
 .rev-week h2{border:none!important;margin:.6em 0 .3em!important;font-size:1.2rem!important;color:var(--accent)}
 .rev-week li{margin:.45em 0}
 .group-head{font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin:24px 0 10px}
+.qt-table th,.qt-table td{min-width:110px}
+.qt-table th:first-child,.qt-table td:first-child{min-width:130px}
