@@ -141,6 +141,14 @@ for _br in soup.find_all("br"):
         _sp = soup.new_tag("span"); _sp["class"] = "pbr"
         _br.replace_with(_sp)
 
+# strip duplicate auto-generated figure label ids
+_seen_ids = set()
+for _el in soup.find_all(id=True):
+    if _el["id"] in _seen_ids:
+        del _el["id"]
+    else:
+        _seen_ids.add(_el["id"])
+
 # de-duplicate longtable header rows (LaTeX firsthead + continuation head)
 for _t in soup.find_all("table"):
     _rows = _t.find_all("tr")
@@ -613,6 +621,8 @@ qz_page = TOOL_LABEL + """<h1>Technique Quiz</h1>
 </script>""" % json.dumps([{"term": g["term"], "def": g["def"]} for g in glossary], ensure_ascii=False)
 
 EXAMGEN = json.load(open(os.path.join(BUILD, "examgen", "examgen.json"), encoding="utf-8"))
+EXAMGEN["sb"] = topics_data.get("Sunset Boulevard", EXAMGEN["sb"])
+EXAMGEN["re"] = topics_data.get("Rainbow\u2019s End", EXAMGEN["re"])
 SLOTCFG = json.load(open(os.path.join(BUILD, "examgen", "slots.json"), encoding="utf-8"))
 eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
 <p class="lede">Generate a unique three-section practice examination on the spot &mdash; the complete task book as a Word document, identical in format to the real paper: cover page, instructions, Section A topics for both texts, a Creating Texts prompt with stimulus material, Section C source material and the assessment criteria.</p>
