@@ -1128,6 +1128,20 @@ for k, pg in enumerate(all_pages):
             sec["class"] = sec.get("class", []) + ["quotes-page"]
         if "exemplar" in pg["file"] or "sample-" in pg["file"]:
             sec["class"] = sec.get("class", []) + ["exemplar-page"]
+        if pg["file"] == "p02-symbols.html":
+            _ul = sec.find("ul")
+            if _ul:
+                _rows = []
+                for _li in _ul.find_all("li", recursive=False):
+                    _sub = _li.find("ul")
+                    _name = _li.get_text("\n").split("\n")[0].strip()
+                    _pts = [x.get_text(" ", strip=True) for x in (_sub.find_all("li") if _sub else [])]
+                    _cell = "<br>".join("&ndash; " + html.escape(p) for p in _pts)
+                    _rows.append("<tr><td><b>%s</b></td><td>%s</td></tr>" % (html.escape(_name), _cell))
+                _tbl = BeautifulSoup('<table class="qt-table"><thead><tr><th>Symbol</th>'
+                                     '<th>Meaning and significance</th></tr></thead><tbody>%s</tbody></table>'
+                                     % "".join(_rows), "html.parser")
+                _ul.replace_with(_tbl)
         rewrite_anchors(sec, pg["file"])
         hh = sec.find(["h2", "h3", "h4"])
         if hh: hh.name = "h1"
