@@ -1261,8 +1261,8 @@ landing = """
     <div class="hero-badge">South Oakleigh College</div>
     <h1>VCE English<br>Exam Preparation Guide</h1>
     <p class="hero-sub">Units 3/4 English &middot; For the VCE English Cohort of 2026</p>
-    <p class="hero-sub hero-sub2">Compiled by Mr. Morlin &middot; Version 4.5</p>
-    <p class="hero-lede">Exemplar essays, thematic and character quote banks, scene analyses, argument-analysis frameworks, full practice exams, marking criteria and study strategies &mdash; the complete booklet, now browsable.</p>
+    <p class="hero-sub hero-sub2">Compiled by Mr. Morlin &middot; Version Invicta 7.9</p>
+    <p class="hero-lede">Annotated exemplar essays, thematic and character quote banks, scene-by-scene analyses, frameworks for every section of the examination, the assessors&rsquo; own insights from 2024 and 2025, and a suite of interactive study tools &mdash; from flashcards to a full exam generator. The complete guide to Units 3/4 English, refined for the web.</p>
     <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a></div>
   </div>
 </section>
