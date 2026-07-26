@@ -399,3 +399,10 @@ mark.anno .anno-cat{display:block;font-size:10px;font-weight:800;letter-spacing:
 .group-head{font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin:24px 0 10px}
 .qt-table th,.qt-table td{min-width:110px}
 .qt-table th:first-child,.qt-table td:first-child{min-width:130px}
+.exam-links li{background:#eaf3de;border-color:#b7d394}
+.exam-links a{color:#3b6d11}
+.exam-links li:hover{border-color:#639922}
+.exam-links a:hover{background:#dcecc8}
+[data-theme="dark"] .exam-links li{background:#25331a;border-color:#43552e}
+[data-theme="dark"] .exam-links a{color:#b3d489}
+[data-theme="dark"] .exam-links a:hover{background:#2e4020}
