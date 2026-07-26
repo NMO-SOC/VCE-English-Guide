@@ -35,6 +35,12 @@ tex = tex.replace("Click the link below to open the Script:\\\\  \n\\textattachf
 tex = re.sub(r"\\textattachfile\{SBScript\.pdf\}\{[^}]*\}",
              r"\\href{https://www.dailyscript.com/scripts/sunset_bld_3_21_49.html}{Read the Sunset Boulevard script at Daily Script}", tex)
 
+tex = tex.replace("\\subsection{Stimuli List II}", "")
+
+# unwrap \resizebox so pandoc keeps the tables inside
+tex = re.sub(r"\\resizebox\{\\textwidth\}\{!\}\{\s*(\\begin\{tabular\}.*?\\end\{tabular\})\s*\}",
+             r"\1", tex, flags=re.S)
+
 # refresh the practice exams intro to match the web version
 tex = tex.replace("This section of the book contains practice exams. These are not the previous VCAA exams which one may find on the official website. These exams have been specially made in order to assist you with better preparation for the exam.",
                   "This section gathers everything you need for timed practice: links to official VCAA past examinations, externally hosted practice papers, the school's purchased trial exams, and a generator that assembles a fresh exam on demand.")
@@ -269,10 +275,8 @@ for pm in part_meta:
             all_pages.append({"file": c["file"], "title": c["title"], "html": c["html"], "nav": f25})
 
 PROMPT_HTML = open(os.path.join(BUILD, "snippets", "prompt-types.html"), encoding="utf-8").read()
-PTRE_HTML = open(os.path.join(BUILD, "snippets", "prompt-types-re.html"), encoding="utf-8").read()
 REV_HTML = open(os.path.join(BUILD, "snippets", "revision-program.html"), encoding="utf-8").read()
 for _pf, _cf, _ct, _ch in [
-    ("part-03-rainbow-s-end.html", "prompt-types-re.html", "Prompt Types: Discuss, To What Extent, How Does\u2026", PTRE_HTML),
     ("part-12-effectively-studying-for-exams.html", "revision-program.html", "Week-by-Week Revision Program", REV_HTML)]:
     for _it in nav_items:
         if _it["file"] == _pf:
