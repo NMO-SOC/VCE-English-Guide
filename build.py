@@ -132,7 +132,7 @@ for p in soup.find_all(["p", "div"]):
         % (html.escape(fname), enc, enc, enc, html.escape(fname)), "html.parser"))
 
 for _t in soup.find_all("table"):
-    if not _t.find("thead"):
+    if not _t.find("thead") and "qt-table" not in (_t.get("class") or []):
         _t["class"] = _t.get("class", []) + ["no-thead"]
 
 # paragraph breaks: LaTeX \\ inside paragraphs became <br>; give them real spacing
