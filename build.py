@@ -35,6 +35,10 @@ tex = tex.replace("Click the link below to open the Script:\\\\  \n\\textattachf
 tex = re.sub(r"\\textattachfile\{SBScript\.pdf\}\{[^}]*\}",
              r"\\href{https://www.dailyscript.com/scripts/sunset_bld_3_21_49.html}{Read the Sunset Boulevard script at Daily Script}", tex)
 
+# refresh the practice exams intro to match the web version
+tex = tex.replace("This section of the book contains practice exams. These are not the previous VCAA exams which one may find on the official website. These exams have been specially made in order to assist you with better preparation for the exam.",
+                  "This section gathers everything you need for timed practice: links to official VCAA past examinations, externally hosted practice papers, the school's purchased trial exams, and a generator that assembles a fresh exam on demand.")
+
 # remove the seven copyrighted practice exam sections (site keeps the generator instead)
 tex = re.sub(r"\\section\{Practice Exam I\}.*?(?=\\section\{English Exam Generator\})", "", tex, flags=re.S)
 
