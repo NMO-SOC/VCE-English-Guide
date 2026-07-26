@@ -406,3 +406,10 @@ mark.anno .anno-cat{display:block;font-size:10px;font-weight:800;letter-spacing:
 [data-theme="dark"] .exam-links li{background:#25331a;border-color:#43552e}
 [data-theme="dark"] .exam-links a{color:#b3d489}
 [data-theme="dark"] .exam-links a:hover{background:#2e4020}
+.stim-task{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 28px;margin:0 0 22px}
+.stim-task h3{margin:.2em 0 .4em;color:var(--accent)}
+.stim-task h4{margin:1.2em 0 .4em;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-size:.95rem}
+.stim-note{font-family:var(--sans);font-size:13.5px;color:var(--muted);font-style:italic}
+.stim-quote{background:var(--soft);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 18px;font-style:italic;line-height:1.7}
+.stim-src{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:6px}
+.stim-img{max-width:420px;margin:.4em 0}
