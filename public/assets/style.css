@@ -413,3 +413,5 @@ mark.anno .anno-cat{display:block;font-size:10px;font-weight:800;letter-spacing:
 .stim-quote{background:var(--soft);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 18px;font-style:italic;line-height:1.7}
 .stim-src{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:6px}
 .stim-img{max-width:420px;margin:.4em 0}
+.sa-notes{list-style:none;padding:0;margin:1em 0}
+.sa-notes li{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 16px;margin:.5em 0;font-size:15.5px;line-height:1.6}
