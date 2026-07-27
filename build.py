@@ -990,7 +990,7 @@ def apply_annotations(page_file, body):
             if c not in used: used.append(c)
     if hit:
         legend = "".join('<button class="lg lg-%s" data-cat="%s">%s</button>' % (c, c, CAT_LABEL[c]) for c in used)
-        body = ('<div class="anno-hint">Click a highlighted passage to see '
+        body = ('<div class="anno-hint">Hover over a highlighted passage (or tap, on touch screens) to see '
                 'what earns marks in that moment.<div class="anno-legend">%s</div></div>' % legend) + body
     return body, hit
 
@@ -1015,7 +1015,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=29">
+<link rel="stylesheet" href="assets/style.css?v=30">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1043,7 +1043,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=29"></script>
+<script src="assets/site.js?v=30"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
