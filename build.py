@@ -276,7 +276,9 @@ for pm in part_meta:
 
 PROMPT_HTML = open(os.path.join(BUILD, "snippets", "prompt-types.html"), encoding="utf-8").read()
 REV_HTML = open(os.path.join(BUILD, "snippets", "revision-program.html"), encoding="utf-8").read()
+WATCH_HTML = open(os.path.join(BUILD, "snippets", "watch-film.html"), encoding="utf-8").read()
 for _pf, _cf, _ct, _ch in [
+    ("part-02-sunset-boulevard.html", "watch-film.html", "Watch the Film (ClickView)", WATCH_HTML),
     ("part-12-effectively-studying-for-exams.html", "revision-program.html", "Week-by-Week Revision Program", REV_HTML)]:
     for _it in nav_items:
         if _it["file"] == _pf:
