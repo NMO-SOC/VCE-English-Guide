@@ -375,7 +375,7 @@ mark.anno:hover{filter:brightness(.96)}
 body.anno-filtered mark.anno{opacity:.25}
 body.anno-filtered mark.anno.anno-match{opacity:1}
 mark.anno .anno-tip{display:none;position:absolute;left:0;top:calc(100% + 10px);z-index:90;width:340px;max-width:78vw;background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:13px 16px;font-family:var(--sans);font-size:13.5px;line-height:1.55;font-style:normal;font-weight:400;box-shadow:0 14px 34px rgba(0,0,0,.22);text-align:left}
-mark.anno.open .anno-tip{display:block}
+mark.anno.open .anno-tip,mark.anno:hover .anno-tip,mark.anno:focus .anno-tip{display:block}
 mark.anno.tip-up .anno-tip{top:auto;bottom:calc(100% + 10px)}
 mark.anno .anno-cat{display:block;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
 .anno-ideas .anno-cat{color:#ba7517}.anno-structure .anno-cat{color:#378add}.anno-language .anno-cat{color:#7f77dd}.anno-audience .anno-cat{color:#1d9e75}.anno-voice .anno-cat{color:#d4537e}
