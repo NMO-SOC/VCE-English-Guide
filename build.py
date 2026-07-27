@@ -893,6 +893,40 @@ dr_page = TOOL_LABEL + """<h1>Micro-Drills</h1>
 })();
 </script>""" % json.dumps(topics_data, ensure_ascii=False)
 
+em_page = TOOL_LABEL + """<h1>Essay Marker</h1>
+<p class="lede">An AI marker calibrated on the official VCE English assessment criteria, the expected qualities, and real high- and low-scoring scripts. Paste an essay from any section of the exam and receive a score out of 10 with criteria-based feedback in minutes.</p>
+<p><a class="btn-inline" href="marker.html">Open the Essay Marker &#8594;</a></p>
+
+<h2>What it does</h2>
+<ul>
+<li><b>Section A &mdash; Analytical response:</b> select your text, enter the topic, paste your essay. Marked against the published criteria: quality of reading, structure and substantiation, and expression &mdash; always in relation to the topic.</li>
+<li><b>Section B &mdash; Creating a text:</b> nominate your Framework, title and stimulus. Judged on framework connection, voice and purpose, and control of language &mdash; with persuasive and expository forms treated on their own terms, as VCAA's samples require.</li>
+<li><b>Section C &mdash; Analysing argument:</b> provide the source material and your analysis. Rewards sequencing and audience-effect analysis over technique-spotting, exactly as the assessors&rsquo; reports describe.</li>
+</ul>
+
+<h2>How it was calibrated</h2>
+<p>The marker&rsquo;s judgement is anchored to benchmark scripts with known scores &mdash; including perfect-score and deliberately weak responses across all three sections &mdash; and tuned so that every benchmark marks within one point of its true score, the same tolerance VCAA accepts between its own trained assessors. It carries the expected-qualities ladders, the topic-relevance principle, and the guidance from the 2024 and 2025 assessment reports.</p>
+
+<h2>Setting it up (once, about two minutes)</h2>
+<ul>
+<li>Open the marker and click <b>AI Settings</b> (top right).</li>
+<li><b>Free option:</b> anyone with a GitHub account can create a fine-grained token with only the &ldquo;Models: Read-only&rdquo; permission &mdash; step-by-step instructions are inside the settings panel. Free-tier rate limits apply.</li>
+<li><b>Alternative:</b> an Anthropic API key (paid) marks with Claude, the engine the marker was calibrated on.</li>
+<li>Your token is stored only in your own browser and sent only to the provider you choose &mdash; never to the school or anyone else.</li>
+</ul>
+
+<h2>Features worth knowing</h2>
+<ul>
+<li><b>Precision mode</b> marks your essay three times independently and reports the median &mdash; if the three marks spread widely, it tells you the script is borderline and worth a human read.</li>
+<li><b>Second opinion</b> re-marks blind, without seeing the first result, for moderation.</li>
+<li><b>Handwriting transcription</b> &mdash; photograph a handwritten essay and the marker types it up for you, preserving your errors so the mark stays honest.</li>
+</ul>
+
+<h2>Getting the most from it</h2>
+<p>Mark work written under timed conditions &mdash; the <a href="practice-topics.html">topic timer</a> can send your essay straight here. Read the criterion feedback before the score, act on the single tip it gives you, then rewrite and re-mark. And treat it as a training partner, not an oracle: for anything borderline or high-stakes, your teacher&rsquo;s judgement is the real thing.</p>
+
+<p><a class="btn-inline" href="marker.html">Open the Essay Marker &#8594;</a></p>"""
+
 hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
 <p class="lede">Interactive revision tools built from the guide&rsquo;s own content.</p>
 <h2 class="in-part-head">Tools</h2>
@@ -900,7 +934,7 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="flashcards.html"><span class="ch-num">1</span><span>Quote Flashcards</span></a>
   <a class="ch-card" href="practice-topics.html"><span class="ch-num">2</span><span>Practice Topics &amp; Essay Timer</span></a>
   <a class="ch-card" href="glossary.html"><span class="ch-num">3</span><span>Glossary of Techniques</span></a>
-  <a class="ch-card" href="marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
+  <a class="ch-card" href="essay-marker.html"><span class="ch-num">4</span><span>Essay Marker</span></a>
   <a class="ch-card" href="technique-quiz.html"><span class="ch-num">5</span><span>Technique Quiz</span></a>
   <a class="ch-card" href="exam-generator.html"><span class="ch-num">6</span><span>Exam Generator</span></a>
   <a class="ch-card" href="outline-builder.html"><span class="ch-num">7</span><span>Essay Outline Builder</span></a>
@@ -915,7 +949,7 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                   "chapters": [{"title": "Quote Flashcards", "file": "flashcards.html"},
                                {"title": "Practice Topics & Essay Timer", "file": "practice-topics.html"},
                                {"title": "Glossary of Techniques", "file": "glossary.html"},
-                               {"title": "Essay Marker", "file": "marker.html"},
+                               {"title": "Essay Marker", "file": "essay-marker.html"},
                                {"title": "Technique Quiz", "file": "technique-quiz.html"},
                                {"title": "Exam Generator", "file": "exam-generator.html"},
                                {"title": "Essay Outline Builder", "file": "outline-builder.html"},
@@ -926,6 +960,7 @@ all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html"
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
 all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
+all_pages.append({"file": "essay-marker.html", "title": "Essay Marker", "html": em_page, "nav": "study-tools.html"})
 all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "html": eg_page, "nav": "study-tools.html"})
 all_pages.append({"file": "outline-builder.html", "title": "Essay Outline Builder", "html": ob_page, "nav": "study-tools.html"})
 all_pages.append({"file": "vocab-upgrader.html", "title": "Vocabulary Upgrader", "html": vu_page, "nav": "study-tools.html"})
