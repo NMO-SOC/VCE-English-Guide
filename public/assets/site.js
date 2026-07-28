@@ -146,3 +146,44 @@
     }
   });
 })();
+(function(){
+  console.log('%cInspecting the page instead of studying?','font-size:16px;font-weight:bold;color:#7a1f2b');
+  console.log('%cVery Section C of you — now analyse how this site positions its audience.','font-size:13px;color:#b7892f');
+
+  function toast(msg,ms){
+    var t=document.createElement('div');t.className='egg-toast';t.textContent=msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){t.classList.add('show');});
+    setTimeout(function(){t.classList.remove('show');setTimeout(function(){t.remove();},450);},ms||7000);
+  }
+
+  var h=new Date().getHours();
+  if(h>=0&&h<4){
+    try{
+      if(!sessionStorage.getItem('midnightNudge')){
+        sessionStorage.setItem('midnightNudge','1');
+        setTimeout(function(){toast("It's past midnight. Norma Desmond never slept either, and look how that ended. Go to bed — the quote banks will still be here tomorrow.",10000);},2500);
+      }
+    }catch(e){}
+  }
+
+  var sb=document.getElementById('search');
+  if(sb){
+    sb.addEventListener('input',function(){
+      var q=sb.value.trim().toLowerCase().replace(/[^a-z ]/g,'');
+      if(q==='closeup'||q==='close up'){
+        sb.value='';
+        document.body.classList.add('closeup-zoom');
+        setTimeout(function(){toast("All right, Mr. DeMille, I'm ready for my close-up.",6000);},900);
+        setTimeout(function(){document.body.classList.remove('closeup-zoom');},3200);
+      }
+      if(/^(do a )?barr?ell? ?roll$/.test(q)){
+        sb.value='';
+        document.body.classList.remove('barrel-roll');
+        void document.body.offsetWidth;
+        document.body.classList.add('barrel-roll');
+        setTimeout(function(){document.body.classList.remove('barrel-roll');},1400);
+      }
+    });
+  }
+})();
