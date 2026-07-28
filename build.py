@@ -959,6 +959,10 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
       .map(function(w){ return norm(w).replace(/ /g, ''); });
     var yearMatch = ql.match(/20\d\d/);
     var year = yearMatch ? yearMatch[0] : null;
+    var numWords = {one:'1',two:'2',three:'3',four:'4',five:'5',six:'6',seven:'7',eight:'8',nine:'9',ten:'10'};
+    function numOf(m){ return m ? (numWords[m[1]] || m[1]) : null; }
+    var actNum = numOf(ql.match(/act\s*(\d+|one|two|three)/));
+    var sceneNum = numOf(ql.match(/scene\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/));
     var scored = INDEX.map(function(e, idx){
       var t = e.NT || '', p = e.NP || '', b = e.NB || '', s = 0;
       var tSq = t.replace(/ /g, ''), bSq = b.replace(/ /g, '');
@@ -976,6 +980,12 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
         s += n;
       });
       if (year && (t.indexOf(year) > -1 || p.indexOf(year) > -1)) s += 14;
+      if (actNum || sceneNum){
+        var hitA = actNum && t.indexOf('act ' + actNum) > -1;
+        var hitS = sceneNum && t.indexOf('scene ' + sceneNum) > -1;
+        if (actNum && sceneNum){ if (hitA && hitS) s += 25; }
+        else if (hitA || hitS) s += 12;
+      }
       return [s, e, idx];
     }).filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
     var seen = {}, pages = [], out = [];
