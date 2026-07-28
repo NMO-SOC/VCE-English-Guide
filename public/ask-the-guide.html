@@ -81,9 +81,11 @@
   function retrieve(question, qvec){
     var ql = question.toLowerCase();
     var extra = [];
-    if (/section\s*c|argument|persuasi/.test(ql)) extra = ['analysing', 'argument', 'language', 'persuade'];
-    else if (/section\s*b|creating|framework|stimul/.test(ql)) extra = ['creating', 'texts', 'framework', 'stimulus'];
-    else if (/section\s*a|text response|analytical/.test(ql)) extra = ['analytical', 'text', 'response'];
+    var textMention = /sunset|boulevard|rainbow|norma|desmond|joe gillis|betty|max|nan dear|gladys|dolly|errol/.test(ql);
+    var essayish = /essay|structure|introduction|intro |conclusion|paragraph|contention|topic sentence|plan|writing about/.test(ql);
+    if (/section\s*c|argument|persuasi|language analysis|analysing language/.test(ql)) extra = ['analysing', 'argument', 'language', 'persuade'];
+    else if (/section\s*b|creating|framework|stimul|personal journey|imaginative|creative/.test(ql)) extra = ['creating', 'texts', 'framework', 'stimulus'];
+    else if (/section\s*a|text response|analytical/.test(ql) || (textMention && essayish)) extra = ['analytical', 'text', 'response', 'essay', 'structure'];
     var terms = ql.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ')
       .split(/\s+/).filter(function(w){ return w.length > 2; }).concat(extra)
       .map(function(w){ return norm(w).replace(/ /g, ''); });
