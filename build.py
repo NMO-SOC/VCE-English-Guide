@@ -1009,19 +1009,24 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
       }
       return [s, e, idx];
     }).filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
-    var seen = {}, pages = [], out = [];
-    for (var k = 0; k < scored.length && pages.length < 3; k++){
+    var seen = {}, picked = [], out = [];
+    for (var k = 0; k < scored.length && picked.length < 3; k++){
       var e = scored[k][1];
-      if (!seen[e.u]){ seen[e.u] = 1; pages.push(e.u); out.push(e); }
+      if (!seen[e.u]){ seen[e.u] = 1; picked.push({ e: e, i: scored[k][2] }); out.push(e); }
     }
-    // pull sibling sections from the matched pages so step-by-step content comes along
-    pages.forEach(function(u){
-      var added = 0;
-      for (var m = 0; m < INDEX.length && added < 6; m++){
-        if (INDEX[m].u.split('#')[0] === u.split('#')[0] && out.indexOf(INDEX[m]) === -1 && (INDEX[m].b || '').length > 40){
-          out.push(INDEX[m]); added++;
+    // pull the sibling sections ADJACENT to each match (a heading's content lives in
+    // the Summary/Analysis chunks that follow it, not at the top of the page)
+    picked.forEach(function(pe){
+      var page = pe.e.u.split('#')[0], cands = [];
+      for (var m = 0; m < INDEX.length; m++){
+        if (INDEX[m].u.split('#')[0] === page && out.indexOf(INDEX[m]) === -1 && (INDEX[m].b || '').length > 40){
+          // prefer chunks after the match (3x weight against preceding ones)
+          cands.push([m > pe.i ? m - pe.i : (pe.i - m) * 3, m]);
         }
       }
+      cands.sort(function(a, b){ return a[0] - b[0]; });
+      cands.slice(0, 6).map(function(c){ return c[1]; }).sort(function(a, b){ return a - b; })
+        .forEach(function(m){ out.push(INDEX[m]); });
     });
     return out.slice(0, 15);
   }
@@ -1285,6 +1290,7 @@ for pg in all_pages:
     if "chapters" in pg and pg["chapters"]:
         search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"]})
         continue
+    _last_ctx = None
     for h in scope.find_all(["h1", "h2", "h3", "h4", "h5"]):
         anc = h.find_parent("section")
         hid = anc.get("id") if anc else None
@@ -1294,7 +1300,12 @@ for pg in all_pages:
             _cl = _copy.copy(anc)
             for _sub in _cl.find_all("section"): _sub.decompose()
             body = re.sub(r"\s+", " ", _cl.get_text(" "))[:1500].strip()
-        search.append({"t": h.get_text(" ", strip=True), "p": part_title,
+        _t = h.get_text(" ", strip=True)
+        if _t.lower() in ("summary", "analysis") and _last_ctx:
+            _t = _last_ctx + " - " + _t
+        else:
+            _last_ctx = _t
+        search.append({"t": _t, "p": part_title,
                        "u": pg["file"] + ("#" + hid if hid else ""), "b": body})
 search.append({"t": "Essay Marker", "p": "Study Tools", "u": "marker.html",
                "b": "ai essay marker score feedback section a b c criteria calibrated marking precision mode second opinion handwriting transcription"})
