@@ -945,23 +945,34 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     var d = document.createElement('div'); d.className = 'ac-msg ' + cls; d.innerHTML = html;
     log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
   }
+  function norm(s){
+    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+  }
   function retrieve(question){
     var ql = question.toLowerCase();
     var extra = [];
     if (/section\s*c|argument|persuasi/.test(ql)) extra = ['analysing', 'argument', 'language', 'persuade'];
     else if (/section\s*b|creating|framework|stimul/.test(ql)) extra = ['creating', 'texts', 'framework', 'stimulus'];
     else if (/section\s*a|text response|analytical/.test(ql)) extra = ['analytical', 'text', 'response'];
-    var terms = ql.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2; }).concat(extra);
+    var terms = ql.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ')
+      .split(/\s+/).filter(function(w){ return w.length > 2; }).concat(extra)
+      .map(function(w){ return norm(w).replace(/ /g, ''); });
     var yearMatch = ql.match(/20\d\d/);
     var year = yearMatch ? yearMatch[0] : null;
     var scored = INDEX.map(function(e, idx){
-      var t = (e.t || '').toLowerCase(), p = (e.p || '').toLowerCase(), b = (e.b || '').toLowerCase(), s = 0;
+      var t = e.NT || '', p = e.NP || '', b = e.NB || '', s = 0;
+      var tSq = t.replace(/ /g, ''), bSq = b.replace(/ /g, '');
       terms.forEach(function(w){
         var stem = w.length > 6 ? w.slice(0, 6) : w;
-        if (t.indexOf(w) > -1) s += 4; else if (t.indexOf(stem) > -1) s += 3;
+        if (t.indexOf(w) > -1 || tSq.indexOf(w) > -1) s += 4;
+        else if (t.indexOf(stem) > -1) s += 3;
         if (p.indexOf(w) > -1) s += 2; else if (p.indexOf(stem) > -1) s += 2;
         var i2 = -1, n = 0;
         while ((i2 = b.indexOf(stem, i2 + 1)) > -1 && n < 5){ n++; }
+        if (n === 0 && w.length > 5){
+          i2 = -1;
+          while ((i2 = bSq.indexOf(w, i2 + 1)) > -1 && n < 5){ n++; }
+        }
         s += n;
       });
       if (year && (t.indexOf(year) > -1 || p.indexOf(year) > -1)) s += 14;
@@ -990,7 +1001,12 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     add('ac-user', esc(question));
     var wait = add('ac-bot', '<em>Thinking&hellip;</em>');
     busy = true; btn.disabled = true;
-    (INDEX ? Promise.resolve() : fetch(window.AC_INDEX_URL).then(function(r){ return r.json(); }).then(function(d){ INDEX = d; }))
+    (INDEX ? Promise.resolve() : fetch(window.AC_INDEX_URL).then(function(r){ return r.json(); }).then(function(d){
+      d.forEach(function(e){
+        e.NT = norm(e.t || ''); e.NP = norm(e.p || ''); e.NB = norm(e.b || '');
+      });
+      INDEX = d;
+    }))
     .then(function(){
       var chunks = retrieve(question);
       if (!chunks.length){
