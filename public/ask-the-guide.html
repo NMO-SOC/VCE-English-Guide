@@ -217,7 +217,10 @@
         var srcs = chunks.slice(0, 3).map(function(c){
           return '<a href="' + c.u + '">' + esc(c.t) + '</a>';
         }).join(' &middot; ');
-        wait.innerHTML = esc(ans).split(NL).join('<br>') +
+        var fmt = esc(ans)
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        wait.innerHTML = fmt.split(NL).join('<br>') +
           '<div class="ac-src">Read more: ' + srcs + '</div>';
       });
     }).catch(function(e){
