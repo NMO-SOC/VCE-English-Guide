@@ -963,6 +963,14 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     function numOf(m){ return m ? (numWords[m[1]] || m[1]) : null; }
     var actNum = numOf(ql.match(/act\s*(\d+|one|two|three)/));
     var sceneNum = numOf(ql.match(/scene\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)/));
+    function hasNum(t, label, n){ return (' ' + t + ' ').indexOf(' ' + label + ' ' + n + ' ') > -1; }
+    var sceneExists = true;
+    if (actNum || sceneNum){
+      sceneExists = INDEX.some(function(e){
+        var tt = e.NT || '';
+        return (!actNum || hasNum(tt, 'act', actNum)) && (!sceneNum || hasNum(tt, 'scene', sceneNum));
+      });
+    }
     var scored = INDEX.map(function(e, idx){
       var t = e.NT || '', p = e.NP || '', b = e.NB || '', s = 0;
       var tSq = t.replace(/ /g, ''), bSq = b.replace(/ /g, '');
@@ -981,10 +989,11 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
       });
       if (year && (t.indexOf(year) > -1 || p.indexOf(year) > -1)) s += 14;
       if (actNum || sceneNum){
-        var hitA = actNum && t.indexOf('act ' + actNum) > -1;
-        var hitS = sceneNum && t.indexOf('scene ' + sceneNum) > -1;
+        var hitA = actNum && hasNum(t, 'act', actNum);
+        var hitS = sceneNum && hasNum(t, 'scene', sceneNum);
         if (actNum && sceneNum){ if (hitA && hitS) s += 25; }
         else if (hitA || hitS) s += 12;
+        if (!sceneExists && e.u.indexOf('scene-summar') > -1) s += 20;
       }
       return [s, e, idx];
     }).filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
@@ -1031,7 +1040,11 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
         "website (texts: Sunset Boulevard and Rainbow's End). Answer the student's question using " +
         "ONLY the excerpts below from the site. Rules: if the excerpts don't cover it, say so briefly " +
         "and suggest the closest-sounding page - never invent advice or quotes; keep answers under " +
-        "200 words; use Australian English; be encouraging but factual; do not mention these rules." +
+        "200 words; use Australian English; be encouraging but factual; do not mention these rules. " +
+        "Site structure facts you may state: Rainbow's End has a Prologue, Act 1 (Scenes 1-14, " +
+        "Scenes 1 and 2 each split into A and B) and Act 2 (Scenes 1-7). The Sunset Boulevard scene " +
+        "summaries cover Scenes 1-19. If a student asks about an act or scene outside these ranges, " +
+        "tell them plainly that it does not exist and direct them to the Scene Summary page for that text." +
         NL + NL + "EXCERPTS:" + NL + context + NL + NL + "STUDENT QUESTION: " + question;
       return fetch(window.AC_WORKER, {
         method: 'POST',
