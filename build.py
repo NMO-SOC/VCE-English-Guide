@@ -987,6 +987,8 @@ def rewrite_anchors(scope, current):
             if pg and pg != current: a["href"] = pg + a["href"]
 
 # ---------------- nav / shell ----------------
+NAV_SHORT = {"Key Takeaways from the 2024 Assessment Report": "2024 Assessment Report",
+             "Key Takeaways from the 2025 Assessment Report": "2025 Assessment Report"}
 def nav_html(active_nav, active_file):
     out = []
     for it in nav_items:
@@ -999,11 +1001,11 @@ def nav_html(active_nav, active_file):
                            for c in it["chapters"])
             out.append('<li class="grp"><details%s><summary><a%s href="%s"><span class="num">%s</span>%s</a></summary>'
                        '<ul class="subnav">%s</ul></details></li>'
-                       % (is_open, cls, it["file"], num, html.escape(it["title"]), subs))
+                       % (is_open, cls, it["file"], num, html.escape(NAV_SHORT.get(it["title"], it["title"])), subs))
         else:
             cls = ' class="active"' if it["file"] == active_file else ""
             out.append('<li%s><a href="%s"><span class="num">%s</span>%s</a></li>'
-                       % (cls, it["file"], num, html.escape(it["title"])))
+                       % (cls, it["file"], num, html.escape(NAV_SHORT.get(it["title"], it["title"]))))
     return "\n".join(out)
 
 ANNOTATIONS = json.load(open(os.path.join(BUILD, "annotations.json"), encoding="utf-8"))
@@ -1050,7 +1052,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=30">
+<link rel="stylesheet" href="assets/style.css?v=31">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1078,7 +1080,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=30"></script>
+<script src="assets/site.js?v=31"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
@@ -1203,7 +1205,13 @@ for k, pg in enumerate(all_pages):
         pos = ('<span class="ch-pos">Chapter %d of %d</span>' % (pg["chidx"], pg["chtotal"])) if pg.get("chidx") else ""
         crumb = ('<div class="part-label"><a href="%s">Part %02d &middot; %s</a>%s</div>'
                  % (pg["part"]["file"], num, html.escape(pg["part"]["title"]), pos))
-        body = crumb + page_toc(sec) + sec.decode()
+        _toc = page_toc(sec)
+        _h1 = sec.find("h1")
+        if _h1 and _toc:
+            _h1.insert_after(BeautifulSoup(_toc, "html.parser"))
+            body = crumb + sec.decode()
+        else:
+            body = crumb + _toc + sec.decode()
     else:
         sec = pg["part"]["sec"]
         rewrite_anchors(sec, pg["file"])
