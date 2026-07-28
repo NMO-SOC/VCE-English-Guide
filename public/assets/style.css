@@ -430,3 +430,8 @@ mark.anno .anno-cat{display:block;font-size:10px;font-weight:800;letter-spacing:
 @keyframes barrelroll{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 body.barrel-roll{animation:barrelroll 1.2s ease-in-out 1}
 body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
+.ac-log{display:flex;flex-direction:column;gap:12px;margin:1.2em 0;min-height:40px;max-height:60vh;overflow-y:auto}
+.ac-msg{max-width:85%;padding:12px 18px;border-radius:14px;font-size:15.5px;line-height:1.6}
+.ac-user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.ac-bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
+.ac-src{font-family:var(--sans);font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
