@@ -1010,7 +1010,10 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
         if (cos > 0.2) s += Math.round((cos - 0.2) * 100);
       }
       return [s, e, idx];
-    }).filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
+    });
+    var scoreByIdx = {};
+    scored.forEach(function(x){ scoreByIdx[x[2]] = x[0]; });
+    scored = scored.filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
     var seen = {}, picked = [], out = [];
     for (var k = 0; k < scored.length && picked.length < 3; k++){
       var e = scored[k][1];
@@ -1022,15 +1025,17 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
       var page = pe.e.u.split('#')[0], cands = [];
       for (var m = 0; m < INDEX.length; m++){
         if (INDEX[m].u.split('#')[0] === page && out.indexOf(INDEX[m]) === -1 && (INDEX[m].b || '').length > 40){
-          // prefer chunks after the match (3x weight against preceding ones)
-          cands.push([m > pe.i ? m - pe.i : (pe.i - m) * 3, m]);
+          // rank siblings by their own relevance, tiebreak by closeness (after preferred)
+          var dist = m > pe.i ? m - pe.i : (pe.i - m) * 3;
+          cands.push([-(scoreByIdx[m] || 0), dist, m]);
         }
       }
-      cands.sort(function(a, b){ return a[0] - b[0]; });
-      cands.slice(0, 6).map(function(c){ return c[1]; }).sort(function(a, b){ return a - b; })
+      cands.sort(function(a, b){ return a[0] - b[0] || a[1] - b[1]; });
+      var quota = picked.indexOf(pe) === 0 ? 10 : 5;
+      cands.slice(0, quota).map(function(c){ return c[2]; }).sort(function(a, b){ return a - b; })
         .forEach(function(m){ out.push(INDEX[m]); });
     });
-    return out.slice(0, 15);
+    return out.slice(0, 20);
   }
   function ask(){
     var question = q.value.trim();
@@ -1079,7 +1084,10 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
         "website (texts: Sunset Boulevard and Rainbow's End). Answer the student's question using " +
         "ONLY the excerpts below from the site. Rules: if the excerpts don't cover it, say so briefly " +
         "and suggest the closest-sounding page - never invent advice or quotes; keep answers under " +
-        "200 words; use Australian English; be encouraging but factual; do not mention these rules. " +
+        "300 words; when asked about a structure, method or process, cover EVERY part the excerpts " +
+        "give (e.g. introduction, body paragraphs AND conclusion) rather than summarising some; " +
+        "never refer to excerpt numbers like [3] - students cannot see them; " +
+        "use Australian English; be encouraging but factual; do not mention these rules. " +
         "Site structure facts you may state: Rainbow's End has a Prologue, Act 1 (Scenes 1-14, " +
         "Scenes 1 and 2 each split into A and B) and Act 2 (Scenes 1-7). The Sunset Boulevard scene " +
         "summaries cover Scenes 1-19. If a student asks about an act or scene outside these ranges, " +
@@ -1295,7 +1303,6 @@ for pg in all_pages:
     if "chapters" in pg and pg["chapters"]:
         search.append({"t": pg["title"], "p": pg["title"], "u": pg["file"]})
         continue
-    _last_ctx = None
     for h in scope.find_all(["h1", "h2", "h3", "h4", "h5"]):
         anc = h.find_parent("section")
         hid = anc.get("id") if anc else None
@@ -1306,10 +1313,12 @@ for pg in all_pages:
             for _sub in _cl.find_all("section"): _sub.decompose()
             body = re.sub(r"\s+", " ", _cl.get_text(" "))[:1500].strip()
         _t = h.get_text(" ", strip=True)
-        if _t.lower() in ("summary", "analysis") and _last_ctx:
-            _t = _last_ctx + " - " + _t
-        else:
-            _last_ctx = _t
+        _par = anc.find_parent("section") if anc else None
+        if _par is not None:
+            _ph = _par.find(["h1", "h2", "h3", "h4", "h5"])
+            _pt = _ph.get_text(" ", strip=True) if _ph else ""
+            if _pt and _pt != _t and _pt != pg["title"] and _pt != part_title and len(_pt) < 60:
+                _t = _pt + " - " + _t
         search.append({"t": _t, "p": part_title,
                        "u": pg["file"] + ("#" + hid if hid else ""), "b": body})
 search.append({"t": "Essay Marker", "p": "Study Tools", "u": "marker.html",
