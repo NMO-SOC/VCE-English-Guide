@@ -1052,7 +1052,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=31">
+<link rel="stylesheet" href="assets/style.css?v=32">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1080,7 +1080,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=31"></script>
+<script src="assets/site.js?v=32"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
@@ -1295,8 +1295,9 @@ BLURB = {
  "Key Takeaways from the 2025 Assessment Report": "What VCAA assessors flagged in 2025 — topic verbs, Framework choices and the interplay discriminator.",
  "Effectively Studying For Exams": "Study habits, schedules, recall and wellbeing.",
 }
-cards = "".join('<a class="card" href="%s">%s<div class="card-num">%02d</div><div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
-                % (it["file"], icon_svg(it["title"]), it["num"], html.escape(it["title"]), html.escape(BLURB.get(it["title"], "")))
+cards = "".join('<a class="card %s" href="%s">%s<div class="card-num">%02d</div><div class="card-body"><h3>%s</h3><p>%s</p></div></a>'
+                % ("card-gold" if it["num"] >= 11 or it["num"] == 1 else "card-maroon",
+                   it["file"], icon_svg(it["title"]), it["num"], html.escape(it["title"]), html.escape(BLURB.get(it["title"], "")))
                 for it in nav_items)
 
 landing = """
@@ -1311,10 +1312,15 @@ landing = """
     <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a></div>
   </div>
 </section>
-<h2 class="section-head">Contents</h2>
+<div class="contents-row"><h2 class="section-head">Contents</h2><span id="resume-slot"></span></div>
 <div class="cards">%s</div>
 <h2 class="section-head">Examples of high marking responses</h2>
 %s
+<div class="site-foot">
+  <div class="sf-motto">Sapere Aude</div>
+  <div class="sf-line">South Oakleigh College &middot; Compiled by the English Team</div>
+  <div class="sf-sub">Mr. Morlin &middot; Ms. Levin &middot; Ms. Hoernel &middot; Ms. Zhiv</div>
+</div>
 """ % (nav_items[0]["file"], cards,
        exemplar_groups_html(exemplars))
 open(os.path.join(PUBLIC, "index.html"), "w", encoding="utf-8").write(shell("Home", "", "index.html", landing))

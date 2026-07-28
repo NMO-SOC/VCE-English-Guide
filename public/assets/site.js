@@ -110,11 +110,12 @@
       localStorage.setItem('lastPage',JSON.stringify({u:here,t:tt}));
     }else if(here==='index.html'){
       var lp=JSON.parse(localStorage.getItem('lastPage')||'null');
+      var slot=document.getElementById('resume-slot');
       var hero=document.querySelector('.hero');
-      if(lp&&lp.u&&hero){
+      if(lp&&lp.u&&(slot||hero)){
         var a=document.createElement('a');a.className='resume-chip';a.href=lp.u;
         a.innerHTML='<span class="rc-label">Resume</span> '+lp.t.replace(/[<>&]/g,'')+' →';
-        hero.parentNode.insertBefore(a,hero.nextSibling);
+        if(slot){slot.appendChild(a);}else{hero.parentNode.insertBefore(a,hero.nextSibling);}
       }
     }
   }catch(e){}
