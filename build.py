@@ -962,9 +962,19 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     if (/section\s*c|argument|persuasi|language analysis|analysing language/.test(ql)) extra = ['analysing', 'argument', 'language', 'persuade'];
     else if (/section\s*b|creating|framework|stimul|personal journey|imaginative|creative/.test(ql)) extra = ['creating', 'texts', 'framework', 'stimulus'];
     else if (/section\s*a|text response|analytical/.test(ql) || (textMention && essayish)) extra = ['analytical', 'text', 'response', 'essay', 'structure'];
+    var STOP = {the:1,and:1,that:1,this:1,with:1,for:1,from:1,was:1,are:1,were:1,have:1,has:1,had:1,
+      what:1,when:1,where:1,which:1,who:1,whom:1,why:1,how:1,does:1,did:1,can:1,could:1,should:1,
+      would:1,will:1,you:1,your:1,about:1,tell:1,give:1,show:1,quickly:1,please:1,need:1,want:1,
+      know:1,some:1,any:1,all:1,not:1,but:1,into:1,out:1,use:1,used:1,using:1,mean:1,means:1};
     var terms = ql.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ')
-      .split(/\s+/).filter(function(w){ return w.length > 2; }).concat(extra)
+      .split(/\s+/).filter(function(w){ return w.length > 2 && !STOP[w]; }).concat(extra)
       .map(function(w){ return norm(w).replace(/ /g, ''); });
+    // IDF: rare words are worth far more than common ones
+    var tWeight = terms.map(function(w){
+      var stem = w.length > 6 ? w.slice(0, 6) : w, df = 0;
+      for (var m = 0; m < INDEX.length; m++){ if ((INDEX[m].NB || '').indexOf(stem) > -1) df++; }
+      return Math.max(0.2, Math.log((INDEX.length + 1) / (df + 1)));
+    });
     var yearMatch = ql.match(/20\d\d/);
     var year = yearMatch ? yearMatch[0] : null;
     var numWords = {one:'1',two:'2',three:'3',four:'4',five:'5',six:'6',seven:'7',eight:'8',nine:'9',ten:'10'};
@@ -982,20 +992,20 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     var scored = INDEX.map(function(e, idx){
       var t = e.NT || '', p = e.NP || '', b = e.NB || '', s = 0;
       var tSq = t.replace(/ /g, ''), bSq = b.replace(/ /g, '');
-      terms.forEach(function(w){
-        var stem = w.length > 6 ? w.slice(0, 6) : w;
-        if (t.indexOf(w) > -1 || tSq.indexOf(w) > -1) s += 4;
-        else if (t.indexOf(stem) > -1) s += 3;
-        if (p.indexOf(w) > -1) s += 2; else if (p.indexOf(stem) > -1) s += 2;
+      terms.forEach(function(w, ti){
+        var stem = w.length > 6 ? w.slice(0, 6) : w, wgt = tWeight[ti];
+        if (t.indexOf(w) > -1 || tSq.indexOf(w) > -1) s += 4 * wgt;
+        else if (t.indexOf(stem) > -1) s += 3 * wgt;
+        if (p.indexOf(w) > -1) s += 2 * wgt; else if (p.indexOf(stem) > -1) s += 2 * wgt;
         var i2 = -1, n = 0;
         while ((i2 = b.indexOf(stem, i2 + 1)) > -1 && n < 5){ n++; }
         if (n === 0 && w.length > 5){
           i2 = -1;
           while ((i2 = bSq.indexOf(w, i2 + 1)) > -1 && n < 5){ n++; }
         }
-        s += n;
+        s += n * wgt;
       });
-      if (year && (t.indexOf(year) > -1 || p.indexOf(year) > -1)) s += 14;
+      if (year && (t.indexOf(year) > -1 || p.indexOf(year) > -1)) s += 25;
       if (actNum || sceneNum){
         var hitA = actNum && hasNum(t, 'act', actNum);
         var hitS = sceneNum && hasNum(t, 'scene', sceneNum);
@@ -1016,8 +1026,8 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     scored = scored.filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
     var seen = {}, picked = [], out = [];
     for (var k = 0; k < scored.length && picked.length < 3; k++){
-      var e = scored[k][1];
-      if (!seen[e.u]){ seen[e.u] = 1; picked.push({ e: e, i: scored[k][2] }); out.push(e); }
+      var e = scored[k][1], pg = e.u.split('#')[0];
+      if (!seen[pg]){ seen[pg] = 1; picked.push({ e: e, i: scored[k][2] }); out.push(e); }
     }
     // pull the sibling sections ADJACENT to each match (a heading's content lives in
     // the Summary/Analysis chunks that follow it, not at the top of the page)
