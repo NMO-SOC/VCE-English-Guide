@@ -435,3 +435,4 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
 .ac-user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
 .ac-bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
 .ac-src{font-family:var(--sans);font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+[data-theme="dark"] .ac-user{color:#2a120c;font-weight:600}
