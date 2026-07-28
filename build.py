@@ -946,23 +946,38 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
     log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
   }
   function retrieve(question){
-    var terms = question.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2; });
-    var scored = INDEX.map(function(e){
-      var t = (e.t || '').toLowerCase(), b = (e.b || '').toLowerCase(), s = 0;
+    var ql = question.toLowerCase();
+    var extra = [];
+    if (/section\s*c|argument|persuasi/.test(ql)) extra = ['analysing', 'argument', 'language', 'persuade'];
+    else if (/section\s*b|creating|framework|stimul/.test(ql)) extra = ['creating', 'texts', 'framework', 'stimulus'];
+    else if (/section\s*a|text response|analytical/.test(ql)) extra = ['analytical', 'text', 'response'];
+    var terms = ql.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2; }).concat(extra);
+    var scored = INDEX.map(function(e, idx){
+      var t = (e.t || '').toLowerCase(), p = (e.p || '').toLowerCase(), b = (e.b || '').toLowerCase(), s = 0;
       terms.forEach(function(w){
         if (t.indexOf(w) > -1) s += 4;
-        var i = -1, n = 0;
-        while ((i = b.indexOf(w, i + 1)) > -1 && n < 5){ n++; }
+        if (p.indexOf(w) > -1) s += 2;
+        var i2 = -1, n = 0;
+        while ((i2 = b.indexOf(w, i2 + 1)) > -1 && n < 5){ n++; }
         s += n;
       });
-      return [s, e];
+      return [s, e, idx];
     }).filter(function(x){ return x[0] > 0; }).sort(function(a, b){ return b[0] - a[0]; });
-    var seen = {}, out = [];
-    for (var i = 0; i < scored.length && out.length < 6; i++){
-      var e = scored[i][1];
-      if (!seen[e.u]){ seen[e.u] = 1; out.push(e); }
+    var seen = {}, pages = [], out = [];
+    for (var k = 0; k < scored.length && pages.length < 3; k++){
+      var e = scored[k][1];
+      if (!seen[e.u]){ seen[e.u] = 1; pages.push(e.u); out.push(e); }
     }
-    return out;
+    // pull sibling sections from the matched pages so step-by-step content comes along
+    pages.forEach(function(u){
+      var added = 0;
+      for (var m = 0; m < INDEX.length && added < 6; m++){
+        if (INDEX[m].u.split('#')[0] === u.split('#')[0] && out.indexOf(INDEX[m]) === -1 && (INDEX[m].b || '').length > 40){
+          out.push(INDEX[m]); added++;
+        }
+      }
+    });
+    return out.slice(0, 15);
   }
   function ask(){
     var question = q.value.trim();
@@ -1138,7 +1153,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=34">
+<link rel="stylesheet" href="assets/style.css?v=35">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1166,7 +1181,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
     %s
   </main>
 </div>
-<script src="assets/site.js?v=34"></script>
+<script src="assets/site.js?v=35"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext))
