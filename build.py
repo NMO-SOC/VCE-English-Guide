@@ -1405,7 +1405,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
       <div id="search-results"></div>
     </div>
     <nav class="toc"><ol>%s</ol></nav>
-    <div class="side-foot">South Oakleigh College &middot; <a class="stats-link" href="https://nmo.goatcounter.com/" target="_blank" rel="noopener">2026</a></div>
+    <div class="side-foot">South Oakleigh College <a class="stats-link" href="https://dash.cloudflare.com/f754727ee6946c63407e658df1c9db20/workers/kv/namespaces/ee491a4f1bab4ec1b81846b9393eb7a4" target="_blank" rel="noopener">&middot;</a> <a class="stats-link" href="https://nmo.goatcounter.com/" target="_blank" rel="noopener">2026</a></div>
   </aside>
   <main class="content" id="main">
     %s
