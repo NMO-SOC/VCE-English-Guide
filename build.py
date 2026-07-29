@@ -1233,41 +1233,11 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
       return fetch(window.AC_WORKER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 700, stream: true })
-      }).then(function(r){
-        var ct = r.headers.get('Content-Type') || '';
-        if (ct.indexOf('event-stream') === -1){
-          return r.json().then(function(j){
-            if (j.error){ throw new Error(j.error.message || j.error); }
-            var ans = j.choices && j.choices[0] ? j.choices[0].message.content : 'No answer returned.';
-            renderFinal(ans);
-          });
-        }
-        var reader = r.body.getReader(), dec = new TextDecoder(), buf = '', ans = '';
-        function pump(){
-          return reader.read().then(function(res){
-            if (res.done){ renderFinal(ans); return; }
-            buf += dec.decode(res.value, { stream: true });
-            var lines = buf.split(NL); buf = lines.pop();
-            lines.forEach(function(ln){
-              if (ln.charCodeAt(ln.length - 1) === 13) ln = ln.slice(0, -1);
-              if (ln.indexOf('data:') !== 0) return;
-              var payload = ln.slice(5).trim();
-              if (!payload || payload === '[DONE]') return;
-              try{
-                var o = JSON.parse(payload);
-                var d = o.choices && o.choices[0] && o.choices[0].delta && o.choices[0].delta.content;
-                if (d){
-                  ans += d;
-                  wait.innerHTML = esc(ans.replace(/FOLLOWUPS:[^]*$/, '')).split(NL).join('<br>');
-                  log.scrollTop = log.scrollHeight;
-                }
-              }catch(pe){}
-            });
-            return pump();
-          });
-        }
-        return pump();
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 700 })
+      }).then(function(r){ return r.json(); }).then(function(j){
+        if (j.error){ throw new Error(j.error.message || j.error); }
+        var ans = j.choices && j.choices[0] ? j.choices[0].message.content : 'No answer returned.';
+        renderFinal(ans);
       });
     }).catch(function(e){
       wait.innerHTML = 'Something went wrong: ' + esc(String(e.message || e)) + '<br>If this keeps happening, the service may be at its daily limit \u2014 the guide itself is always here.';
