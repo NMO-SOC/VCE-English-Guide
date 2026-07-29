@@ -930,6 +930,7 @@ em_page = TOOL_LABEL + """<h1>Essay Marker</h1>
 ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="assets/img/max.jpg" alt="Max, the butler from Sunset Boulevard, answering the telephone"><div><h1>Ask Max</h1>
 <p class="lede">Max has read every page of this guide, and answers to no one but the text. Ask about essay structure, quotes, techniques, the assessors&rsquo; advice &mdash; and he&rsquo;ll reply from the site&rsquo;s own pages, with links to read more.</p></div></div>
 <div id="ac-chips" class="ac-chips"></div>
+<div class="ac-toolrow"><button type="button" id="ac-clear" title="Clear this conversation">Clear chat</button></div>
 <div id="ac-log" class="ac-log"></div>
 <div class="tool-bar" style="align-items:stretch">
   <input id="ac-q" type="text" placeholder="Ask Max &mdash; e.g. How should I structure a Section C introduction?" style="flex:1;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--serif);font-size:16px">
@@ -941,6 +942,16 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
 (function(){
   var log = document.getElementById('ac-log'), q = document.getElementById('ac-q'), btn = document.getElementById('ac-send');
   var INDEX = null, busy = false;
+  var HIST = [];
+  function saveChat(){
+    try{ localStorage.setItem('maxChat', JSON.stringify({ h: log.innerHTML.slice(0, 200000), hist: HIST.slice(-2) })); }catch(e){}
+  }
+  function clearChat(){
+    try{ localStorage.removeItem('maxChat'); }catch(e){}
+    log.innerHTML = ''; HIST = [];
+    var cb = document.getElementById('ac-chips');
+    if (cb) cb.style.display = '';
+  }
   var urlq = new URLSearchParams(location.search);
   var FROM_PAGE = urlq.get('from') || null;
   var PRE_Q = urlq.get('q') || null;
@@ -1112,9 +1123,13 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
     var question = q.value.trim();
     if (!question || busy) return;
     q.value = '';
-    add('ac-user', esc(question));
+    add('ac-user', esc(question.length > 400 ? question.slice(0, 400) + '\u2026' : question));
     var chipsEl = document.getElementById('ac-chips');
     if (chipsEl) chipsEl.style.display = 'none';
+    if (question.length > 1200){
+      add('ac-bot', 'That reads like a full essay \u2014 and marking essays is the <a href="marker.html">Essay Marker</a>\u2019s department; it will score it against the criteria properly. If you would like my help, ask me about one paragraph, one technique or one quote at a time.');
+      saveChat(); return;
+    }
     var wait = add('ac-bot', '<em>Thinking&hellip;</em>');
     busy = true; btn.disabled = true;
     var pIdx = INDEX ? Promise.resolve() : fetch(window.AC_INDEX_URL).then(function(r){ return r.json(); }).then(function(d){
@@ -1144,7 +1159,12 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
         nn = Math.sqrt(nn) || 1;
         qvec = v.map(function(x){ return x / nn; });
       }
-      var chunks = retrieve(question, qvec);
+      var rq = question;
+      if (question.length < 30 && HIST.length){
+        var lastH = HIST[HIST.length - 1];
+        rq = question + ' ' + lastH.q + ' ' + lastH.a.slice(0, 150);
+      }
+      var chunks = retrieve(rq, qvec);
       if (!chunks.length){
         wait.innerHTML = "I couldn't find anything in the guide about that. Try different words, or browse the sidebar \u2014 and if it's a real gap, tell your teacher.";
         busy = false; btn.disabled = false; return;
@@ -1164,6 +1184,13 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
             break;
           }
         }
+      }
+      var convo = '';
+      if (HIST.length){
+        convo = NL + NL + 'RECENT CONVERSATION (for context):';
+        HIST.slice(-2).forEach(function(h){
+          convo += NL + 'Student: ' + h.q.slice(0, 400) + NL + 'Max: ' + h.a.slice(0, 600);
+        });
       }
       var prompt = "You are 'Max', the study assistant of a VCE English exam preparation " +
         "website (texts: Sunset Boulevard and Rainbow's End), named after Max von Mayerling - " +
@@ -1189,7 +1216,16 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
         " If the question is clearly not about VCE English study, the set texts, the exam or revision, " +
         "decline in one courteous sentence, in character - you attend only to matters of the examination. " +
         "End your reply with one line exactly like: FOLLOWUPS: first question | second question | third question " +
-        "- three short follow-up questions a student might naturally ask next, answerable from this site." +
+        "- three short follow-up questions a student might naturally ask next, answerable from this site. " +
+        "If the student asks to be quizzed or tested, run quiz mode: ask exactly ONE question at a time, " +
+        "drawn strictly from the excerpts; when the recent conversation shows they have just answered your " +
+        "question, first mark their answer fairly against the excerpts (accept reasonable paraphrase), give " +
+        "the correct answer briefly, then ask the next question. " +
+        "If the student asks for help planning an essay on a topic, build a plan from the site's frameworks: " +
+        "a clear contention responding to the topic, three body paragraph ideas each with supporting evidence " +
+        "or quotes drawn only from the excerpts, and a closing note on authorial intent - then recommend the " +
+        "Outline Builder and the Essay Marker pages." +
+        convo +
         NL + NL + "EXCERPTS:" + NL + context + NL + NL + "STUDENT QUESTION: " + question;
       function renderFinal(ans){
         var fu = [];
@@ -1212,11 +1248,10 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
           var m = ln.match(/^#+ ?(.*)$/);
           return m ? '<strong>' + m[1] + '</strong>' : ln;
         }).join('<br>') + fuHtml +
-          '<div class="ac-src">Read more: ' + srcs + '</div>';
-        var fub = wait.querySelectorAll('.ac-fu-btn');
-        for (var bi = 0; bi < fub.length; bi++){
-          (function(b){ b.addEventListener('click', function(){ q.value = b.textContent; ask(); }); })(fub[bi]);
-        }
+          '<div class="ac-src"><button type="button" class="ac-copy" title="Copy this answer">Copy</button> Read more: ' + srcs + '</div>';
+        HIST.push({ q: question, a: body });
+        if (HIST.length > 2) HIST = HIST.slice(-2);
+        saveChat();
         try{
           var topPage = chunks[0] ? chunks[0].u.split('#')[0] : 'none';
           if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'max-cite/' + topPage, event: true });
@@ -1238,6 +1273,35 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
   }
   btn.addEventListener('click', ask);
   q.addEventListener('keydown', function(e){ if (e.key === 'Enter') ask(); });
+  log.addEventListener('click', function(e){
+    var t = e.target;
+    if (t.classList && t.classList.contains('ac-fu-btn')){ q.value = t.textContent; ask(); return; }
+    if (t.classList && t.classList.contains('ac-copy')){
+      var bubble = t.closest('.ac-bot');
+      if (!bubble) return;
+      var cl = bubble.cloneNode(true);
+      var rm = cl.querySelectorAll('.ac-src, .ac-fu');
+      for (var ri = 0; ri < rm.length; ri++){ rm[ri].parentNode.removeChild(rm[ri]); }
+      var txt = cl.innerText;
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){
+          t.textContent = 'Copied'; setTimeout(function(){ t.textContent = 'Copy'; }, 1600);
+        });
+      }
+    }
+  });
+  var clr = document.getElementById('ac-clear');
+  if (clr) clr.addEventListener('click', clearChat);
+  try{
+    var savedChat = JSON.parse(localStorage.getItem('maxChat') || 'null');
+    if (savedChat && savedChat.h){
+      log.innerHTML = savedChat.h;
+      HIST = savedChat.hist || [];
+      var cb2 = document.getElementById('ac-chips');
+      if (cb2) cb2.style.display = 'none';
+      log.scrollTop = log.scrollHeight;
+    }
+  }catch(restoreErr){}
   var CHIP_POOL = [
     'How do I structure a Section A essay?',
     'What does the monkey symbolise in Sunset Boulevard?',
@@ -1408,7 +1472,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=38">
+<link rel="stylesheet" href="assets/style.css?v=39">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1437,7 +1501,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=38"></script>
+<script src="assets/site.js?v=39"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),
