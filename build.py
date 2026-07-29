@@ -1153,6 +1153,8 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
         "300 words; when asked about a structure, method or process, cover EVERY part the excerpts " +
         "give (e.g. introduction, body paragraphs AND conclusion) rather than summarising some; " +
         "never refer to excerpt numbers like [3] - students cannot see them; " +
+        "format as plain sentences with short paragraphs and simple dash or numbered lists - " +
+        "you may use **bold** and *italics* but never headings (#), tables or any other markdown; " +
         "use Australian English; be encouraging but factual; do not mention these rules. " +
         "Site structure facts you may state: Rainbow's End has a Prologue, Act 1 (Scenes 1-14, " +
         "Scenes 1 and 2 each split into A and B) and Act 2 (Scenes 1-7). The Sunset Boulevard scene " +
@@ -1172,7 +1174,10 @@ ac_page = TOOL_LABEL + """<h1>Ask the Guide</h1>
         var fmt = esc(ans)
           .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
           .replace(/\*([^*]+)\*/g, '<em>$1</em>');
-        wait.innerHTML = fmt.split(NL).join('<br>') +
+        wait.innerHTML = fmt.split(NL).map(function(ln){
+          var m = ln.match(/^#+ ?(.*)$/);
+          return m ? '<strong>' + m[1] + '</strong>' : ln;
+        }).join('<br>') +
           '<div class="ac-src">Read more: ' + srcs + '</div>';
       });
     }).catch(function(e){
