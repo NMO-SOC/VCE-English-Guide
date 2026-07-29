@@ -299,7 +299,9 @@
       var NL = String.fromCharCode(10);
       var examDate = new Date(2026, 9, 27, 9, 0, 0), today = new Date();
       var daysLeft = Math.max(0, Math.ceil((examDate - today) / 86400000));
-      var dateNote = ' Today is ' + today.toDateString() + '; the English exam is on Tuesday 27 October 2026 at 9am, ' + daysLeft + ' days from now - use this when asked about revision timing.';
+      var hr = today.getHours();
+      var partOfDay = hr < 12 ? 'morning' : (hr < 18 ? 'afternoon' : 'evening');
+      var dateNote = ' Today is ' + today.toDateString() + ' and it is currently ' + partOfDay + ' for the student (greet accordingly, if you greet at all); the English exam is on Tuesday 27 October 2026 at 9am, ' + daysLeft + ' days from now - use this when asked about revision timing.';
       var ctxNote = '';
       if (FROM_PAGE){
         for (var fi = 0; fi < INDEX.length; fi++){
