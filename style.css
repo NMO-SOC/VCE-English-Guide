@@ -469,3 +469,8 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
   .ac-log{max-height:none;overflow:visible;border:none}
   .ac-msg{page-break-inside:avoid}
 }
+
+/* Ask Max: personal key row */
+.ac-tokrow{display:flex;gap:8px;margin-top:12px}
+.ac-tokrow input{flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--sans);font-size:13px}
+.ac-tokrow button{font-family:var(--sans);font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;cursor:pointer}
