@@ -78,6 +78,44 @@
   function norm(s){
     return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, '');
   }
+  var VOCAB = null;
+  function buildVocab(){
+    VOCAB = {};
+    INDEX.forEach(function(e){
+      ((e.NB || '') + ' ' + (e.NT || '')).split(' ').forEach(function(w){
+        if (w.length > 3) VOCAB[w] = (VOCAB[w] || 0) + 1;
+      });
+    });
+  }
+  function editDist(a, b){
+    var la = a.length, lb = b.length, row = [], i, j;
+    for (j = 0; j <= lb; j++) row[j] = j;
+    for (i = 1; i <= la; i++){
+      var prev = row[0]; row[0] = i;
+      for (j = 1; j <= lb; j++){
+        var cur = row[j];
+        row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prev = cur;
+      }
+    }
+    return row[lb];
+  }
+  function correctWord(w){
+    if (!VOCAB) buildVocab();
+    var best = null, bd = 3, bc = 0;
+    for (var v in VOCAB){
+      if (Math.abs(v.length - w.length) > 2) continue;
+      var d = editDist(w, v);
+      if (d < bd || (d === bd && VOCAB[v] > bc)){ best = v; bd = d; bc = VOCAB[v]; }
+    }
+    return bd <= 2 ? best : null;
+  }
+  function dfOf(s){
+    var n = 0;
+    for (var m = 0; m < INDEX.length; m++){ if ((INDEX[m].NB || '').indexOf(s) > -1) n++; }
+    return n;
+  }
+  function stemOf(w){ return (w.length > 6 && w.length <= 9) ? w.slice(0, 6) : w; }
   function retrieve(question, qvec){
     var ql = question.toLowerCase();
     var extra = [];
@@ -93,10 +131,14 @@
     var terms = ql.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ')
       .split(/\s+/).filter(function(w){ return w.length > 2 && !STOP[w]; }).concat(extra)
       .map(function(w){ return norm(w).replace(/ /g, ''); });
+    // typo tolerance: a word that appears nowhere on the site is corrected against site vocabulary
+    terms = terms.map(function(w){
+      if (w.length > 3 && dfOf(w) === 0){ var c = correctWord(w); if (c) return c; }
+      return w;
+    });
     // IDF: rare words are worth far more than common ones
     var tWeight = terms.map(function(w){
-      var stem = w.length > 6 ? w.slice(0, 6) : w, df = 0;
-      for (var m = 0; m < INDEX.length; m++){ if ((INDEX[m].NB || '').indexOf(stem) > -1) df++; }
+      var dfw = dfOf(w), df = dfw > 0 ? dfw : dfOf(stemOf(w));
       return Math.max(0.2, Math.log((INDEX.length + 1) / (df + 1)));
     });
     var yearMatch = ql.match(/20\d\d/);
@@ -117,7 +159,7 @@
       var t = e.NT || '', p = e.NP || '', b = e.NB || '', s = 0;
       var tSq = t.replace(/ /g, ''), bSq = b.replace(/ /g, '');
       terms.forEach(function(w, ti){
-        var stem = w.length > 6 ? w.slice(0, 6) : w, wgt = tWeight[ti];
+        var stem = stemOf(w), wgt = tWeight[ti];
         if (t.indexOf(w) > -1 || tSq.indexOf(w) > -1) s += 4 * wgt;
         else if (t.indexOf(stem) > -1) s += 3 * wgt;
         if (p.indexOf(w) > -1) s += 2 * wgt; else if (p.indexOf(stem) > -1) s += 2 * wgt;
@@ -168,6 +210,20 @@
       var quota = picked.indexOf(pe) === 0 ? 10 : 5;
       cands.slice(0, quota).map(function(c){ return c[2]; }).sort(function(a, b){ return a - b; })
         .forEach(function(m){ out.push(INDEX[m]); });
+    });
+    out = out.slice(0, 17);
+    // guarantee: every rare query word gets its best chunk into the excerpts
+    var added = 0;
+    terms.forEach(function(w, ti){
+      if (tWeight[ti] < 3.5 || added >= 3) return;
+      var have = out.some(function(e){ return ((e.NB || '') + ' ' + (e.NT || '')).indexOf(w) > -1; });
+      if (have) return;
+      for (var k2 = 0; k2 < scored.length; k2++){
+        var e2 = scored[k2][1];
+        if (((e2.NB || '') + ' ' + (e2.NT || '')).indexOf(w) > -1 && out.indexOf(e2) === -1){
+          out.push(e2); added++; break;
+        }
+      }
     });
     return out.slice(0, 20);
   }
