@@ -187,3 +187,31 @@
     });
   }
 })();
+
+/* Ask Max about selected text */
+(function(){
+  if (location.pathname.indexOf('ask-the-guide') > -1) return;
+  var btn = null;
+  function hide(){ if (btn){ btn.remove(); btn = null; } }
+  document.addEventListener('mouseup', function(){
+    setTimeout(function(){
+      hide();
+      var sel = window.getSelection();
+      var txt = sel ? sel.toString().trim() : '';
+      if (txt.length < 12 || txt.length > 300) return;
+      var main = document.getElementById('main');
+      if (!main || !sel.anchorNode || !main.contains(sel.anchorNode)) return;
+      var rect = sel.getRangeAt(0).getBoundingClientRect();
+      var page = location.pathname.split('/').pop() || 'index.html';
+      btn = document.createElement('a');
+      btn.id = 'max-sel';
+      btn.textContent = 'Ask Max about this';
+      btn.href = 'ask-the-guide.html?from=' + encodeURIComponent(page) +
+        '&q=' + encodeURIComponent('From the guide: "' + txt + '" - can you explain this?');
+      btn.style.top = (window.scrollY + rect.top - 42) + 'px';
+      btn.style.left = Math.max(10, window.scrollX + rect.left + rect.width / 2 - 70) + 'px';
+      document.body.appendChild(btn);
+    }, 10);
+  });
+  document.addEventListener('mousedown', function(e){ if (btn && e.target !== btn) hide(); });
+})();
