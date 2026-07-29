@@ -20,8 +20,9 @@ for ($i = 0; $i -lt $idx.Count; $i += 100) {
         $batch += $text
     }
     $body = @{ embed = $true; input = $batch } | ConvertTo-Json -Depth 4
-    $resp = Invoke-RestMethod -Uri $worker -Method Post -ContentType "application/json" `
-        -Headers @{ Origin = "http://localhost" } -Body $body
+    $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($body)
+    $resp = Invoke-RestMethod -Uri $worker -Method Post -ContentType "application/json; charset=utf-8" `
+        -Headers @{ Origin = "http://localhost" } -Body $bodyBytes
     if (-not $resp.data) { throw "No data returned at batch $i - is the Worker updated?" }
     foreach ($d in $resp.data) {
         $v = $d.embedding[0..($dim - 1)]
