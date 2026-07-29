@@ -1138,7 +1138,7 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
       add('ac-bot', 'That reads like a full essay \u2014 and marking essays is the <a href="marker.html">Essay Marker</a>\u2019s department; it will score it against the criteria properly. If you would like my help, ask me about one paragraph, one technique or one quote at a time.');
       saveChat(); return;
     }
-    var wait = add('ac-bot', '<em>Thinking&hellip;</em>');
+    var wait = add('ac-bot', '<em>Max is consulting the guide</em><span class="ac-dots"><i></i><i></i><i></i></span>');
     busy = true; btn.disabled = true;
     var pIdx = INDEX ? Promise.resolve() : fetch(window.AC_INDEX_URL).then(function(r){ return r.json(); }).then(function(d){
       d.forEach(function(e){
@@ -1513,7 +1513,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=40">
+<link rel="stylesheet" href="assets/style.css?v=41">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1542,7 +1542,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=40"></script>
+<script src="assets/site.js?v=41"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),

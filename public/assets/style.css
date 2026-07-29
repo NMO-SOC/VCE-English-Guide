@@ -474,3 +474,28 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
 .ac-tokrow{display:flex;gap:8px;margin-top:12px}
 .ac-tokrow input{flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--sans);font-size:13px}
 .ac-tokrow button{font-family:var(--sans);font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;cursor:pointer}
+
+/* ---- Ask Max aesthetics ---- */
+/* 4: cinematic header */
+.max-head{background:linear-gradient(rgba(12,10,8,.58),rgba(12,10,8,.72)),url(img/max-wide.jpg) center 30%/cover no-repeat;border-radius:14px;padding:30px 30px 26px;border-top:7px solid #0c0a08;border-bottom:7px solid #0c0a08;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.max-head h1{color:#d4a94e;margin-top:0}
+.max-head .lede{color:#ece5d6}
+.max-head .max-avatar{margin-top:2px;box-shadow:0 6px 22px rgba(0,0,0,.5)}
+/* 1: Max's portrait beside each reply */
+.ac-bot{margin-left:48px;position:relative;overflow:visible}
+.ac-bot::before{content:'';position:absolute;left:-48px;top:2px;width:36px;height:36px;border-radius:50%;background:url(img/max.jpg) center/cover;border:2px solid var(--gold);box-shadow:0 3px 9px rgba(0,0,0,.25)}
+/* 5: correspondence feel */
+.ac-bot{border-left:4px solid var(--gold);line-height:1.68;padding-left:16px}
+/* 2: consulting dots */
+.ac-dots{display:inline-block;margin-left:6px}
+.ac-dots i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);margin:0 2px;animation:acdot 1.2s infinite}
+.ac-dots i:nth-child(2){animation-delay:.2s}
+.ac-dots i:nth-child(3){animation-delay:.4s}
+@keyframes acdot{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+/* 3: empty-state watermark */
+.ac-log{position:relative}
+.ac-log:empty{min-height:190px}
+.ac-log:empty::before{content:'';position:absolute;inset:0;background:url(img/max.jpg) center/180px no-repeat;opacity:.06;filter:grayscale(1)}
+/* 6: silver-nitrate dark mode */
+[data-theme="dark"] .ac-bot{background:#1b1d20;border-color:#34373b;border-left-color:var(--gold)}
+[data-theme="dark"] .ac-log:empty::before{opacity:.09}
