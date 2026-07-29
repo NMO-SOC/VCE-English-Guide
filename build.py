@@ -1685,8 +1685,6 @@ landing = """
 %s
 <div class="site-foot">
   <div class="sf-motto">Sapere Aude</div>
-  <div class="sf-line">South Oakleigh College &middot; Compiled by the English Team</div>
-  <div class="sf-sub">Mr. Morlin &middot; Ms. Levin &middot; Ms. Hoernel &middot; Ms. Zhiv</div>
 </div>
 """ % (nav_items[0]["file"], cards,
        exemplar_groups_html(exemplars))
