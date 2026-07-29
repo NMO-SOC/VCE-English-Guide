@@ -448,3 +448,12 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
 #to-top{bottom:84px}
 .btn-max{display:inline-flex;align-items:center;gap:10px;margin-left:12px}
 .btn-max img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5)}
+
+/* Ask Max extras */
+.ac-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}
+.ac-chip{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--soft-bd);border-radius:18px;padding:7px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+.ac-chip:hover{border-color:var(--gold);background:var(--tint)}
+.ac-fu{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.ac-fu .ac-chip{font-size:12.5px;padding:6px 12px}
+#max-sel{position:absolute;z-index:300;background:var(--accent);color:#fff;font-family:var(--sans);font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:18px;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.3);white-space:nowrap}
+#max-sel:hover{filter:brightness(1.1)}

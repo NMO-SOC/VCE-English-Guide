@@ -929,6 +929,14 @@ em_page = TOOL_LABEL + """<h1>Essay Marker</h1>
 
 ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="assets/img/max.jpg" alt="Max, the butler from Sunset Boulevard, answering the telephone"><div><h1>Ask Max</h1>
 <p class="lede">Max has read every page of this guide, and answers to no one but the text. Ask about essay structure, quotes, techniques, the assessors&rsquo; advice &mdash; and he&rsquo;ll reply from the site&rsquo;s own pages, with links to read more.</p></div></div>
+<div id="ac-chips" class="ac-chips">
+  <button type="button" class="ac-chip">How do I structure a Section A essay?</button>
+  <button type="button" class="ac-chip">What does the monkey symbolise in Sunset Boulevard?</button>
+  <button type="button" class="ac-chip">What happens in Act 2, Scene 5 of Rainbow's End?</button>
+  <button type="button" class="ac-chip">What did the assessors say about Section C?</button>
+  <button type="button" class="ac-chip">Give me quotes about reality and illusion</button>
+  <button type="button" class="ac-chip">How should I revise this week?</button>
+</div>
 <div id="ac-log" class="ac-log"></div>
 <div class="tool-bar" style="align-items:stretch">
   <input id="ac-q" type="text" placeholder="Ask Max &mdash; e.g. How should I structure a Section C introduction?" style="flex:1;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--serif);font-size:16px">
@@ -940,6 +948,9 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
 (function(){
   var log = document.getElementById('ac-log'), q = document.getElementById('ac-q'), btn = document.getElementById('ac-send');
   var INDEX = null, busy = false;
+  var urlq = new URLSearchParams(location.search);
+  var FROM_PAGE = urlq.get('from') || null;
+  var PRE_Q = urlq.get('q') || null;
   var EMB = null, EMB_TRIED = false;
   function decodeVec(b64){
     var raw = atob(b64), n = raw.length, a = new Float32Array(n);
@@ -1048,6 +1059,7 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
         s += n * wgt;
       });
       if (year && (t.indexOf(year) > -1 || p.indexOf(year) > -1)) s += 25;
+      if (typeof FROM_PAGE !== 'undefined' && FROM_PAGE && e.u.indexOf(FROM_PAGE) === 0) s += 6;
       if (actNum || sceneNum){
         var hitA = actNum && hasNum(t, 'act', actNum);
         var hitS = sceneNum && hasNum(t, 'scene', sceneNum);
@@ -1108,6 +1120,8 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
     if (!question || busy) return;
     q.value = '';
     add('ac-user', esc(question));
+    var chipsEl = document.getElementById('ac-chips');
+    if (chipsEl) chipsEl.style.display = 'none';
     var wait = add('ac-bot', '<em>Thinking&hellip;</em>');
     busy = true; btn.disabled = true;
     var pIdx = INDEX ? Promise.resolve() : fetch(window.AC_INDEX_URL).then(function(r){ return r.json(); }).then(function(d){
@@ -1146,6 +1160,18 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
         return '[' + (i + 1) + '] From ' + c.t + ' (page: ' + c.p + '):' + String.fromCharCode(10) + (c.b || c.t);
       }).join(String.fromCharCode(10) + String.fromCharCode(10));
       var NL = String.fromCharCode(10);
+      var examDate = new Date(2026, 9, 27, 9, 0, 0), today = new Date();
+      var daysLeft = Math.max(0, Math.ceil((examDate - today) / 86400000));
+      var dateNote = ' Today is ' + today.toDateString() + '; the English exam is on Tuesday 27 October 2026 at 9am, ' + daysLeft + ' days from now - use this when asked about revision timing.';
+      var ctxNote = '';
+      if (FROM_PAGE){
+        for (var fi = 0; fi < INDEX.length; fi++){
+          if (INDEX[fi].u.indexOf(FROM_PAGE) === 0){
+            ctxNote = " The student clicked Ask Max while reading the page '" + INDEX[fi].t + "' (" + INDEX[fi].p + "), so vague questions probably refer to that page.";
+            break;
+          }
+        }
+      }
       var prompt = "You are 'Max', the study assistant of a VCE English exam preparation " +
         "website (texts: Sunset Boulevard and Rainbow's End), named after Max von Mayerling - " +
         "courteous, precise and quietly devoted, like the butler himself. A light touch of that " +
@@ -1162,25 +1188,82 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
         "Scenes 1 and 2 each split into A and B) and Act 2 (Scenes 1-7). The Sunset Boulevard scene " +
         "summaries cover Scenes 1-19. If a student asks about an act or scene outside these ranges, " +
         "tell them plainly that it does not exist and direct them to the Scene Summary page for that text." +
+        ctxNote + dateNote +
+        " If the question is clearly not about VCE English study, the set texts, the exam or revision, " +
+        "decline in one courteous sentence, in character - you attend only to matters of the examination. " +
+        "End your reply with one line exactly like: FOLLOWUPS: first question | second question | third question " +
+        "- three short follow-up questions a student might naturally ask next, answerable from this site." +
         NL + NL + "EXCERPTS:" + NL + context + NL + NL + "STUDENT QUESTION: " + question;
-      return fetch(window.AC_WORKER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 700 })
-      }).then(function(r){ return r.json(); }).then(function(j){
-        if (j.error){ throw new Error(j.error.message || j.error); }
-        var ans = j.choices && j.choices[0] ? j.choices[0].message.content : 'No answer returned.';
+      function renderFinal(ans){
+        var fu = [];
+        var lines = ans.split(NL).filter(function(ln){
+          var m = ln.match(/^ *FOLLOWUPS: ?(.*)$/);
+          if (m){ fu = m[1].split('|').map(function(s2){ return s2.trim(); }).filter(Boolean); return false; }
+          return true;
+        });
+        var body = lines.join(NL).replace(/ +$/, '');
         var srcs = chunks.slice(0, 3).map(function(c){
           return '<a href="' + c.u + '">' + esc(c.t) + '</a>';
         }).join(' &middot; ');
-        var fmt = esc(ans)
+        var fmt = esc(body)
           .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
           .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        var fuHtml = fu.length ? '<div class="ac-fu">' + fu.slice(0, 3).map(function(f){
+          return '<button type="button" class="ac-chip ac-fu-btn">' + esc(f) + '</button>';
+        }).join('') + '</div>' : '';
         wait.innerHTML = fmt.split(NL).map(function(ln){
           var m = ln.match(/^#+ ?(.*)$/);
           return m ? '<strong>' + m[1] + '</strong>' : ln;
-        }).join('<br>') +
+        }).join('<br>') + fuHtml +
           '<div class="ac-src">Read more: ' + srcs + '</div>';
+        var fub = wait.querySelectorAll('.ac-fu-btn');
+        for (var bi = 0; bi < fub.length; bi++){
+          (function(b){ b.addEventListener('click', function(){ q.value = b.textContent; ask(); }); })(fub[bi]);
+        }
+        try{
+          var topPage = chunks[0] ? chunks[0].u.split('#')[0] : 'none';
+          if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'max-cite/' + topPage, event: true });
+          else (new Image()).src = 'https://nmo.goatcounter.com/count?p=' + encodeURIComponent('max-cite/' + topPage) + '&e=true';
+        }catch(gcErr){}
+      }
+      return fetch(window.AC_WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 700, stream: true })
+      }).then(function(r){
+        var ct = r.headers.get('Content-Type') || '';
+        if (ct.indexOf('event-stream') === -1){
+          return r.json().then(function(j){
+            if (j.error){ throw new Error(j.error.message || j.error); }
+            var ans = j.choices && j.choices[0] ? j.choices[0].message.content : 'No answer returned.';
+            renderFinal(ans);
+          });
+        }
+        var reader = r.body.getReader(), dec = new TextDecoder(), buf = '', ans = '';
+        function pump(){
+          return reader.read().then(function(res){
+            if (res.done){ renderFinal(ans); return; }
+            buf += dec.decode(res.value, { stream: true });
+            var lines = buf.split(NL); buf = lines.pop();
+            lines.forEach(function(ln){
+              if (ln.charCodeAt(ln.length - 1) === 13) ln = ln.slice(0, -1);
+              if (ln.indexOf('data:') !== 0) return;
+              var payload = ln.slice(5).trim();
+              if (!payload || payload === '[DONE]') return;
+              try{
+                var o = JSON.parse(payload);
+                var d = o.choices && o.choices[0] && o.choices[0].delta && o.choices[0].delta.content;
+                if (d){
+                  ans += d;
+                  wait.innerHTML = esc(ans.replace(/FOLLOWUPS:[^]*$/, '')).split(NL).join('<br>');
+                  log.scrollTop = log.scrollHeight;
+                }
+              }catch(pe){}
+            });
+            return pump();
+          });
+        }
+        return pump();
       });
     }).catch(function(e){
       wait.innerHTML = 'Something went wrong: ' + esc(String(e.message || e)) + '<br>If this keeps happening, the service may be at its daily limit \u2014 the guide itself is always here.';
@@ -1188,6 +1271,14 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
   }
   btn.addEventListener('click', ask);
   q.addEventListener('keydown', function(e){ if (e.key === 'Enter') ask(); });
+  var chipBox = document.getElementById('ac-chips');
+  if (chipBox){
+    var cbs = chipBox.querySelectorAll('.ac-chip');
+    for (var ci = 0; ci < cbs.length; ci++){
+      (function(b){ b.addEventListener('click', function(){ q.value = b.textContent; ask(); }); })(cbs[ci]);
+    }
+  }
+  if (PRE_Q){ q.value = PRE_Q; ask(); }
 })();
 </script>"""
 
@@ -1319,7 +1410,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=37">
+<link rel="stylesheet" href="assets/style.css?v=38">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1348,11 +1439,11 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=37"></script>
+<script src="assets/site.js?v=38"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),
-       '' if active_file == 'ask-the-guide.html' else '<a id="max-fab" href="ask-the-guide.html" aria-label="Ask Max a question"><img src="assets/img/max.jpg" alt=""><span>Ask Max</span></a>')
+       '' if active_file == 'ask-the-guide.html' else '<a id="max-fab" href="ask-the-guide.html?from=' + active_file + '" aria-label="Ask Max a question"><img src="assets/img/max.jpg" alt=""><span>Ask Max</span></a>')
 
 def page_toc(scope):
     lis = []
