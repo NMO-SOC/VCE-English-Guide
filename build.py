@@ -1293,7 +1293,7 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="outline-builder.html"><span class="ch-num">7</span><span>Essay Outline Builder</span></a>
   <a class="ch-card" href="vocab-upgrader.html"><span class="ch-num">8</span><span>Vocabulary Upgrader</span></a>
   <a class="ch-card" href="micro-drills.html"><span class="ch-num">9</span><span>Micro-Drills</span></a>
-  <a class="ch-card" href="ask-the-guide.html"><span class="ch-num">10</span><span>Ask Max</span></a>
+  <a class="ch-card" href="ask-max.html"><span class="ch-num">10</span><span>Ask Max</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -1309,7 +1309,7 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                                {"title": "Essay Outline Builder", "file": "outline-builder.html"},
                                {"title": "Vocabulary Upgrader", "file": "vocab-upgrader.html"},
                                {"title": "Micro-Drills", "file": "micro-drills.html"},
-                               {"title": "Ask Max", "file": "ask-the-guide.html"}]})
+                               {"title": "Ask Max", "file": "ask-max.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
@@ -1320,7 +1320,7 @@ all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "htm
 all_pages.append({"file": "outline-builder.html", "title": "Essay Outline Builder", "html": ob_page, "nav": "study-tools.html"})
 all_pages.append({"file": "vocab-upgrader.html", "title": "Vocabulary Upgrader", "html": vu_page, "nav": "study-tools.html"})
 all_pages.append({"file": "micro-drills.html", "title": "Micro-Drills", "html": dr_page, "nav": "study-tools.html"})
-all_pages.append({"file": "ask-the-guide.html", "title": "Ask Max", "html": ac_page, "nav": "study-tools.html"})
+all_pages.append({"file": "ask-max.html", "title": "Ask Max", "html": ac_page, "nav": "study-tools.html"})
 _ed = os.path.join(PUBLIC, "assets", "exam")
 for _sub in ("b", "c"):
     os.makedirs(os.path.join(_ed, _sub), exist_ok=True)
@@ -1441,7 +1441,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),
-       '' if active_file == 'ask-the-guide.html' else '<a id="max-fab" href="ask-the-guide.html?from=' + active_file + '" aria-label="Ask Max a question"><img src="assets/img/max.jpg" alt=""><span>Ask Max</span></a>')
+       '' if active_file == 'ask-max.html' else '<a id="max-fab" href="ask-max.html?from=' + active_file + '" aria-label="Ask Max a question"><img src="assets/img/max.jpg" alt=""><span>Ask Max</span></a>')
 
 def page_toc(scope):
     lis = []
@@ -1674,7 +1674,7 @@ landing = """
     <p class="hero-sub">Units 3/4 English &middot; For the VCE English Cohort of 2026</p>
     <p class="hero-sub hero-sub2">Compiled by Mr. Morlin &middot; Version Invicta 7.9</p>
     <p class="hero-lede">Annotated exemplar essays, thematic and character quote banks, scene-by-scene analyses, frameworks for every section of the examination, the assessors&rsquo; own insights from 2024 and 2025, and a suite of interactive study tools &mdash; from flashcards to a full exam generator. The complete guide to Units 3/4 English, refined for the web.</p>
-    <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a><a class="btn btn-max" href="ask-the-guide.html"><img src="assets/img/max.jpg" alt="">Ask Max</a></div>
+    <div class="hero-cta"><a class="btn" href="%s">Start reading &#8594;</a><a class="btn btn-max" href="ask-max.html"><img src="assets/img/max.jpg" alt="">Ask Max</a></div>
   </div>
 </section>
 <div class="contents-row"><h2 class="section-head">Contents</h2><span id="resume-slot"></span></div>
@@ -1687,6 +1687,13 @@ landing = """
 """ % (nav_items[0]["file"], cards,
        exemplar_groups_html(exemplars))
 open(os.path.join(PUBLIC, "index.html"), "w", encoding="utf-8").write(shell("Home", "", "index.html", landing))
+
+# redirect stub: ask-the-guide.html -> ask-max.html
+open(os.path.join(PUBLIC, "ask-the-guide.html"), "w", encoding="utf-8").write(
+    '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+    '<meta http-equiv="refresh" content="0;url=ask-max.html">'
+    '<link rel="canonical" href="ask-max.html"><title>Ask Max</title></head>'
+    '<body><p>Max has moved: <a href="ask-max.html">ask-max.html</a></p></body></html>')
 
 nf = """
 <div class="nf-wrap">
