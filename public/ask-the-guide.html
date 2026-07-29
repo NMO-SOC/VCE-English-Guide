@@ -53,14 +53,7 @@
   <main class="content" id="main">
     <div class="part-label">Study Tools</div><div class="max-head"><img class="max-avatar" src="assets/img/max.jpg" alt="Max, the butler from Sunset Boulevard, answering the telephone"><div><h1>Ask Max</h1>
 <p class="lede">Max has read every page of this guide, and answers to no one but the text. Ask about essay structure, quotes, techniques, the assessors&rsquo; advice &mdash; and he&rsquo;ll reply from the site&rsquo;s own pages, with links to read more.</p></div></div>
-<div id="ac-chips" class="ac-chips">
-  <button type="button" class="ac-chip">How do I structure a Section A essay?</button>
-  <button type="button" class="ac-chip">What does the monkey symbolise in Sunset Boulevard?</button>
-  <button type="button" class="ac-chip">What happens in Act 2, Scene 5 of Rainbow's End?</button>
-  <button type="button" class="ac-chip">What did the assessors say about Section C?</button>
-  <button type="button" class="ac-chip">Give me quotes about reality and illusion</button>
-  <button type="button" class="ac-chip">How should I revise this week?</button>
-</div>
+<div id="ac-chips" class="ac-chips"></div>
 <div id="ac-log" class="ac-log"></div>
 <div class="tool-bar" style="align-items:stretch">
   <input id="ac-q" type="text" placeholder="Ask Max &mdash; e.g. How should I structure a Section C introduction?" style="flex:1;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--serif);font-size:16px">
@@ -369,12 +362,43 @@
   }
   btn.addEventListener('click', ask);
   q.addEventListener('keydown', function(e){ if (e.key === 'Enter') ask(); });
+  var CHIP_POOL = [
+    'How do I structure a Section A essay?',
+    'What does the monkey symbolise in Sunset Boulevard?',
+    'What happens in Act 2, Scene 5 of Rainbow’s End?',
+    'What did the assessors say about Section C?',
+    'Give me quotes about reality and illusion',
+    'How should I revise this week?',
+    'Who is Norma Desmond?',
+    'How are Gladys and Dolly different?',
+    'What does the staircase symbolise?',
+    'What is mise-en-scène?',
+    'How do I write a strong contention?',
+    'What should go in a Section B piece?',
+    'What are hinge sentences?',
+    'What quotes show Nan Dear’s resilience?',
+    'How is the Hollywood dream criticised in Sunset Boulevard?',
+    'What happened at the New Year’s Eve party?',
+    'What does the flood mean in Rainbow’s End?',
+    'What did the 2025 assessors warn about?',
+    'How do I analyse a persuasive article?',
+    'What film techniques should I mention in an essay?',
+    'How do I use topic sentences well?',
+    'What is the exam format?'
+  ];
   var chipBox = document.getElementById('ac-chips');
   if (chipBox){
-    var cbs = chipBox.querySelectorAll('.ac-chip');
-    for (var ci = 0; ci < cbs.length; ci++){
-      (function(b){ b.addEventListener('click', function(){ q.value = b.textContent; ask(); }); })(cbs[ci]);
+    var pool = CHIP_POOL.slice();
+    for (var si = pool.length - 1; si > 0; si--){
+      var sj = Math.floor(Math.random() * (si + 1));
+      var tmp = pool[si]; pool[si] = pool[sj]; pool[sj] = tmp;
     }
+    pool.slice(0, 6).forEach(function(txt){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ac-chip'; b.textContent = txt;
+      b.addEventListener('click', function(){ q.value = txt; ask(); });
+      chipBox.appendChild(b);
+    });
   }
   if (PRE_Q){ q.value = PRE_Q; ask(); }
 })();
