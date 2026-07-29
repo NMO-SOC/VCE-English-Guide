@@ -943,6 +943,13 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
   var log = document.getElementById('ac-log'), q = document.getElementById('ac-q'), btn = document.getElementById('ac-send');
   var INDEX = null, busy = false;
   var HIST = [];
+  var LASTQ = '';
+  function getTok(){ try{ return localStorage.getItem('maxTok') || ''; }catch(e){ return ''; } }
+  function workerFetch(payload, tok){
+    var h = { 'Content-Type': 'application/json' };
+    if (tok) h['X-User-Token'] = tok;
+    return fetch(window.AC_WORKER, { method: 'POST', headers: h, body: JSON.stringify(payload) });
+  }
   function saveChat(){
     try{ localStorage.setItem('maxChat', JSON.stringify({ h: log.innerHTML.slice(0, 200000), hist: HIST.slice(-2) })); }catch(e){}
   }
@@ -1122,6 +1129,7 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
   function ask(){
     var question = q.value.trim();
     if (!question || busy) return;
+    LASTQ = question;
     q.value = '';
     add('ac-user', esc(question.length > 400 ? question.slice(0, 400) + '\u2026' : question));
     var chipsEl = document.getElementById('ac-chips');
@@ -1143,10 +1151,9 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
       .then(function(d){ EMB = { dim: d.dim, vecs: d.v.map(decodeVec) }; })
       .catch(function(){ EMB = null; })
       .then(function(){ EMB_TRIED = true; });
-    var pQvec = fetch(window.AC_WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ embed: true, input: [question] })
+    var pQvec = workerFetch({ embed: true, input: [question] }).then(function(r){
+      if (!r.ok && getTok()) return workerFetch({ embed: true, input: [question] }, getTok());
+      return r;
     }).then(function(r){ return r.json(); })
       .then(function(j){ return (j.data && j.data[0] && j.data[0].embedding) || null; })
       .catch(function(){ return null; });
@@ -1260,17 +1267,49 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
           else (new Image()).src = 'https://nmo.goatcounter.com/count?p=' + encodeURIComponent('max-cite/' + topPage) + '&e=true';
         }catch(gcErr){}
       }
-      return fetch(window.AC_WORKER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: 700 })
-      }).then(function(r){ return r.json(); }).then(function(j){
+      var chatPayload = { messages: [{ role: 'user', content: prompt }], max_tokens: 700 };
+      return workerFetch(chatPayload).then(function(r){
+        if (r.ok) return r.json();
+        return r.json()['catch'](function(){ return {}; }).then(function(je){
+          var tk = getTok();
+          if (tk){
+            return workerFetch(chatPayload, tk).then(function(r2){
+              if (r2.ok) return r2.json();
+              return r2.json()['catch'](function(){ return {}; }).then(function(je2){
+                var m2 = (je2.error && (je2.error.message || je2.error)) || ('HTTP ' + r2.status);
+                throw new Error('The shared allowance is used up and your personal key could not be used either (' + m2 + '). It may be out of quota or invalid - you can paste a new one by asking again.');
+              });
+            });
+          }
+          var em = { tokenNeeded: true };
+          throw em;
+        });
+      }).then(function(j){
         if (j.error){ throw new Error(j.error.message || j.error); }
         var ans = j.choices && j.choices[0] ? j.choices[0].message.content : 'No answer returned.';
         renderFinal(ans);
       });
-    }).catch(function(e){
-      wait.innerHTML = 'Something went wrong: ' + esc(String(e.message || e)) + '<br>If this keeps happening, the service may be at its daily limit \u2014 the guide itself is always here.';
+    })['catch'](function(e){
+      if (e && e.tokenNeeded){
+        wait.innerHTML = 'The household\u2019s shared allowance for today is spent, I\u2019m afraid \u2014 it renews daily. ' +
+          'If you\u2019d like to continue now, you can lend Max your own free key: sign in to GitHub, create a ' +
+          '<a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained personal access token</a> ' +
+          'with the <strong>Models</strong> account permission (read-only), and paste it below. It stays on this device only, ' +
+          'and Max returns to the house account automatically once the shared allowance renews.' +
+          '<div class="ac-tokrow"><input id="ac-tok" type="password" placeholder="github_pat_&hellip;" autocomplete="off">' +
+          '<button type="button" id="ac-tok-save">Save key</button></div>';
+        var inp = wait.querySelector('#ac-tok'), sv = wait.querySelector('#ac-tok-save');
+        if (sv) sv.addEventListener('click', function(){
+          var v = inp.value.trim();
+          if (!v) return;
+          try{ localStorage.setItem('maxTok', v); }catch(se){}
+          wait.innerHTML = 'Key received and kept safely on this device. One moment \u2014 asking again&hellip;';
+          if (LASTQ){ q.value = LASTQ; ask(); }
+        });
+      } else {
+        wait.innerHTML = 'Something went wrong: ' + esc(String(e.message || e)) + '<br>If this keeps happening, the service may be at its daily limit \u2014 the guide itself is always here.';
+      }
+      saveChat();
     }).then(function(){ busy = false; btn.disabled = false; });
   }
   btn.addEventListener('click', ask);
@@ -1474,7 +1513,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=39">
+<link rel="stylesheet" href="assets/style.css?v=40">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1503,7 +1542,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=39"></script>
+<script src="assets/site.js?v=40"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),
