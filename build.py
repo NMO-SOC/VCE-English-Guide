@@ -1294,11 +1294,11 @@ ac_page = TOOL_LABEL + """<div class="max-head"><img class="max-avatar" src="ass
     })['catch'](function(e){
       if (e && e.tokenNeeded){
         wait.innerHTML = 'The household\u2019s shared allowance for today is spent, I\u2019m afraid \u2014 it renews daily. ' +
-          'If you\u2019d like to continue now, you can lend Max your own free key: sign in to GitHub, create a ' +
-          '<a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained personal access token</a> ' +
-          'with the <strong>Models</strong> account permission (read-only), and paste it below. It stays on this device only, ' +
+          'If you\u2019d like to continue now, you can lend Max your own free key: sign in with a Google account at ' +
+          '<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>, ' +
+          'click <strong>Create API key</strong>, and paste it below. It stays on this device only, ' +
           'and Max returns to the house account automatically once the shared allowance renews.' +
-          '<div class="ac-tokrow"><input id="ac-tok" type="password" placeholder="github_pat_&hellip;" autocomplete="off">' +
+          '<div class="ac-tokrow"><input id="ac-tok" type="password" placeholder="AIza&hellip;" autocomplete="off">' +
           '<button type="button" id="ac-tok-save">Save key</button></div>';
         var inp = wait.querySelector('#ac-tok'), sv = wait.querySelector('#ac-tok-save');
         if (sv) sv.addEventListener('click', function(){
