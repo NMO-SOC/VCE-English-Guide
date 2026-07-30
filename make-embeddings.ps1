@@ -3,7 +3,7 @@
 # Usage: powershell -ExecutionPolicy Bypass -File make-embeddings.ps1
 
 $worker = "https://jolly-waterfall-d01a.nicholas-morlin.workers.dev/"
-$dim = 256
+$dim = 768
 $idxPath = "public/assets/search.json"
 $outPath = "public/assets/embeddings.json"
 
