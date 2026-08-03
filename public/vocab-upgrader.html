@@ -69,7 +69,7 @@
   function check(){
     var text = ta.value;
     if (!text.trim()){ out.innerHTML = ''; document.getElementById('vu-count').textContent = ''; return; }
-    var pattern = new RegExp('\b(' + keys.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')\b', 'gi');
+    var pattern = new RegExp('\\b(' + keys.map(function(k){ return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')\\b', 'gi');
     var n = 0, html = '';
     var last = 0, m;
     while ((m = pattern.exec(text)) !== null){
