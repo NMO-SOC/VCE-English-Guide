@@ -637,7 +637,7 @@ eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
   <span class="tool-count" id="eg-note"></span>
 </div>
 <p style="font-family:var(--sans);font-size:13.5px;color:var(--muted)">Every exam is assembled fresh from the question banks the moment you click. Print it and sit it under timed conditions &mdash; then mark it against the <a href="part-09-exam-assessment-criteria.html">assessment criteria</a> or with the <a href="marker.html">Essay Marker</a>.</p>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="assets/vendor/jszip.min.js"></script>
 <script>window.EG_DATA = %s; window.EG_SLOTS = %s;</script>
 <script>
 (function(){
