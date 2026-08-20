@@ -517,3 +517,23 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
   .ac-dots i{animation:none;opacity:.7}
   #max-fab,.ac-chip{transition:none}
 }
+
+/* ---- The Director's Cut (scavenger hunt) ---- */
+.hunt-dots{display:flex;gap:8px;flex-wrap:wrap;margin:1em 0}
+.hunt-dot{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:16px;padding:5px 12px}
+.hunt-dot.done{background:var(--gold);color:#2a2005;border-color:var(--gold)}
+.hunt-dot.now{border-color:var(--accent);color:var(--accent)}
+.hunt-card{margin:1.2em 0}
+.hunt-stage{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:22px 26px}
+.hunt-num{font-family:var(--sans);font-size:11.5px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px}
+.hunt-q{font-size:17px;line-height:1.65;margin:0 0 4px}
+.hunt-msg{font-family:var(--sans);font-size:13.5px;color:var(--accent);min-height:20px}
+.hunt-small{font-family:var(--sans);font-size:12px;color:var(--muted)}
+.hunt-hint{font-family:var(--sans);font-size:13.5px;margin-top:8px}
+.hunt-hint summary{cursor:pointer;color:var(--gold-text);font-weight:700}
+.hunt-reset{background:none;border:none;color:var(--muted);cursor:pointer;font-family:var(--sans);font-size:12px;text-decoration:underline;padding:0}
+.hunt-done{text-align:center;padding:40px 20px;background:var(--card);border:1px solid var(--gold);border-radius:14px}
+.hunt-code{font-family:var(--sans);font-size:30px;font-weight:800;letter-spacing:4px;color:var(--gold-text);margin-bottom:14px}
+@keyframes huntshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hunt-shake{animation:huntshake .25s}
+@media (prefers-reduced-motion:reduce){.hunt-shake{animation:none}}

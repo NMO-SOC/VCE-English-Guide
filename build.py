@@ -1373,6 +1373,7 @@ hub_tools = TOOL_LABEL + """<h1>Study Tools</h1>
   <a class="ch-card" href="vocab-upgrader.html"><span class="ch-num">8</span><span>Vocabulary Upgrader</span></a>
   <a class="ch-card" href="micro-drills.html"><span class="ch-num">9</span><span>Micro-Drills</span></a>
   <a class="ch-card" href="ask-max.html"><span class="ch-num">10</span><span>Ask Max</span></a>
+  <a class="ch-card" href="scavenger-hunt.html"><span class="ch-num">11</span><span>The Director&rsquo;s Cut</span></a>
 </div>
 <p style="font-family:var(--sans);font-size:14px;color:var(--muted)">The Essay Marker gives a calibrated score out of 10 with criteria-based feedback for Sections A, B and C. It needs an AI connection: a free GitHub Models token or an Anthropic API key (set up inside the tool; stored only in your browser).</p>"""
 
@@ -1388,11 +1389,89 @@ nav_items.append({"num": tools_num, "title": "Study Tools", "file": "study-tools
                                {"title": "Essay Outline Builder", "file": "outline-builder.html"},
                                {"title": "Vocabulary Upgrader", "file": "vocab-upgrader.html"},
                                {"title": "Micro-Drills", "file": "micro-drills.html"},
-                               {"title": "Ask Max", "file": "ask-max.html"}]})
+                               {"title": "Ask Max", "file": "ask-max.html"},
+                               {"title": "The Director's Cut", "file": "scavenger-hunt.html"}]})
 all_pages.append({"file": "study-tools.html", "title": "Study Tools", "html": hub_tools, "nav": "study-tools.html"})
 all_pages.append({"file": "flashcards.html", "title": "Quote Flashcards", "html": fc_page, "nav": "study-tools.html"})
 all_pages.append({"file": "practice-topics.html", "title": "Practice Topics & Essay Timer", "html": tp_page, "nav": "study-tools.html"})
 all_pages.append({"file": "glossary.html", "title": "Glossary of Techniques", "html": gl_page, "nav": "study-tools.html"})
+hunt_page = TOOL_LABEL + """<h1>The Director’s Cut</h1>
+<p class="lede">A ten-stage scavenger hunt through this guide. Every answer is buried in these pages — in the scenes, the quote banks, the glossary, the exemplars. No answer is typed anywhere in this page’s code, so there is only one way through: read like a top-scoring student. Progress saves on this device. Finish, and bring what you find to Mr Morlin.</p>
+<div id="hunt-dots" class="hunt-dots"></div>
+<div id="hunt-card" class="hunt-card"></div>
+<p style="font-family:var(--sans);font-size:12px;color:var(--muted)"><button type="button" id="hunt-reset" class="hunt-reset">Start over</button></p>
+<script>
+(function(){
+  var ST = [{n:'I',q:'Begin where the story ends. Our narrator addresses you from the one place in Hollywood he never wanted top billing — face-down. In one word, what does he float in?',h:'The Scene Summaries of <em>Sunset Boulevard</em> — first scene and last.',a:['4f913a06','50a56b7b','84450421']},{n:'II',q:'‘What a woman! What a part! The Princess in love with a Holy man.’ Her dance costs a holy man his head — and her script costs Joe far more. Name her.',h:'The thematic quote banks of <em>Sunset Boulevard</em> — fame has its own obsessions.',a:['f79d7978']},{n:'III',q:'The most deceptively simple technique of all: everything that appears within the frame, and where the director chose to place it. Name it — the French is welcome.',h:'Film Techniques — the analysis of particular scenes.',a:['34ee6e99','9b141ba8','3d589a5e']},{n:'IV',q:'Complete Joe’s cruellest kindness: ‘There’s nothing tragic about being fifty — not unless you try to be ______.’',h:'The character quote banks — or the theme where gender roles are laid bare.',a:['61671bc','28a4600c']},{n:'V',q:'He arrives at Rainbow’s End selling the whole world in instalments, and accidentally insults the crockery. What does he sell? (plural)',h:'Character analysis — the nervous salesman.',a:['ac83c8f2','120418cd','2a2f2f5','8cfd786c']},{n:'VI',q:'Gladys’s recurring dream reaches all the way to the throne — an impossible vision the play stages in interludes. Whom does she imagine meeting?',h:'Structure and themes in <em>Rainbow’s End</em> — dream sequences and juxtaposition.',a:['589da9df','846a8868']},{n:'VII',q:'‘Waterlogged’ and ‘mud-spattered’, built from flattened kero tins on a floodplain — yet it shelters the fiercest love in the play. Name the dwelling.',h:'Language in <em>Rainbow’s End</em> — structural and symbolic language.',a:['da81df3','9eb5484e','845f3796']},{n:'VIII',q:'A road diverged at a family dinner, and a 19/20 writer took it. Give the title of that Creating Texts piece.',h:'The sample pieces under Creating Texts.',a:['6a2759e1','7b9688b6']},{n:'IX',q:'School is distracting. School is boring. School sucks. Name the technique that just tried to persuade you — repetition at the start of successive clauses.',h:'The Glossary of Techniques — or Analysing Argument’s terms and strategies.',a:['6e9984d2']},{n:'X',q:'Synthesis, to finish: the year Wilder’s picture premiered — the very era in which the Dear family rebuilds on the Flats. Four digits unlock the end.',h:'Background and context — both texts share a decade.',a:['a6cce00f']}];
+  var CIPHER = 'ZydpdGEkEHczc3xEGhl6dWtsMyw=';
+  var card = document.getElementById('hunt-card'), dots = document.getElementById('hunt-dots');
+  var REBUFF = ['Not quite \u2014 the house rewards closer reading.',
+    'Max shakes his head. Consult the guide again.',
+    'The reel keeps spinning. Look once more.'];
+  function nrm(s){ return s.toLowerCase().replace(/[^a-z0-9]/g, ''); }
+  function fnv(s){
+    var h = 2166136261 >>> 0;
+    for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h.toString(16);
+  }
+  function state(){ try{ return JSON.parse(localStorage.getItem('huntState') || '{"n":0,"w":0}'); }catch(e){ return { n: 0, w: 0 }; } }
+  function save(st){ try{ localStorage.setItem('huntState', JSON.stringify(st)); }catch(e){} }
+  function renderDots(n){
+    var out = '';
+    for (var i = 0; i < ST.length; i++){
+      out += '<span class="hunt-dot' + (i < n ? ' done' : (i === n ? ' now' : '')) + '">' + ST[i].n + '</span>';
+    }
+    dots.innerHTML = out;
+  }
+  function finish(){
+    var key = '';
+    for (var i = 0; i < ST.length; i++){ key += ST[i].a[0]; }
+    var raw = atob(CIPHER), out = '';
+    for (var j = 0; j < raw.length; j++){ out += String.fromCharCode(raw.charCodeAt(j) ^ key.charCodeAt(j % key.length)); }
+    card.innerHTML = '<div class="hunt-done"><div class="hunt-code">' + out + '</div>' +
+      '<p>All ten locks opened. You have crossed both texts, walked a personal journey and named the machinery of persuasion \u2014 that is a revision session most students never do. Show the words above to Mr Morlin.</p></div>';
+    renderDots(ST.length);
+  }
+  function render(){
+    var st = state();
+    renderDots(st.n);
+    if (st.n >= ST.length){ finish(); return; }
+    var s = ST[st.n];
+    card.innerHTML = '<div class="hunt-stage"><div class="hunt-num">Stage ' + s.n + ' of X</div>' +
+      '<p class="hunt-q">' + s.q + '</p>' +
+      '<div class="tool-bar" style="margin:.6em 0"><input id="hunt-a" type="text" autocomplete="off" placeholder="Your answer\u2026" style="flex:1;padding:11px 14px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font-family:var(--serif);font-size:15.5px"><button id="hunt-go">Unlock</button></div>' +
+      '<div id="hunt-msg" class="hunt-msg"></div>' +
+      (st.w >= 2 ? '<details class="hunt-hint"><summary>Where to look</summary><p>' + s.h + '</p></details>' : '<p class="hunt-small">A hint appears after two wrong tries.</p>') +
+      '</div>';
+    var inp = document.getElementById('hunt-a'), go = document.getElementById('hunt-go'), msg = document.getElementById('hunt-msg');
+    function attempt(){
+      var v = nrm(inp.value);
+      if (!v) return;
+      var hv = fnv('h' + (st.n + 1) + ':' + v);
+      if (s.a.indexOf(hv) > -1){
+        var ns = state(); ns.n += 1; ns.w = 0; save(ns); render();
+        window.scrollTo({ top: 0 });
+      } else {
+        var ns2 = state(); ns2.w += 1; save(ns2);
+        msg.textContent = REBUFF[ns2.w % REBUFF.length];
+        card.querySelector('.hunt-stage').classList.remove('hunt-shake');
+        void card.offsetWidth;
+        card.querySelector('.hunt-stage').classList.add('hunt-shake');
+        if (ns2.w === 2) render();
+      }
+    }
+    go.addEventListener('click', attempt);
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') attempt(); });
+    inp.focus();
+  }
+  document.getElementById('hunt-reset').addEventListener('click', function(){
+    try{ localStorage.removeItem('huntState'); }catch(e){}
+    render();
+  });
+  render();
+})();
+</script>"""
+
 all_pages.append({"file": "essay-marker.html", "title": "Essay Marker", "html": em_page, "nav": "study-tools.html"})
 all_pages.append({"file": "technique-quiz.html", "title": "Technique Quiz", "html": qz_page, "nav": "study-tools.html"})
 all_pages.append({"file": "exam-generator.html", "title": "Exam Generator", "html": eg_page, "nav": "study-tools.html"})
@@ -1400,6 +1479,7 @@ all_pages.append({"file": "outline-builder.html", "title": "Essay Outline Builde
 all_pages.append({"file": "vocab-upgrader.html", "title": "Vocabulary Upgrader", "html": vu_page, "nav": "study-tools.html"})
 all_pages.append({"file": "micro-drills.html", "title": "Micro-Drills", "html": dr_page, "nav": "study-tools.html"})
 all_pages.append({"file": "ask-max.html", "title": "Ask Max", "html": ac_page, "nav": "study-tools.html"})
+all_pages.append({"file": "scavenger-hunt.html", "title": "The Director's Cut", "html": hunt_page, "nav": "study-tools.html", "nosearch": True})
 _ed = os.path.join(PUBLIC, "assets", "exam")
 for _sub in ("b", "c"):
     os.makedirs(os.path.join(_ed, _sub), exist_ok=True)
@@ -1487,7 +1567,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=42">
+<link rel="stylesheet" href="assets/style.css?v=43">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1516,7 +1596,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=42"></script>
+<script src="assets/site.js?v=43"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),
@@ -1535,6 +1615,7 @@ def page_toc(scope):
 # ---------------- search index ----------------
 search = []
 for pg in all_pages:
+    if pg.get("nosearch"): continue
     if "chapter" in pg:
         scope, part_title = pg["chapter"]["sec"], pg["part"]["title"]
     elif "part" in pg:
