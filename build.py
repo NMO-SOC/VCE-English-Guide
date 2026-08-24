@@ -1652,25 +1652,43 @@ json.dump(search, open(os.path.join(PUBLIC, "assets", "search.json"), "w", encod
 
 # ---------------- write pages ----------------
 PRACTICE_LINKS = """
-<p>Official past VCE English examinations and examiner reports are published by the VCAA:</p>
-<p><a class="btn-inline" href="https://www.vcaa.vic.edu.au/assessment/vce/examination-specifications-past-examinations-and-examination-reports/english" target="_blank" rel="noopener">Past VCE English examinations (VCAA)</a></p>
-<h2>Practice exams</h2>
-<p>The following practice exams are hosted externally (a free account may be required to view them). They open in a new tab.</p>
-<ul class="exp-list exam-links">
-<li><a href="https://www.studocu.com/en-au/document/hillcrest-christian-college/english/vce-english-section-c-exam-practice-2024-insight-publications/144053159" target="_blank" rel="noopener">Practice Exam I</a></li>
-<li><a href="https://www.studocu.com/en-au/document/kew-high-school/vce-english/vce-english-practice-exam-analyzing-boxing-risks-vs-ama-credibility/127292037" target="_blank" rel="noopener">Practice Exam II</a></li>
-<li><a href="https://www.studocu.com/en-au/document/john-monash-science-school/chemistry-unit-4/vce-english-year-12-trial-exam-paper-2024-comprehensive-task-book/163993956" target="_blank" rel="noopener">Practice Exam III</a></li>
-<li><a href="https://www.studocu.com/en-au/document/melbourne-high-school/english/2025-tssm-vce-english-trial-exam-question-answer-book/142530772" target="_blank" rel="noopener">Practice Exam IV</a></li>
-<li><a href="https://www.studocu.com/en-au/document/melbourne-high-school/english/2025-vce-english-year-12-trial-exam-task-book/143045324" target="_blank" rel="noopener">Practice Exam V</a></li>
-<li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-year-12-trial-exam-task-book/141298123" target="_blank" rel="noopener">Practice Exam VI</a></li>
-<li><a href="https://www.studocu.com/en-au/document/loreto-mandeville-hall-toorak/english/2025-vce-english-trial-examination-comprehensive-study-guide/141298120" target="_blank" rel="noopener">Practice Exam VII</a></li>
-</ul>
-<h2>School-purchased trial exams</h2>
-<p>The following trial exams were purchased by South Oakleigh College under licence for the exclusive use of its students. They are available only through the school&rsquo;s SharePoint &mdash; sign in with your school account to view them. Please do not share, repost or distribute them outside the school.</p>
-<ul class="exp-list exam-links">
-<li><a href="https://eduvic.sharepoint.com/:b:/r/sites/EDUVIC_SOC_26_EN34A_NMO/Shared%20Documents/General/Practice%20Exams/Practice%20Exam%20VIII%20with%20Model%20Section%20C.pdf?csf=1&web=1&e=icqicL" target="_blank" rel="noopener">Practice Exam VIII with Model Section C</a></li>
-<li><a href="https://eduvic.sharepoint.com/:b:/r/sites/EDUVIC_SOC_26_EN34A_NMO/Shared%20Documents/General/Practice%20Exams/practice-exam-ix.pdf?csf=1&web=1&e=mycdzw" target="_blank" rel="noopener">Practice Exam IX</a></li>
-</ul>
+<div id="px-gate">
+  <p class="lede">The practice exam collection is for this class only. Enter the class password to open it.</p>
+  <div class="tool-bar" style="margin:.6em 0"><input id="px-pw" type="password" autocomplete="off" placeholder="Class password" style="max-width:220px;padding:9px 13px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font-family:var(--sans);font-size:14px"><button id="px-go">Unlock</button></div>
+  <p id="px-msg" style="font-family:var(--sans);font-size:12.5px;color:var(--muted)">Ask Mr Morlin for the class password.</p>
+</div>
+<div id="px-content"></div>
+<script>
+(function(){
+  var H = '2cb61a83', ENC = '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';
+  var gate = document.getElementById('px-gate'), box = document.getElementById('px-content');
+  var pw = document.getElementById('px-pw'), go = document.getElementById('px-go'), msg = document.getElementById('px-msg');
+  function fnv(s){
+    var h = 2166136261 >>> 0;
+    for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h.toString(16);
+  }
+  function unlock(p){
+    if (fnv('gate:' + p) !== H) return false;
+    var raw = atob(ENC), stream = '', i = 0;
+    while (stream.length < raw.length){ stream += fnv(p + ':' + i); i++; }
+    var out = '';
+    for (var j = 0; j < raw.length; j++){ out += String.fromCharCode(raw.charCodeAt(j) ^ stream.charCodeAt(j)); }
+    try{ out = decodeURIComponent(escape(out)); }catch(ue){}
+    box.innerHTML = out; gate.style.display = 'none';
+    return true;
+  }
+  function attempt(){
+    var p = pw.value.trim().toLowerCase();
+    if (!p) return;
+    if (unlock(p)){ try{ localStorage.setItem('pxPass', p); }catch(e){} }
+    else { msg.textContent = 'Not the password \u2014 ask Mr Morlin in class.'; }
+  }
+  go.addEventListener('click', attempt);
+  pw.addEventListener('keydown', function(e){ if (e.key === 'Enter') attempt(); });
+  try{ var saved = localStorage.getItem('pxPass'); if (saved) unlock(saved); }catch(e){}
+})();
+</script>
 """
 
 for k, pg in enumerate(all_pages):
