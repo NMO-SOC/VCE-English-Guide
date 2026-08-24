@@ -537,3 +537,11 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
 @keyframes huntshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .hunt-shake{animation:huntshake .25s}
 @media (prefers-reduced-motion:reduce){.hunt-shake{animation:none}}
+
+/* ---- Sentence Starters ---- */
+.sst-group{margin:1.6em 0}
+.sst-pills{display:flex;flex-wrap:wrap;gap:8px}
+.sst-chip{font-family:var(--sans);font-size:13.5px;color:var(--ink);background:var(--soft);border:1px solid var(--soft-bd);border-radius:16px;padding:8px 14px;cursor:pointer;transition:border-color .15s,background .15s,transform .1s;text-align:left}
+.sst-chip:hover{border-color:var(--gold);background:var(--tint)}
+.sst-chip.sst-copied{border-color:var(--gold);background:var(--gold);color:#2a2005;transform:scale(1.04)}
+.sst-template{border-left:4px solid var(--gold);background:var(--soft);border-radius:0 10px 10px 0;padding:14px 20px;margin:.8em 0;font-size:15.5px}

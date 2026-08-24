@@ -312,6 +312,17 @@ _last6 = max(i for i, p in enumerate(all_pages) if p.get("nav") == P06)
 all_pages.insert(_last6 + 1, {"file": "vocabulary.html", "title": "High-Scoring Vocabulary Bank",
                               "html": VOCAB_HTML, "nav": P06})
 
+SST_HTML = open(os.path.join(BUILD, "snippets", "sentence-starters.html"), encoding="utf-8").read()
+for _it in nav_items:
+    if _it["file"] == P06:
+        _it["chapters"].append({"title": "Sentence Starters for Analytical Writing", "file": "sentence-starters.html"})
+for _pg in all_pages:
+    if _pg["file"] == P06 and "chapters" in _pg:
+        _pg["chapters"].append({"title": "Sentence Starters for Analytical Writing", "file": "sentence-starters.html"})
+_last6b = max(i for i, p in enumerate(all_pages) if p.get("nav") == P06)
+all_pages.insert(_last6b + 1, {"file": "sentence-starters.html", "title": "Sentence Starters for Analytical Writing",
+                              "html": SST_HTML, "nav": P06})
+
 for e in exemplars:
     e["url"] = (id_to_page.get(e["id"], "index.html") + "#" + e["id"]) if e["id"] else "index.html"
 
@@ -1567,7 +1578,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=43">
+<link rel="stylesheet" href="assets/style.css?v=44">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1596,7 +1607,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=43"></script>
+<script src="assets/site.js?v=44"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),
