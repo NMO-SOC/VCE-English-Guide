@@ -1872,6 +1872,7 @@ landing = """
 %s
 <div class="site-foot">
   <div class="sf-motto">Sapere Aude</div>
+  <div class="sf-sub">This site is provided free and as-is for study purposes, without warranty of any kind. Content is offered in good faith but may contain errors &mdash; verify anything high-stakes with your teacher. External links lead to sites not controlled by the author, and no liability is accepted for their content or for any loss arising from use of this site.</div>
 </div>
 """ % (nav_items[0]["file"], cards,
        exemplar_groups_html(exemplars))
