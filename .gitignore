@@ -12,3 +12,5 @@
 # stray rsync temp file
 .*.uNCYW1
 .ExamGenerator.exe.*
+localpdf/practice-exam-viii.pdf
+localpdf/practice-exam-ix.pdf
