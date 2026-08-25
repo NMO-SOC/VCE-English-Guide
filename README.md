@@ -33,5 +33,3 @@ links lead to third-party sites outside the author's control. To the maximum
 extent permitted by law, the author accepts **no liability** for any loss or
 damage arising from use of this site, its tools, its AI-generated responses,
 or any linked content.
-
-Feedback and error reports: nicholas.morlin@education.vic.gov.au
