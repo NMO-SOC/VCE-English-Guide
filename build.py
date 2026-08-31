@@ -712,8 +712,12 @@ eg_page = TOOL_LABEL + """<h1>Exam Generator</h1>
 
 # ---------- outline builder (static page, no % formatting) ----------
 ob_page = TOOL_LABEL + """<h1>Essay Outline Builder</h1>
-<p class="lede">Plan a body paragraph with the Th.E.S.A.M.L. method. Fill in each element, then copy or print your plan. Everything autosaves on this device.</p>
-<div class="ob-field"><label>Contention (your essay&rsquo;s overall argument)</label><textarea id="ob-contention" rows="2" placeholder="e.g. Obsession with self is what ultimately leads to the downfall of characters."></textarea></div>
+<p class="lede">Plan body paragraphs with the right scaffold for the task: <b>Th.E.S.A.M.L.</b> for a Section A text response, <b>What &middot; How &middot; Why</b> for Section C analysing argument. (Section B pieces are not built from a formula &mdash; see <a href="part-05-creating-texts.html">Creating Texts</a>.) Everything autosaves on this device.</p>
+<div class="tool-bar" id="ob-modes">
+  <button type="button" class="ob-mode" data-m="a">Section A &mdash; Th.E.S.A.M.L.</button>
+  <button type="button" class="ob-mode" data-m="c">Section C &mdash; What &middot; How &middot; Why</button>
+</div>
+<div class="ob-field"><label id="ob-cont-label">Contention (your essay&rsquo;s overall argument)</label><textarea id="ob-contention" rows="2" placeholder="e.g. Obsession with self is what ultimately leads to the downfall of characters."></textarea></div>
 <div id="ob-paras"></div>
 <div class="tool-bar">
   <button id="ob-add">+ Add paragraph</button>
@@ -725,27 +729,53 @@ ob_page = TOOL_LABEL + """<h1>Essay Outline Builder</h1>
 <div id="ob-preview" class="ob-preview"></div>
 <script>
 (function(){
-  var FIELDS = [
-    ['th', 'Th \u2014 Thematic topic sentence', 'A sentence based on a theme, not a character.'],
-    ['e', 'E \u2014 Evidence', 'Quotes and scenes that support the theme.'],
-    ['s', 'S \u2014 Symbols', 'Symbols, context and setting that relate to the theme.'],
-    ['a', 'A \u2014 Authorial intention', 'What was the author intending?'],
-    ['m', 'M \u2014 Metalanguage', 'The techniques you will name and analyse.'],
-    ['l', 'L \u2014 Linking sentence', 'Link back to your contention.']
-  ];
-  var state = { contention: '', paras: [{}] };
-  try { var sv = JSON.parse(localStorage.getItem('obState') || 'null'); if (sv && sv.paras) state = sv; } catch(e){}
+  var FIELDSETS = {
+    a: [
+      ['th', 'Th \u2014 Thematic topic sentence', 'A sentence based on a theme, not a character.'],
+      ['e', 'E \u2014 Evidence', 'Quotes and scenes that support the theme.'],
+      ['s', 'S \u2014 Symbols', 'Symbols, context and setting that relate to the theme.'],
+      ['a', 'A \u2014 Authorial intention', 'What was the author intending?'],
+      ['m', 'M \u2014 Metalanguage', 'The techniques you will name and analyse.'],
+      ['l', 'L \u2014 Linking sentence', 'Link back to your contention.']
+    ],
+    c: [
+      ['what', 'What \u2014 The argument', 'What is the author arguing at this point of the piece?'],
+      ['how', 'How \u2014 Technique and evidence', 'Which persuasive technique or language choice, with a short embedded quote?'],
+      ['why', 'Why \u2014 Effect on the audience', 'How does this position the specific target audience to think, feel or act?']
+    ]
+  };
+  var CONT = {
+    a: ['Contention (your essay\u2019s overall argument)', 'e.g. Obsession with self is what ultimately leads to the downfall of characters.'],
+    c: ['Opening overview \u2014 author, form, contention, tone, audience', 'e.g. In her opinion piece, [author] contends that\u2026 in a [tone] tone, targeting\u2026']
+  };
+  var FIELDS;
+  var state = { mode: 'a', a: { contention: '', paras: [{}] }, c: { contention: '', paras: [{}] } };
+  try {
+    var sv = JSON.parse(localStorage.getItem('obState') || 'null');
+    if (sv && sv.a && sv.c) state = sv;
+    else if (sv && sv.paras) state.a = sv;
+  } catch(e){}
+  function cur(){ return state[state.mode]; }
+  function setMode(m){
+    state.mode = m;
+    FIELDS = FIELDSETS[m];
+    document.getElementById('ob-cont-label').textContent = CONT[m][0];
+    document.getElementById('ob-contention').placeholder = CONT[m][1];
+    var mb = document.querySelectorAll('.ob-mode');
+    for (var i = 0; i < mb.length; i++){ mb[i].classList.toggle('ob-mode-on', mb[i].getAttribute('data-m') === m); }
+    save(); render(); preview();
+  }
   function save(){ try { localStorage.setItem('obState', JSON.stringify(state)); } catch(e){} }
   function render(){
-    document.getElementById('ob-contention').value = state.contention || '';
+    document.getElementById('ob-contention').value = cur().contention || '';
     var host = document.getElementById('ob-paras'); host.innerHTML = '';
-    state.paras.forEach(function(p, pi){
+    cur().paras.forEach(function(p, pi){
       var box = document.createElement('div'); box.className = 'ob-para';
       var head = document.createElement('div'); head.className = 'ob-para-head';
       head.innerHTML = '<b>Body paragraph ' + (pi + 1) + '</b>';
-      if (state.paras.length > 1){
+      if (cur().paras.length > 1){
         var rm = document.createElement('button'); rm.textContent = 'Remove'; rm.className = 'ob-rm';
-        rm.addEventListener('click', function(){ state.paras.splice(pi, 1); save(); render(); preview(); });
+        rm.addEventListener('click', function(){ cur().paras.splice(pi, 1); save(); render(); preview(); });
         head.appendChild(rm);
       }
       box.appendChild(head);
@@ -760,8 +790,8 @@ ob_page = TOOL_LABEL + """<h1>Essay Outline Builder</h1>
     });
   }
   function planText(){
-    var out = 'ESSAY PLAN' + String.fromCharCode(10) + 'Contention: ' + (state.contention || '') + String.fromCharCode(10);
-    state.paras.forEach(function(p, pi){
+    var out = 'ESSAY PLAN (' + (state.mode === 'a' ? 'Section A - Th.E.S.A.M.L.' : 'Section C - What/How/Why') + ')' + String.fromCharCode(10) + (state.mode === 'a' ? 'Contention: ' : 'Overview: ') + (cur().contention || '') + String.fromCharCode(10);
+    cur().paras.forEach(function(p, pi){
       out += String.fromCharCode(10) + 'BODY PARAGRAPH ' + (pi + 1) + String.fromCharCode(10);
       FIELDS.forEach(function(f){ if (p[f[0]]) out += '  ' + f[1] + ': ' + p[f[0]] + String.fromCharCode(10); });
     });
@@ -770,8 +800,8 @@ ob_page = TOOL_LABEL + """<h1>Essay Outline Builder</h1>
   function esc(s){ return s.replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
   function preview(){
     var h = '<h2>Your plan</h2>';
-    if (state.contention) h += '<p><b>Contention:</b> ' + esc(state.contention) + '</p>';
-    state.paras.forEach(function(p, pi){
+    if (cur().contention) h += '<p><b>' + (state.mode === 'a' ? 'Contention' : 'Overview') + ':</b> ' + esc(cur().contention) + '</p>';
+    cur().paras.forEach(function(p, pi){
       var rows = FIELDS.filter(function(f){ return p[f[0]]; });
       if (!rows.length) return;
       h += '<h3>Body paragraph ' + (pi + 1) + '</h3><ul>';
@@ -780,12 +810,16 @@ ob_page = TOOL_LABEL + """<h1>Essay Outline Builder</h1>
     });
     document.getElementById('ob-preview').innerHTML = h;
   }
-  document.getElementById('ob-contention').addEventListener('input', function(e){ state.contention = e.target.value; save(); preview(); });
-  document.getElementById('ob-add').addEventListener('click', function(){ if (state.paras.length < 5){ state.paras.push({}); save(); render(); } });
+  document.getElementById('ob-contention').addEventListener('input', function(e){ cur().contention = e.target.value; save(); preview(); });
+  document.getElementById('ob-add').addEventListener('click', function(){ if (cur().paras.length < 5){ cur().paras.push({}); save(); render(); } });
   document.getElementById('ob-copy').addEventListener('click', function(){ navigator.clipboard.writeText(planText()).then(function(){ document.getElementById('ob-copy').textContent = 'Copied \u2713'; setTimeout(function(){ document.getElementById('ob-copy').textContent = 'Copy plan'; }, 1500); }); });
   document.getElementById('ob-print').addEventListener('click', function(){ window.print(); });
-  document.getElementById('ob-clear').addEventListener('click', function(){ if (confirm('Clear the whole plan?')){ state = { contention: '', paras: [{}] }; save(); render(); preview(); } });
-  render(); preview();
+  document.getElementById('ob-clear').addEventListener('click', function(){ if (confirm('Clear this plan?')){ state[state.mode] = { contention: '', paras: [{}] }; save(); render(); preview(); } });
+  var mbs = document.querySelectorAll('.ob-mode');
+  for (var mi = 0; mi < mbs.length; mi++){
+    (function(b){ b.addEventListener('click', function(){ setMode(b.getAttribute('data-m')); }); })(mbs[mi]);
+  }
+  setMode(state.mode || 'a');
 })();
 </script>"""
 
@@ -1578,7 +1612,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
 <meta property="og:description" content="South Oakleigh College Units 3/4 English exam preparation guide - texts, essays, practice exams and study tools.">
 <meta property="og:image" content="https://nmo-soc.github.io/VCE-English-Guide/assets/img/soc-logo.png">
 <script>try{if(localStorage.getItem('siteTheme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-<link rel="stylesheet" href="assets/style.css?v=44">
+<link rel="stylesheet" href="assets/style.css?v=45">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1607,7 +1641,7 @@ def shell(title, active_nav, active_file, main_html, prevnext=""):
   </main>
 </div>
 %s
-<script src="assets/site.js?v=44"></script>
+<script src="assets/site.js?v=45"></script>
 <script data-goatcounter="https://nmo.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>""" % (html.escape(title), SITE_TITLE, html.escape(title), nav_html(active_nav, active_file), fix_quotes(main_html), fix_quotes(prevnext),

@@ -545,3 +545,7 @@ body.closeup-zoom{transition:transform 1.6s ease-in-out;transform:scale(1.18)}
 .sst-chip:hover{border-color:var(--gold);background:var(--tint)}
 .sst-chip.sst-copied{border-color:var(--gold);background:var(--gold);color:#2a2005;transform:scale(1.04)}
 .sst-template{border-left:4px solid var(--gold);background:var(--soft);border-radius:0 10px 10px 0;padding:14px 20px;margin:.8em 0;font-size:15.5px}
+
+/* outline builder modes */
+.ob-mode{opacity:.65}
+.ob-mode.ob-mode-on{opacity:1;border-color:var(--gold) !important;background:var(--tint) !important;font-weight:800}
