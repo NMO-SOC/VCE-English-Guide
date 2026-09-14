@@ -14,3 +14,6 @@
 .ExamGenerator.exe.*
 localpdf/practice-exam-viii.pdf
 localpdf/practice-exam-ix.pdf
+
+_body.html
+_pre.tex
