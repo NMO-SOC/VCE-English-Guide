@@ -3,8 +3,8 @@
 import os, re, shutil, json, html, urllib.parse
 from bs4 import BeautifulSoup
 
-SRC = "/sessions/loving-pensive-clarke/mnt/VCE Textbook/2026 Yr12 Booklet/12 Booklet 2026"
-BUILD = "/sessions/loving-pensive-clarke/mnt/outputs/site-build"
+SRC = r"C:\Users\NMO\Claude\Projects\VCE Textbook\2026 Yr12 Booklet\12 Booklet 2026"
+BUILD = r"C:\Users\NMO\Claude\Projects\VCE Textbook\vce-english-site"
 PUBLIC = os.path.join(BUILD, "public")
 IMG_DIR = os.path.join(PUBLIC, "assets", "img")
 PDF_DIR = os.path.join(PUBLIC, "assets", "pdf")
@@ -116,16 +116,10 @@ for p in soup.find_all(["p", "div"]):
                     "SS.pdf": "ss.html",
                     "PJ1.pdf": "pj1.html",
                     "PJ2.pdf": "pj2.html"}
-    if fname in INLINE_FRAGS:
+    if fname in INLINE_FRAGS and os.path.exists(os.path.join(BUILD, "snippets", INLINE_FRAGS[fname])):
         frag = open(os.path.join(BUILD, "snippets", INLINE_FRAGS[fname]), encoding="utf-8").read()
         p.replace_with(BeautifulSoup(frag, "html.parser"))
         copied_pdfs.add(fname)
-        continue
-        frag = open(os.path.join(BUILD, "snippets", INLINE_TABLES[fname]), encoding="utf-8").read()
-        enc = urllib.parse.quote(fname)
-        p.replace_with(BeautifulSoup(
-            '<div class="inline-table-bar"><a class="pdf-dl" href="assets/pdf/%s" download>Download as PDF &#8595;</a></div>%s'
-            % (enc, frag), "html.parser"))
         continue
     if os.path.exists(os.path.join(SRC, fname)) and fname not in copied_pdfs:
         copy_if_changed(os.path.join(SRC, fname), os.path.join(PDF_DIR, fname)); copied_pdfs.add(fname)
